@@ -1,0 +1,79 @@
+﻿@model Tienda.Models.ProductDetailsViewModel
+@{
+    ViewBag.Title = "Detalles";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <h2>Detalle</h2>
+    <div class="row mb-5">
+        <!-- Columna izquierda para la imagen -->
+        <div class="col-md-6">
+            <img src="@Model.Product.Imagen" alt="@Model.Product.Nombre" class="img-fluid">
+        </div>
+
+        <!-- Columna derecha para el texto -->
+        <div class="col-md-6">
+            <h2 class="font-weight-bold">@Model.Product.Nombre</h2>
+            <p class="text-price">@Model.Product.Precio.ToString("C")</p>
+            <p>@Model.Product.Detalle</p>
+            <p>@Model.Product.Descripcion</p>
+            <p class="font-italic">Nota: no se hacen devoluciones de dinero.</p>
+            <p>Abrimos todos los días del año desde las 9:00 a.m. hasta las 4:00 p.m. para el ingreso y hasta las 6:00 p.m. para estar en las instalaciones.</p>
+        </div>
+    </div>
+    <div class="col-12">
+        <h1 class="border-bottom">Descripción</h1>
+        <p>@Model.Product.Descripcion</p>
+        <p class="font-italic">Nota: no se hacen devoluciones de dinero.</p>
+        <p>Abrimos todos los días del año desde las 9:00 a.m. hasta las 4:00 p.m. para el ingreso y hasta las 6:00 p.m. para estar en las instalaciones.</p>
+        <h3 class="text-center">Conoce nuestras restricciones</h3>
+        <ul>
+            <li>No está permitido el ingreso a personas que estén bajo el efecto de bebidas alcohólicas o sustancias alucinógenas</li>
+            <li>Por el bienestar de su mascota y las especies del Bioparque, no se permite los ingresos de animales</li>
+            <li>Los menores de edad deben estar bajo vigilancia de un adulto</li>
+            <li>No esta permitido ingresar alimentos y/o bebidas</li>
+            <li>Está prohibido ingresar armas de fuego y elementos corto punzantes</li>
+            <li>No alimente los animales, ya que podría enfermarlos y ocasionarles la muerte, cada animal tiene una dieta especial elaborada por un profesional</li>
+            <li>No golpee los vidrios y mallas de los exhibidores, los ruidos altos asustan y estresan los animales</li>
+            <li>No lance objetos a los animales, puede causar daños irreversibles</li>
+            <li>Camine por los senderos indicados, respete los límites y barreras de seguridad de las exhibiciones, traspasarlos representa un peligro</li>
+            <li>No intente tocar los animales, introduciendo las manos por las rejas, esto representa un peligro</li>
+            <li>Cuide las plantas y jardines del Bioparque, son parte del hábitat y entorno de los animales, enriquecen el paisaje y brindan bienestar en el recorrido</li>
+            <li>En las zonas de aviarios asegúrese de mantener las puertas cerradas, para evitar escapes o accidentes con los animales</li>
+        </ul>
+    </div>
+    <div class="col-12">
+        <h2 class="border-bottom mb-4">Productos relacionados</h2>
+        <div class="row mb-4">
+            @foreach (var relatedProduct in Model.RelatedProducts)
+            {
+                <div class="col-md-4 mb-2">
+                    <div class="card product-card narrow-card">
+                        <!-- Envuelve la imagen y el cuerpo de la tarjeta en un enlace -->
+                        <a href="@Url.Action("Details", new { id = relatedProduct.Id })" class="stretched-link text-decoration-none">
+                            <img src="@relatedProduct.Imagen" class="card-img-top" alt="@relatedProduct.Nombre">
+                            <div class="card-body">
+                                <h5 class="card-title text-success">@relatedProduct.Nombre</h5>
+                                <p class="card-text">@relatedProduct.Descripcion</p>
+                                <p class="card-text text-price">@relatedProduct.Precio.ToString("C")</p>
+                            </div>
+                        </a>
+                        <!-- Deja el pie de tarjeta fuera del enlace -->
+                        <div class="card-footer">
+                            <button class="btn btn-secondary">Comprar</button>
+                            <button class="btn btn-secondary">Añadir al carrito</button>
+                        </div>
+                    </div>
+                </div>
+             }
+        </div>
+    </div>
+</div>
+<style>
+    .narrow-card {
+        max-width: 330px;
+    }
+</style>
+
+

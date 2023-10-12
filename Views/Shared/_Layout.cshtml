@@ -1,5 +1,4 @@
 ﻿<!DOCTYPE html>
-@model IEnumerable<Tienda.Models.Categoria>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -19,7 +18,7 @@
             </button>
             <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-3">
-                    <li>@Html.ActionLink("Inicio", "Index", "Home", new { area = "" }, new { @class = "nav-link" })</li>
+                    <li>@Html.ActionLink("Inicio", "About", "Home", new { area = "" }, new { @class = "nav-link" })</li>
                     <li>@Html.ActionLink("Acerca de", "Contact", "Home", new { area = "" }, new { @class = "nav-link" })</li>
                 </ul>
             </div>
@@ -28,24 +27,90 @@
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-dark nav-botto">
         <div class="container">
             <div class="collapse navbar-collapse justify-content-center ">
-                <ul class="navbar-nav flex-grow-2">
-
-                    @foreach(Tienda.Models.Categoria categoria in Model)
-                     {
-                        <li>@Html.ActionLink(categoria.Nombre, "Index", "Home", new { area = "" }, new { @class = "nav-link text-white" })</li>
-                     }
-                    <li>@Html.ActionLink("Carrito de Compras", "About", "Home", new { area = "" }, new { @class = "nav-link text-white" })</li>
-                </ul>
+                @Html.Action("CategoryNav", "Home")
             </div>
         </div>
     </nav>
+
     <div class="container body-content">
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year - Mi aplicación ASP.NET</p>
+            <div class="container">
+                <div class="row justify-content-center">
+                    <!-- Añadida clase para centrar las columnas -->
+                    <div class="col-md-6 text-center">
+                        <!-- Cambiado a 6 para que tome la mitad del ancho -->
+                        <p><strong>Pagos 100% Seguros</strong></p>
+                        <p>Recibimos todas las tarjetas</p>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <!-- Cambiado a 6 para que tome la mitad del ancho -->
+                        <p><strong>Entregas Nacionales</strong></p>
+                        <p>Enviamos a toda Colombia</p>
+                    </div>
+                </div>
+            </div>
+
+            @*<div id="myCarousel" class="carousel slide" data-ride="carousel" data-interval="2000">
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <img src="~/Imagenes/efecty.jpg" class="d-block w-25 h-25 carousel-image" alt="Imagen 1">
+                        <img src="~/Imagenes/bancobogota.jpg" class="d-block w-25 h-25 carousel-image" alt="Imagen 2">
+                        <img src="~/Imagenes/american.jpg" class="d-block w-25 h-25 carousel-image" alt="Imagen 3">
+                    </div>
+                </div>
+            </div>*@
+
+            <div class="container my-5 bg-dark">
+                <!-- my-5 añade margen arriba y abajo -->
+                <div class="row text-white">
+                    <div class="col-md-4">
+                        <h2>Dirección</h2>
+                        <p>
+                            Kilómetro 14 vía cerritos<br>
+                            Entrada por la bomba Santa Barbara.
+                        </p>
+                        <p>
+                            60 6 3515488<br>
+                            servicioalcliente@ukumari.co
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <h2>Horario de atención:</h2>
+                        <p>9:00 am – 4:00 pm</p>
+                        <p>Abrimos los 365 días del año.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h2>Redes sociales</h2>
+                        <!-- Puedes añadir aquí tus enlaces a redes sociales, por ejemplo, con íconos -->
+                    </div>
+                </div>
+            </div>
+            <div class="container text-center">
+                <!-- Agregada estructura de contenedor y fila -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <!-- Cambiado a 12 para que tome todo el ancho -->
+                        <p>- Parque Temático De Flora Y Fauna De Pereira SAS – Bioparque Ukumarí.</p>
+                        <p>Todos los derechos reservados &copy; @DateTime.Now.Year</p>
+                    </div>
+                </div>
+            </div>
         </footer>
     </div>
+
+    @*<style>
+        .carousel-inner {
+            display: flex;
+            overflow: auto;
+        }
+
+        .carousel-item {
+            flex: 0 0 auto;
+            width: 100%;
+        }
+    </style>*@
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")

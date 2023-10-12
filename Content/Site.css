@@ -18,3 +18,30 @@ select,
 textarea {
     max-width: 280px;
 }
+
+.product-card {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: 0.3s;
+    border-radius: 5px; /* Bordas redondeadas */
+    margin-bottom: 20px;
+}
+
+    .product-card:hover {
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+
+.card-img-top {
+    width: 100%; /* Asegurar que las imágenes cubren toda la tarjeta */
+    object-fit: cover; /* Asegurar que las imágenes mantengan su aspecto */
+    height: 200px; /* Altura fija para imágenes */
+}
+
+.text-price {
+    color: #333;
+    font-weight: bold;
+}
+
+/* Espaciado entre botones */
+.btn + .btn {
+    margin-left: 10px;
+}

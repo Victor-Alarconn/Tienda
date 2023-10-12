@@ -1,0 +1,129 @@
+﻿@model Tienda.Models.Cart
+
+@{
+    ViewBag.Title = "Carrito de compras";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mb-5">Carrito de compras</h2>  <!-- Agregada la clase mb-4 para un margen en la parte inferior -->
+
+<div class="container">
+    <!-- Fila de títulos -->
+    <div class="row mb-3 font-weight-bold border-bottom">
+        <div class="row mb-3 font-weight-bold  d-none d-md-flex">
+            <div class="col-md-2 text-center"></div>  <!-- Título para la columna de acciones -->
+            <div class="col-md-2"></div>  <!-- Título para la columna de imagen -->
+            <div class="col-md-2">Producto</div>  <!-- Título para la columna de nombre de producto -->
+            <div class="col-md-2 text-right">Precio</div>  <!-- Título para la columna de precio -->
+            <div class="col-md-2 ">Cantidad</div>  <!-- Título para la columna de cantidad -->
+            <div class="col-md-2 text-right">Subtotal</div>  <!-- Título para la columna de subtotal -->
+        </div>
+    </div>
+
+    @foreach (var item in Model.Items)
+    {
+        <div class="row mb-3 border-bottom">
+            <!-- Sección para eliminar producto -->
+            <div class="col-md-2 d-flex justify-content-center align-items-center border-right border-bottom-md">
+                <div class="d-md-none w-100 mb-2">
+                    <button class="btn btn-danger w-100" onclick="removeFromCart(@item.Product.Id)">Eliminar</button>
+                </div>
+                <div class="d-none d-md-block">
+                    <button class="btn btn-danger" onclick="removeFromCart(@item.Product.Id)">Eliminar</button>
+                </div>
+            </div>
+            <!-- Sección para la imagen del producto -->
+            <div class="col-md-2 d-flex justify-content-center align-items-center border-right border-bottom-md">
+                <img src="@item.Product.Imagen" alt="@item.Product.Nombre" class="img-fluid" style="max-width: 80%; height: 65%;">
+            </div>
+            <!-- Sección para el nombre del producto -->
+            <div class="col-md-2 border-right">
+                <div class="row">
+                    <div class="col-7 d-md-none font-weight-bold border-bottom">Producto</div>
+                    <div class="col-md-12 col-5 border-bottom">@item.Product.Nombre</div>
+                </div>
+            </div>
+            <!-- Sección para el precio del producto -->
+            <div class="col-md-2 border-right">
+                <div class="row">
+                    <div class="col-7 d-md-none font-weight-bold border-bottom">Precio</div>
+                    <div class="col-md-12 col-5 text-md-right text-left border-bottom">@item.Product.Precio.ToString("C")</div>
+                </div>
+            </div>
+            <!-- Sección para la cantidad del producto -->
+            <div class="col-md-1 text-md-left text-left border-right">
+                <div class="row">
+                    <div class="col-8 d-md-none font-weight-bold text-start border-bottom">Cantidad</div>
+                    <div class="col-md-12 col-4 border-bottom">
+                        <input type="number" class="form-control form-control-sm " value="@item.Quantity" min="1" onchange="updateQuantity(@item.Product.Id, this.value)">
+                    </div>
+                </div>
+            </div>
+            <!-- Sección para el subtotal del producto -->
+            <div class="col-md-2 border-right">
+                <div class="row">
+                    <div class="col-7 d-md-none font-weight-bold border-bottom">Subtotal</div>
+                    <div class="col-md-12 col-5 text-md-end text-left border-bottom">@((item.Product.Precio * item.Quantity).ToString("C"))</div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row mb-5 border-bottom">
+        <div class="col-lg-2 col-6">
+            <input type="text" class="form-control" placeholder="Código de cupón" />
+        </div>
+        <div class="col-lg-8 col-6 text-lg-start text-right">
+            <button class="btn btn-secondary mb-2 mb-lg-0">Aplicar Descuento</button>
+        </div>
+        <div class="col-lg-2 col-12 text-lg-right text-center mt-lg-0 mt-2">
+            <button class="btn btn-secondary">Actualizar Carrito</button>
+        </div>
+    </div>
+
+
+</div>
+
+<div class="row mb-5 " >
+    <div class="col-md-6">
+        <!-- Espacio vacío a la izquierda -->
+    </div>
+    <div class="col-md-6 ">
+        <div class="row mb-2">
+            <div class="col-md-6 text-right border-bottom">
+                Subtotal:
+            </div>
+            <div class="col-md-6 text-right border-bottom">
+                @Model.TotalPrice().ToString("C")
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6 text-right border-bottom">
+                Total:
+            </div>
+            <div class="col-md-6 text-right border-bottom">
+                @Model.TotalPrice().ToString("C")  <!-- Asumiendo que el total y subtotal son iguales -->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-right">
+                <button class="btn btn-danger btn-lg big-text long-button">Finalizar Compra</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .long-button {
+        width: 400px; /* Ajusta el ancho  */
+    }
+</style>
+<script>
+    function removeFromCart(productId) {
+        // Implementa la lógica para remover un producto del carrito.
+    }
+
+    function updateQuantity(productId, quantity) {
+        // Implementa la lógica para actualizar la cantidad de un producto en el carrito.
+    }
+</script>

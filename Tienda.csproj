@@ -148,7 +148,10 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Cart.cs" />
     <Compile Include="Models\Categoria.cs" />
+    <Compile Include="Models\ProductDetailsViewModel.cs" />
+    <Compile Include="Models\Producto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -171,6 +174,16 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <Content Include="Imagenes\american.jpg" />
+    <Content Include="Imagenes\bancobogota.jpg" />
+    <Content Include="Imagenes\bancolombia.jpg" />
+    <Content Include="Imagenes\codensa.jpg" />
+    <Content Include="Imagenes\davivienda.jpg" />
+    <Content Include="Imagenes\diners.jpg" />
+    <Content Include="Imagenes\efecty.jpg" />
+    <Content Include="Imagenes\mastercard.jpg" />
+    <Content Include="Imagenes\pse.jpg" />
+    <Content Include="Imagenes\sured.jpg" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -202,6 +215,9 @@
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Home\_CategoryNav.cshtml" />
+    <Content Include="Views\Home\Details.cshtml" />
+    <Content Include="Views\Home\Carrito.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,0 +1,10 @@
+﻿@model IEnumerable<Tienda.Models.Categoria>
+
+<ul class="navbar-nav flex-grow-2">
+    @foreach (var categoria in Model)
+    {
+       <li>@Html.ActionLink(categoria.Nombre, "Index", "Home", new { categoryId = categoria.Id }, new { @class = "nav-link text-white" })</li>
+    }
+    <li>@Html.ActionLink("Carrito de Compras", "Carrito", "Home", new { area = "" }, new { @class = "nav-link text-white" })</li>
+</ul>
+

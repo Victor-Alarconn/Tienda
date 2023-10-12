@@ -1,33 +1,94 @@
-﻿@{
-    ViewBag.Title = "Rm";
+﻿@model IEnumerable<Tienda.Models.Producto>
+
+@{
+    ViewBag.Title = "Inicio";
 }
 
 <main>
     <section class="row" aria-labelledby="aspnetTitle">
-        <h1 id="title">ASP.NET</h1>
-        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-        <p><a href="https://asp.net" class="btn btn-primary btn-md">Learn more &raquo;</a></p>
+        <h1 id="title">Productos</h1>
+        <p class="lead">Explora nuestros productos.</p>
+        <p>Mostrando @ViewBag.ProductCount resultados</p>
+        <div class="row">
+            @foreach (var product in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card product-card">
+                        <a href="@Url.Action("Details", new { id = product.Id })" class="text-decoration-none">
+                            <img src="@product.Imagen" class="card-img-top" alt="@product.Nombre">
+                            <div class="card-body">
+                                <h5 class="card-title text-success">@product.Nombre</h5>
+                                <p class="card-text">@product.Descripcion</p>
+                                <p class="card-text text-price">@product.Precio.ToString("C")</p>
+                            </div>
+                        </a>
+                        <div class="card-footer">
+                            <button class="btn btn-secondary buy-now" data-product-id="@product.Id">Comprar</button>
+                            <button class="btn btn-secondary add-to-cart" data-product-id="@product.Id">Añadir al carrito</button>
+                            <span class="confirmation d-none" id="confirmation-@product.Id">
+                                ✓
+                                <br>
+                                <span class="text-danger">El producto se agregó al carrito</span>
+                                <br>
+                                <a href="@Url.Action("Carrito", "Home")">Ver carrito</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
     </section>
-
-    <div class="row">
-        <section class="col-md-4" aria-labelledby="gettingStartedTitle">
-            <h2 id="gettingStartedTitle">Getting started</h2>
-            <p>
-                ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-                enables a clean separation of concerns and gives you full control over markup
-                for enjoyable, agile development.
-            </p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="librariesTitle">
-            <h2 id="librariesTitle">Get more libraries</h2>
-            <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="hostingTitle">
-            <h2 id="hostingTitle">Web Hosting</h2>
-            <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-        </section>
-    </div>
 </main>
+<script>
+
+    function buyNow(productId) {
+        fetch('/Home/AddToCart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ productId: productId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirigir al carrito de compras si la operación fue exitosa
+                window.location.href = '@Url.Action("Carrito", "Home")';
+            }
+        });
+    }
+
+    // Evento de clic para botón de Comprar
+    document.querySelectorAll('.buy-now').forEach(button => {
+        button.addEventListener('click', function () {
+            var productId = this.getAttribute('data-product-id');
+            buyNow(productId);
+        });
+    });
+
+
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function () {
+            var productId = this.getAttribute('data-product-id');
+            fetch('/Home/AddToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId: productId })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('confirmation-' + productId).classList.remove('d-none');
+                    }
+                });
+        });
+    });
+</script>
+<style>
+    .hidden {
+        display: none;
+    }
+</style>
+
