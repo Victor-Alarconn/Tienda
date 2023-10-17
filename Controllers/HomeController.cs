@@ -23,6 +23,19 @@ namespace Tienda.Controllers
             _cart = new Cart();
         }
 
+        public ActionResult Checkout()
+        {
+            var cart = Session["cart"] as Cart;
+            if (cart == null || !cart.Items.Any())
+            {
+                // Si el carrito está vacío, redirige de vuelta a la vista del carrito o muestra un mensaje de error.
+                return RedirectToAction("Carrito");
+            }
+
+            return View(cart);
+        }
+
+
         [HttpPost]
         public ActionResult AddToCart()
         {
@@ -49,6 +62,7 @@ namespace Tienda.Controllers
                 // Parsear la cadena JSON en un objeto JObject
                 JObject data = JObject.Parse(requestBodyData);
                 var productId = data["productId"].ToObject<int>();
+                var quantity = data.ContainsKey("quantity") ? data["quantity"].ToObject<int>() : 1;
 
                 // Asumiendo que tienes una forma de obtener un producto por su ID
                 var product = GetProductById(productId);
@@ -66,7 +80,7 @@ namespace Tienda.Controllers
                 }
 
                 // Añadir el producto al carrito.
-                cart.AddProduct(product);
+                cart.AddProduct(product, quantity);
 
                 return Json(new { success = true });
             }
@@ -74,6 +88,35 @@ namespace Tienda.Controllers
             {
                 return Json(new { success = false, error = ex.Message });
             }
+        }
+
+        [HttpPost]
+        public ActionResult RemoveFromCart(int productId)
+        {
+            // Obtener el carrito de la sesión
+            var cart = Session["cart"] as Cart;
+            if (cart == null)
+            {
+                return HttpNotFound();  // Retorna un error si no hay carrito en la sesión
+            }
+
+            // Buscar el item en el carrito
+            var itemToRemove = cart.Items.SingleOrDefault(item => item.Product.Id == productId);
+            if (itemToRemove == null)
+            {
+                return HttpNotFound();  // Retorna un error si el producto no se encuentra en el carrito
+            }
+
+            // Eliminar el item del carrito
+            cart.Items.Remove(itemToRemove);
+
+            // Guardar el carrito actualizado en la sesión
+            Session["cart"] = cart;
+
+            // Guardar mensaje de éxito en TempData
+            TempData["SuccessMessage"] = $"Producto \"{itemToRemove.Product.Nombre}\" eliminado. <a href='#' class='undo-link'>¿Deshacer?</a>";
+
+            return RedirectToAction("Carrito");  // Retorna una respuesta exitosa si el producto fue eliminado correctamente
         }
 
 
@@ -87,6 +130,28 @@ namespace Tienda.Controllers
             }
             return View(cart);
         }
+
+        [HttpPost]
+        public JsonResult UpdateQuantity(int productId, int quantity)
+        {
+            var cart = Session["cart"] as Cart;
+            if (cart == null)
+            {
+                return Json(new { success = false });
+            }
+
+            var itemToUpdate = cart.Items.SingleOrDefault(item => item.Product.Id == productId);
+            if (itemToUpdate == null)
+            {
+                return Json(new { success = false });
+            }
+
+            itemToUpdate.Quantity = quantity;  // Actualiza la cantidad
+            Session["cart"] = cart;  // Guarda el carrito actualizado en la sesión
+
+            return Json(new { success = true });
+        }
+
 
         private Producto GetProductById(int productId)
         {
@@ -275,5 +340,12 @@ namespace Tienda.Controllers
 
             return View();
         }
+
+        public ActionResult Politica()
+        {
+
+            return View();
+        }
+
     }
 }

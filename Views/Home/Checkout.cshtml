@@ -1,0 +1,195 @@
+﻿@model Tienda.Models.Cart
+
+<!-- Formulario de Pago -->
+<div class="page-header border-bottom">
+    <h1>Página de Pago</h1>
+</div>
+
+<div style="margin-top: 20px; margin-bottom: 20px;">
+    ¿Tienes un cupón? <span id="coupon-link" class="text-danger" style="cursor:pointer;">Haz clic aquí para introducir tu código</span>
+</div>
+
+<!-- Div oculto para introducir el código de cupón -->
+<div id="coupon-div" style="display:none; margin-bottom: 20px;">
+    <div>
+        Si tienes un código de cupón, por favor, aplícalo abajo.
+    </div>
+    <div class="form-row">
+        <div class="col-md-6 d-flex">
+            <input type="text" class="form-control" id="couponCode" name="couponCode" placeholder="Código de cupón" />
+            <button type="button" class="btn btn-secondary" style="margin-left: 20px;">Aplicar cupón</button>
+        </div>
+    </div>
+</div>
+
+<div id="error-message" class="alert alert-danger" style="display:none;">
+    Por favor, complete todos los campos obligatorios.
+</div>
+
+<!-- Detalles de Facturación -->
+<div class="billing-details">
+    @using (Html.BeginForm("Checkout", "Home", FormMethod.Post))
+    {
+        <h2>Detalles de Facturación</h2>
+
+        <!-- Renglón de Nombre y Apellidos -->
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="firstName">Nombre <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="firstName" name="firstName" required autocomplete="given-name" />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="lastName">Apellidos <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="lastName" name="lastName" required autocomplete="given-lastname" />
+            </div>
+        </div>
+
+
+        <!-- Renglón de Tipo y Número de Documento -->
+        <div class="row">
+            <!-- Cambié form-row a row -->
+            <div class="form-group col-md-6">
+                <label for="documentType">Tipo de Documento</label>
+                <select id="documentType" name="documentType" class="form-control" required autocomplete="given-type">
+                    <option value="" disabled selected>Seleccione</option>
+                    <option value="CC">Cédula de Ciudadanía</option>
+                    <option value="TI">Tarjeta de Identidad</option>
+                    <option value="PP">Pasaporte</option>
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="documentNumber">Número de Documento <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="documentNumber" name="documentNumber" required autocomplete="given-document" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="companyName">Nombre de la empresa (opcional)</label>
+            <input type="text" class="form-control" id="companyName" name="companyName" />
+        </div>
+        <div class="form-group">
+            <label for="country">País / Región <span class="text-danger">*</span></label>
+            <p id="country-display" style="font-weight: bold;">Colombia</p>
+            <input type="hidden" id="country" name="country" value="Colombia" />
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="state">Departamento <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="state" name="state" required autocomplete="given-stae" />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="city">Ciudad <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="city" name="city" required autocomplete="given-city" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="streetAddress">Dirección de la calle <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="streetAddress" name="streetAddress" required autocomplete="given-street" />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="postalCode">Código postal (opcional)</label>
+                <input type="text" class="form-control" id="postalCode" name="postalCode" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="phone">Teléfono <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="phone" name="phone" required autocomplete="given-phone" />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="email">Dirección de correo electrónico <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" id="email" name="email" required autocomplete="given-email" />
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Detalles del Pedido -->
+<div class="order-details">
+    <h2>Tu pedido</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.Product.Nombre × @item.Quantity</td>
+                    <td>@((item.Product.Precio * item.Quantity).ToString("C"))</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>Subtotal</th>
+                <td>@Model.TotalPrice().ToString("C")</td>
+            </tr>
+            <tr>
+                <th>Total</th>
+                <td>@Model.TotalPrice().ToString("C")</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="bg-light p-3">
+        <!-- Título PayU Latam -->
+        <div class="privacy-notice text-lg-start d-flex align-items-center">
+            <h2>PayU Latam</h2>
+            <img src="~/Imagenes/payu.jpg" alt="Logo de PayU Latam" class="ml-2" style="width: 50px; height: auto;"> <!-- ml-2 añade un margen a la izquierda -->
+        </div>
+        <!-- Texto sobre el uso de datos personales -->
+        <div class="privacy-notice">
+            <p>
+                Sus datos personales se utilizarán para procesar su pedido y respaldar su experiencia en este sitio web descrita en nuestra <a href="@Url.Action("Politica", "Home")" class="text-danger">política de privacidad</a>.
+            </p>
+        </div>
+
+        <!-- Botón para realizar el pago -->
+        <div class="row">
+            <div class="col-md-12 d-flex justify-content-end">
+                <button type="submit" class="btn btn-purple" id="submit-button">Realizar Pago</button>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<style>
+    .btn-purple {
+        background-color: purple;
+        color: white;
+        border: none;
+    }
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript">
+    // Función para mostrar/ocultar el div de código de cupón
+    document.getElementById('coupon-link').onclick = function () {
+        var couponDiv = document.getElementById('coupon-div');
+        if (couponDiv.style.display === 'none') {
+            couponDiv.style.display = 'block';
+        } else {
+            couponDiv.style.display = 'none';
+        }
+    }
+
+    // Función para mostrar/ocultar los campos faltan por rellenar antes de enviar el formulario
+    $(document).ready(function () {
+        $('#submit-button').click(function (e) {
+            var isValid = true;
+            $('input[required]').each(function () {
+                if ($(this).val() === '') {
+                    isValid = false;
+                }
+            });
+            if (!isValid) {
+                e.preventDefault(); // Prevent the form from submitting
+                $('#error-message').show(); // Show the error message
+            }
+        });
+    });
+</script>

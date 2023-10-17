@@ -20,7 +20,22 @@
             <p>@Model.Product.Descripcion</p>
             <p class="font-italic">Nota: no se hacen devoluciones de dinero.</p>
             <p>Abrimos todos los días del año desde las 9:00 a.m. hasta las 4:00 p.m. para el ingreso y hasta las 6:00 p.m. para estar en las instalaciones.</p>
+            <div class="input-group mb-3">
+                <input type="number" class="form-control" id="product-quantity" value="1" min="1" style="max-width: 70px; margin-right: 10px;">
+                <div class="input-group-append">
+                    <button class="btn btn-secondary add-to-cart" data-product-id="@Model.Product.Id">Añadir al carrito</button>
+                    <button class="btn btn-secondary buy-now" data-product-id="@Model.Product.Id">Comprar</button>
+                </div>
+            </div>
+            <span class="confirmation d-none" id="confirmation-@Model.Product.Id">
+                ✓
+                <br>
+                <span class="text-danger">El producto se agregó al carrito</span>
+                <br>
+                <a href="@Url.Action("Carrito", "Home")">Ver carrito</a>
+            </span>
         </div>
+
     </div>
     <div class="col-12">
         <h1 class="border-bottom">Descripción</h1>
@@ -50,26 +65,93 @@
             {
                 <div class="col-md-4 mb-2">
                     <div class="card product-card narrow-card">
-                        <!-- Envuelve la imagen y el cuerpo de la tarjeta en un enlace -->
-                        <a href="@Url.Action("Details", new { id = relatedProduct.Id })" class="stretched-link text-decoration-none">
+                        <!-- Envuelve solo la imagen y el título en enlaces -->
+                        <a href="@Url.Action("Details", new { id = relatedProduct.Id })" class="text-decoration-none">
                             <img src="@relatedProduct.Imagen" class="card-img-top" alt="@relatedProduct.Nombre">
-                            <div class="card-body">
-                                <h5 class="card-title text-success">@relatedProduct.Nombre</h5>
-                                <p class="card-text">@relatedProduct.Descripcion</p>
-                                <p class="card-text text-price">@relatedProduct.Precio.ToString("C")</p>
-                            </div>
                         </a>
-                        <!-- Deja el pie de tarjeta fuera del enlace -->
+                        <div class="card-body">
+                            <a href="@Url.Action("Details", new { id = relatedProduct.Id })" class="text-decoration-none text-success">
+                                <h5 class="card-title">@relatedProduct.Nombre</h5>
+                            </a>
+                            <p class="card-text">@relatedProduct.Descripcion</p>
+                            <p class="card-text text-price">@relatedProduct.Precio.ToString("C")</p>
+                        </div>
                         <div class="card-footer">
-                            <button class="btn btn-secondary">Comprar</button>
-                            <button class="btn btn-secondary">Añadir al carrito</button>
+                            <button class="btn btn-secondary buy-now" data-product-id="@relatedProduct.Id">Comprar</button>
+                            <button class="btn btn-secondary add-to-cart" data-product-id="@relatedProduct.Id">Añadir al carrito</button>
+                            <span class="confirmation d-none" id="confirmation-@relatedProduct.Id">
+                                ✓
+                                <br>
+                                <span class="text-danger">El producto se agregó al carrito</span>
+                                <br>
+                                <a href="@Url.Action("Carrito", "Home")">Ver carrito</a>
+                            </span>
                         </div>
                     </div>
                 </div>
-             }
+
+            }
         </div>
     </div>
 </div>
+<script>
+    function updateQuantity(amount) {
+        var quantityInput = document.getElementById('product-quantity');
+        var newQuantity = parseInt(quantityInput.value) + amount;
+        if (newQuantity < 1) {
+            newQuantity = 1;  // Asegura que la cantidad sea al menos 1
+        }
+        quantityInput.value = newQuantity;
+    }
+
+    // Asegurando que la cantidad seleccionada se envíe al servidor
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function () {
+            var productId = this.getAttribute('data-product-id');
+            var quantity = document.getElementById('product-quantity').value;
+            fetch('/Home/AddToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId: productId, quantity: quantity })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('confirmation-' + productId).classList.remove('d-none');
+                    }
+                });
+        });
+    });
+
+    function buyNow(productId) {
+        var quantity = document.getElementById('product-quantity').value;
+        fetch('/Home/AddToCart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ productId: productId, quantity: quantity })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirigir al carrito de compras si la operación fue exitosa
+                window.location.href = '@Url.Action("Carrito", "Home")';
+            }
+        });
+    }
+
+    // Evento de clic para botón de Comprar
+    document.querySelectorAll('.buy-now').forEach(button => {
+        button.addEventListener('click', function () {
+            var productId = this.getAttribute('data-product-id');
+            buyNow(productId);
+        });
+    });
+</script>
+
 <style>
     .narrow-card {
         max-width: 330px;

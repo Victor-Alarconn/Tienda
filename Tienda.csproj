@@ -182,6 +182,8 @@
     <Content Include="Imagenes\diners.jpg" />
     <Content Include="Imagenes\efecty.jpg" />
     <Content Include="Imagenes\mastercard.jpg" />
+    <Content Include="Imagenes\payu.jpg" />
+    <Content Include="Imagenes\payu.png" />
     <Content Include="Imagenes\pse.jpg" />
     <Content Include="Imagenes\sured.jpg" />
     <Content Include="Scripts\bootstrap.bundle.js" />
@@ -218,6 +220,8 @@
     <Content Include="Views\Home\_CategoryNav.cshtml" />
     <Content Include="Views\Home\Details.cshtml" />
     <Content Include="Views\Home\Carrito.cshtml" />
+    <Content Include="Views\Home\Checkout.cshtml" />
+    <Content Include="Views\Home\Politica.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
