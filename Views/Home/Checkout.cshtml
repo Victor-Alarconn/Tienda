@@ -1,4 +1,4 @@
-﻿@model Tienda.Models.Cart
+﻿@model Tienda.Models.PaymentInfo
 
 <!-- Formulario de Pago -->
 <div class="page-header border-bottom">
@@ -23,15 +23,17 @@
 </div>
 
 <div id="error-message" class="alert alert-danger" style="display:none;">
-    Por favor, complete todos los campos obligatorios.
+    Por favor, complete todos los campos obligatorios:
+    <ul id="error-list"></ul>
 </div>
+
 
 <!-- Detalles de Facturación -->
 <div class="billing-details">
     @using (Html.BeginForm("Checkout", "Home", FormMethod.Post))
     {
         <h2>Detalles de Facturación</h2>
-
+        @Html.HiddenFor(model => model.Cart)
         <!-- Renglón de Nombre y Apellidos -->
         <div class="row">
             <div class="form-group col-md-6">
@@ -40,7 +42,7 @@
             </div>
             <div class="form-group col-md-6">
                 <label for="lastName">Apellidos <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="lastName" name="lastName" required autocomplete="given-lastname" />
+                <input type="text" class="form-control" id="lastName" name="lastName" required autocomplete="family-name" />
             </div>
         </div>
 
@@ -50,7 +52,7 @@
             <!-- Cambié form-row a row -->
             <div class="form-group col-md-6">
                 <label for="documentType">Tipo de Documento</label>
-                <select id="documentType" name="documentType" class="form-control" required autocomplete="given-type">
+                <select id="documentType" name="documentType" class="form-control" required>
                     <option value="" disabled selected>Seleccione</option>
                     <option value="CC">Cédula de Ciudadanía</option>
                     <option value="TI">Tarjeta de Identidad</option>
@@ -59,102 +61,104 @@
             </div>
             <div class="form-group col-md-6">
                 <label for="documentNumber">Número de Documento <span class="text-danger">*</span></label>
-                <input type="number" class="form-control" id="documentNumber" name="documentNumber" required autocomplete="given-document" />
+                <input type="number" class="form-control" id="documentNumber" name="documentNumber" required />
             </div>
         </div>
         <div class="form-group">
             <label for="companyName">Nombre de la empresa (opcional)</label>
-            <input type="text" class="form-control" id="companyName" name="companyName" />
+            <input type="text" class="form-control" id="companyName" name="companyName" autocomplete="organization" />
         </div>
         <div class="form-group">
-            <label for="country">País / Región <span class="text-danger">*</span></label>
+            <label for="country-input">País / Región <span class="text-danger">*</span></label>
             <p id="country-display" style="font-weight: bold;">Colombia</p>
-            <input type="hidden" id="country" name="country" value="Colombia" />
+            <input type="hidden" id="country-input" name="country" value="Colombia" />
         </div>
         <div class="row">
             <div class="form-group col-md-6">
                 <label for="state">Departamento <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="state" name="state" required autocomplete="given-stae" />
+                <input type="text" class="form-control" id="state" name="state" required autocomplete="address-level1" />
             </div>
             <div class="form-group col-md-6">
                 <label for="city">Ciudad <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="city" name="city" required autocomplete="given-city" />
+                <input type="text" class="form-control" id="city" name="city" required autocomplete="address-level2" />
             </div>
         </div>
         <div class="row">
             <div class="form-group col-md-6">
                 <label for="streetAddress">Dirección de la calle <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="streetAddress" name="streetAddress" required autocomplete="given-street" />
+                <input type="text" class="form-control" id="streetAddress" name="streetAddress" required autocomplete="street-address" />
             </div>
             <div class="form-group col-md-6">
                 <label for="postalCode">Código postal (opcional)</label>
-                <input type="text" class="form-control" id="postalCode" name="postalCode" />
+                <input type="text" class="form-control" id="postalCode" name="postalCode" autocomplete="postal-code" />
             </div>
         </div>
         <div class="row">
             <div class="form-group col-md-6">
                 <label for="phone">Teléfono <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="phone" name="phone" required autocomplete="given-phone" />
+                <input type="text" class="form-control" id="phone" name="phone" required autocomplete="tel" />
             </div>
             <div class="form-group col-md-6">
                 <label for="email">Dirección de correo electrónico <span class="text-danger">*</span></label>
-                <input type="email" class="form-control" id="email" name="email" required autocomplete="given-email" />
+                <input type="email" class="form-control" id="email" name="email" required autocomplete="email" />
             </div>
         </div>
+        <!-- Detalles del Pedido -->
+        <div class="order-details">
+            <h2>Tu pedido</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Cart.Items)
+                    {
+                        <tr>
+                            <td>@item.Product.Nombre × @item.Quantity</td>
+                            <td>@((item.Product.Precio * item.Quantity).ToString("C"))</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Subtotal</th>
+                        <td>@Model.Cart.TotalPrice().ToString("C")</td>
+                    </tr>
+                    <tr>
+                        <th>Total</th>
+                        <td>@Model.Cart.TotalPrice().ToString("C")</td>
+                    </tr>
+                </tfoot>
+
+            </table>
+
+            <div class="bg-light p-3">
+                <!-- Título PayU Latam -->
+                <div class="privacy-notice text-lg-start d-flex align-items-center">
+                    <h2>PayU Latam</h2>
+                    <img src="~/Imagenes/payu.jpg" alt="Logo de PayU Latam" class="ml-2" style="width: 50px; height: auto;"> <!-- ml-2 añade un margen a la izquierda -->
+                </div>
+                <!-- Texto sobre el uso de datos personales -->
+                <div class="privacy-notice">
+                    <p>
+                        Sus datos personales se utilizarán para procesar su pedido y respaldar su experiencia en este sitio web descrita en nuestra <a href="@Url.Action("Politica", "Home")" class="text-danger">política de privacidad</a>.
+                    </p>
+                </div>
+
+                <!-- Botón para realizar el pago -->
+                <div class="row">
+                    <div class="col-md-12 d-flex justify-content-end">
+                        <button type="submit" class="btn btn-purple" id="submit-button">Realizar Pago</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
     }
-</div>
-
-<!-- Detalles del Pedido -->
-<div class="order-details">
-    <h2>Tu pedido</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Producto</th>
-                <th>Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.Items)
-            {
-                <tr>
-                    <td>@item.Product.Nombre × @item.Quantity</td>
-                    <td>@((item.Product.Precio * item.Quantity).ToString("C"))</td>
-                </tr>
-            }
-        </tbody>
-        <tfoot>
-            <tr>
-                <th>Subtotal</th>
-                <td>@Model.TotalPrice().ToString("C")</td>
-            </tr>
-            <tr>
-                <th>Total</th>
-                <td>@Model.TotalPrice().ToString("C")</td>
-            </tr>
-        </tfoot>
-    </table>
-
-    <div class="bg-light p-3">
-        <!-- Título PayU Latam -->
-        <div class="privacy-notice text-lg-start d-flex align-items-center">
-            <h2>PayU Latam</h2>
-            <img src="~/Imagenes/payu.jpg" alt="Logo de PayU Latam" class="ml-2" style="width: 50px; height: auto;"> <!-- ml-2 añade un margen a la izquierda -->
-        </div>
-        <!-- Texto sobre el uso de datos personales -->
-        <div class="privacy-notice">
-            <p>
-                Sus datos personales se utilizarán para procesar su pedido y respaldar su experiencia en este sitio web descrita en nuestra <a href="@Url.Action("Politica", "Home")" class="text-danger">política de privacidad</a>.
-            </p>
-        </div>
-
-        <!-- Botón para realizar el pago -->
-        <div class="row">
-            <div class="col-md-12 d-flex justify-content-end">
-                <button type="submit" class="btn btn-purple" id="submit-button">Realizar Pago</button>
-            </div>
-        </div>
-    </div>
 
 
 </div>
@@ -181,15 +185,24 @@
     $(document).ready(function () {
         $('#submit-button').click(function (e) {
             var isValid = true;
+            var errorList = $('#error-list');
+            errorList.empty();  // Limpiar la lista de errores anterior
+
             $('input[required]').each(function () {
                 if ($(this).val() === '') {
                     isValid = false;
+                    // Agregar el nombre del campo a la lista de errores
+                    var fieldName = $(this).prev('label').text();
+                    errorList.append('<li>' + fieldName + '</li>');
                 }
             });
+
             if (!isValid) {
                 e.preventDefault(); // Prevent the form from submitting
                 $('#error-message').show(); // Show the error message
+                window.scrollTo(0, 0);  // Desplazar la ventana al inicio de la página
             }
         });
     });
 </script>
+

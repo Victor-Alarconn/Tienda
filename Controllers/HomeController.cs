@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using Tienda.Data;
@@ -23,16 +24,103 @@ namespace Tienda.Controllers
             _cart = new Cart();
         }
 
+        [HttpGet]
         public ActionResult Checkout()
         {
             var cart = Session["cart"] as Cart;
             if (cart == null || !cart.Items.Any())
             {
-                // Si el carrito está vacío, redirige de vuelta a la vista del carrito o muestra un mensaje de error.
                 return RedirectToAction("Carrito");
             }
 
-            return View(cart);
+            var model = new PaymentInfo { Cart = cart };
+            return View(model);
+        }
+
+        [HttpPost]
+        public ActionResult Checkout(PaymentInfo model)
+        {
+            StringBuilder productNames = new StringBuilder();
+            // Recuperar el carrito de la sesión
+            model.Cart = Session["cart"] as Cart;
+            // Se prepara los datos para PayU
+            var merchantId = "508029";
+            var apiKey = "4Vj8eK4rloUd272L48hsrarnUA";
+            var referenceCode = "TestPayU-" + Guid.NewGuid().ToString();
+            var amount = model.Cart.TotalPrice();
+            var currency = "COP";
+            var buyerEmail = model.Email;
+            var accountId = "512321";
+            var tax = 0;
+            var taxReturnBase = 0;
+            var test = "1";
+            var phone = model.Phone;
+            var fullName = $"{model.FirstName} {model.LastName}";  // Combina FirstName y LastName
+            var address = model.StreetAddress;
+            var document = model.DocumentType;
+            var documentNumber = model.DocumentNumber;
+            var company = model.CompanyName;
+            var country = model.Country;
+            var state = model.State;
+            var city = model.City;
+            var PostalCode = model.postalCode;
+            var paymentMethod = "VISA,VISA_DEBIT,PSE,MASTERCARD,MASTERCARD_DEBIT";
+
+            var responseUrl = "http://localhost:5000/Home/Confirmation";
+            var confirmationUrl = "http://localhost:5000/Home/Confirmation";
+            // Genera la firma
+            var formattedAmount = amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+            var signature = GenerarFirma(apiKey, merchantId, referenceCode, formattedAmount, currency);  // Llamada un nuevo método
+
+            foreach (var item in model.Cart.Items)
+            {
+                if (productNames.Length > 0)
+                {
+                    productNames.Append(", ");
+                }
+                productNames.Append(item.Product.Nombre);
+            }
+            string productDescription = productNames.ToString();
+            // Se crea un nuevo modelo para pasar a la vista de PayU
+            var payUModel = new PayUModel
+            {
+                MerchantId = merchantId,
+                ApiKey = apiKey,
+                ReferenceCode = referenceCode,
+                Amount = amount,  // mantener amount como decimal
+                Currency = currency,
+                BuyerEmail = buyerEmail,
+                Signature = signature,
+                AccountId = accountId,
+                Tax = tax,
+                TaxReturnBase = taxReturnBase,
+                Test = test,
+                ResponseUrl = responseUrl,
+                ConfirmationUrl = confirmationUrl,
+                Description = productDescription,
+                Telephone = phone,
+                BuyerfullName = fullName,
+                PaymentMethod = paymentMethod
+            };
+
+            return View("PayUForm", payUModel);
+        }
+
+        private string GenerarFirma(string apiKey, string merchantId, string referencia, string precio, string currency)
+        {
+            var datos = $"{apiKey}~{merchantId}~{referencia}~{precio}~{currency}";
+            using (var md5 = System.Security.Cryptography.MD5.Create())
+            {
+                byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(datos);
+                byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < hashBytes.Length; i++)
+                {
+                    sb.Append(hashBytes[i].ToString("X2"));
+                }
+                return sb.ToString().ToLower(); // Convertir a minúsculas si es necesario.
+            }
         }
 
 
@@ -76,11 +164,12 @@ namespace Tienda.Controllers
                 if (cart == null)
                 {
                     cart = new Cart();
-                    Session["cart"] = cart;
                 }
 
                 // Añadir el producto al carrito.
                 cart.AddProduct(product, quantity);
+
+                Session["cart"] = cart;
 
                 return Json(new { success = true });
             }
@@ -346,6 +435,11 @@ namespace Tienda.Controllers
 
             return View();
         }
+        
+        public ActionResult Confirmation()
+        {
 
+            return View();
+        }
     }
 }

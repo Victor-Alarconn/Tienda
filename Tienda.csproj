@@ -150,6 +150,8 @@
     </Compile>
     <Compile Include="Models\Cart.cs" />
     <Compile Include="Models\Categoria.cs" />
+    <Compile Include="Models\PaymentInfo.cs" />
+    <Compile Include="Models\PayUModel.cs" />
     <Compile Include="Models\ProductDetailsViewModel.cs" />
     <Compile Include="Models\Producto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -222,6 +224,8 @@
     <Content Include="Views\Home\Carrito.cshtml" />
     <Content Include="Views\Home\Checkout.cshtml" />
     <Content Include="Views\Home\Politica.cshtml" />
+    <Content Include="Views\Home\PayUForm.cshtml" />
+    <Content Include="Views\Home\Confirmation.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
