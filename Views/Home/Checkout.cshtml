@@ -57,12 +57,20 @@
                     <option value="CC">Cédula de Ciudadanía</option>
                     <option value="TI">Tarjeta de Identidad</option>
                     <option value="PP">Pasaporte</option>
+                    <option value="NIT">Nit</option>
                 </select>
             </div>
             <div class="form-group col-md-6">
                 <label for="documentNumber">Número de Documento <span class="text-danger">*</span></label>
                 <input type="number" class="form-control" id="documentNumber" name="documentNumber" required />
             </div>
+
+            <div class="form-group col-md-6" id="dvVerificationDigit" style="display: none;">
+                <label for="verificationDigit">Dígito de Verificación</label>
+                <input type="number" class="form-control" id="verificationDigit" name="verificationDigit" />
+            </div>
+
+
         </div>
         <div class="form-group">
             <label for="companyName">Nombre de la empresa (opcional)</label>
@@ -201,6 +209,17 @@
                 e.preventDefault(); // Prevent the form from submitting
                 $('#error-message').show(); // Show the error message
                 window.scrollTo(0, 0);  // Desplazar la ventana al inicio de la página
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        $("#documentType").change(function () {
+            var selectedValue = $(this).val();
+            if (selectedValue === "NIT") {
+                $("#dvVerificationDigit").show();
+            } else {
+                $("#dvVerificationDigit").hide();
             }
         });
     });

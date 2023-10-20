@@ -123,6 +123,27 @@ namespace Tienda.Controllers
             }
         }
 
+       
+            // Acción para la respuesta que muestra una vista al usuario
+            [HttpPost]
+            public ActionResult PayUResponse(PayUResponse model)
+            {
+                // Aquí puedes procesar alguna lógica si es necesario.
+                return View(model);
+            }
+
+            // Acción para la confirmación que solo procesa datos en backend y no muestra una vista
+            [HttpPost]
+            public ActionResult Confirmation(PayUConfirmation model)
+            {
+                // Procesar los datos (guardar en la base de datos, etc.)
+                // ...
+
+                // Devolver una respuesta HTTP indicando que todo está bien.
+                return View();
+            }
+        
+
 
         [HttpPost]
         public ActionResult AddToCart()
