@@ -14,7 +14,7 @@
             <th>MÉTODO DE PAGO:</th>
         </tr>
         <tr>
-            <td>10407</td>
+            <td>@Model.ReferenceCode</td>
             <td>@DateTime.Now.ToString("MMMM dd, yyyy", new System.Globalization.CultureInfo("es-ES"))</td>
             <td>$ @Model.Amount.ToString("N0")</td>
             <td>PayU Latam</td>
@@ -40,8 +40,8 @@
     <input name="telephone" type="hidden" value="@Model.Telephone">
     <input name="buyerFullName" type="hidden" value="@Model.BuyerfullName">
     <input name="paymentMethod" type="hidden" value="@Model.PaymentMethod">
-    <input name="responseUrl" type="hidden" value="http://www.rmsoft.com.co">
-    <input name="confirmationUrl" type="hidden" value="https://www.disneyplus.com">
+    <input name="responseUrl" type="hidden" value="@Model.ResponseUrl">
+    <input name="confirmationUrl" type="hidden" value="@Model.ConfirmationUrl">
     <input name="Submit" type="submit" value="Pagar" class="btn btn-red">
 </form>
 

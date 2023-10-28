@@ -1,8 +1,12 @@
-﻿using MySqlConnector;
+﻿using MimeKit;
+using MySqlConnector;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Drawing.Imaging;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,9 +15,7 @@ using System.Web;
 using System.Web.Mvc;
 using Tienda.Data;
 using Tienda.Models;
-
-
-
+using System.Net.Mail;
 
 namespace Tienda.Controllers
 {
@@ -49,7 +51,7 @@ namespace Tienda.Controllers
             // Se prepara los datos para PayU
             var merchantId = "508029";
             var apiKey = "4Vj8eK4rloUd272L48hsrarnUA";
-            var referenceCode = "TestPayU-" + Guid.NewGuid().ToString();  // Guardad en base de datos
+            var referenceCode = GenerarReferencia();
             var amount = model.Cart.TotalPrice();
             var currency = "COP";
             var buyerEmail = model.Email; // Guardad en base de datos
@@ -68,8 +70,8 @@ namespace Tienda.Controllers
             var city = model.City; // Guardad en base de datos
             var PostalCode = model.postalCode; // Guardad en base de datos
             var paymentMethod = "VISA,VISA_DEBIT,PSE,MASTERCARD,MASTERCARD_DEBIT";
-            var responseUrl = "http://localhost:5000/Home/Confirmation";
-            var confirmationUrl = "http://localhost:5000/Home/Confirmation";
+            var responseUrl = "https://61de-186-87-167-91.ngrok-free.app/Home/PayUResponse";
+            var confirmationUrl = "https://61de-186-87-167-91.ngrok-free.app/Home/Confirmation";
             // Genera la firma
             var formattedAmount = amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             var signature = GenerarFirma(apiKey, merchantId, referenceCode, formattedAmount, currency);  // Llamada un nuevo método
@@ -147,33 +149,58 @@ namespace Tienda.Controllers
             }
         }
 
-
-        // Acción para la respuesta que muestra una vista al usuario
         [HttpPost]
-        public ActionResult PayUResponse(PayUResponse model)
+        public ActionResult Confirmation(PayUConfirmation model)
         {
-            string apiKey = "4Vj8eK4rloUd272L48hsrarnUA"; // Reemplaza con tu API key
-            string generatedSignature = CreateSignature(apiKey, model.MerchantId, model.ReferenceCode, Convert.ToDecimal(model.TX_VALUE), model.Currency, Convert.ToInt32(model.TransactionState));
+            System.Diagnostics.Debug.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(model)); // para imprimir todo el modelo recibido.
+            string apiKey = "4Vj8eK4rloUd272L48hsrarnUA";
+            string generatedSignature = CreateSignature(apiKey, model.Merchant_id, model.Reference_sale, model.Value, model.Currency, model.State_pol);
 
-            if (generatedSignature.Equals(model.Signature, StringComparison.OrdinalIgnoreCase))
+            if (generatedSignature.Equals(model.Sign, StringComparison.OrdinalIgnoreCase))
             {
                 // La firma es válida
+               // GuardarBase(model);  // Guardar en la base de datos
+               // EnviarEmail(model);  // Enviar correo con el resumen de la compra y el código QR
             }
             else
             {
-                // La firma no es válida
+                // La firma no es válida. 
             }
 
-            return View(model);
+            return new EmptyResult();
         }
 
+
+        public ActionResult PayUResponse(PayUResponse model)
+        {
+            string apiKey = "4Vj8eK4rloUd272L48hsrarnUA";
+            string generatedSignature = CreateSignature2(apiKey, model.MerchantId, model.ReferenceCode, model.TX_VALUE, model.Currency, model.TransactionState);
+
+            if (generatedSignature.Equals(model.Signature, StringComparison.OrdinalIgnoreCase))
+            {
+                model.IsSuccess = true;  // La firma es válida
+                model.Message = "La transacción fue exitosa."; // Puedes configurar un mensaje de éxito aquí si lo deseas
+            }
+            else
+            {
+                model.IsSuccess = false;  // La firma no es válida
+                model.Message = "Hubo un problema con la firma de la transacción."; // Puedes configurar un mensaje de error aquí
+            }
+
+            return View(model);  // Esta vista simplemente informa al usuario sobre el estado de la transacción
+        }
+
+
+
         // Método para crear la firma de confirmación
-        private string CreateSignature(string apiKey, string merchantId, string referenceCode, decimal txValue, string currency, int transactionState)
+        private string CreateSignature(string apiKey, int merchantId, string referenceCode, decimal txValue, string currency, string transactionState)
         {
             // Aproxima TX_VALUE a un decimal usando el método de redondeo Round half to even
             decimal newValue = Math.Round(txValue, 1, MidpointRounding.ToEven);
+
             // Genera la cadena para la firma
             string rawSignature = $"{apiKey}~{merchantId}~{referenceCode}~{newValue}~{currency}~{transactionState}";
+
             // Calcula el hash MD5
             using (MD5 md5Hash = MD5.Create())
             {
@@ -186,6 +213,70 @@ namespace Tienda.Controllers
                 return sBuilder.ToString();
             }
         }
+
+        private string CreateSignature2(string apiKey, long merchantId, string referenceCode, decimal txValue, string currency, int transactionState)
+        {
+            // Aproxima TX_VALUE a un decimal usando el método de redondeo Round half to even
+            decimal newValue = Math.Round(txValue, 1, MidpointRounding.ToEven);
+
+            // Genera la cadena para la firma
+            string rawSignature = $"{apiKey}~{merchantId}~{referenceCode}~{newValue}~{currency}~{transactionState}";
+
+            // Calcula el hash MD5
+            using (MD5 md5Hash = MD5.Create())
+            {
+                byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(rawSignature));
+                StringBuilder sBuilder = new StringBuilder();
+                for (int i = 0; i < data.Length; i++)
+                {
+                    sBuilder.Append(data[i].ToString("x2"));
+                }
+                return sBuilder.ToString();
+            }
+        }
+
+
+        //private void EnviarEmail(PayUConfirmation model)
+        //{
+        //    var message = new MimeMessage();
+        //    message.From.Add(new MailboxAddress("TuNombreOEmpresa", "tucorreo@gmail.com"));
+        //    message.To.Add(new MailboxAddress(model.EmailDelComprador, model.EmailDelComprador));
+        //    message.Subject = "Detalles de tu compra";
+
+        //    var builder = new BodyBuilder();
+
+        //    // Aquí puedes personalizar tu mensaje con los detalles de la compra
+        //    string bodyText = $"Gracias por tu compra, {model.NombreDelComprador}. Aquí están los detalles:\n";
+        //    foreach (var producto in model.Producto) // Asumiendo que tienes una lista de productos en el modelo
+        //    {
+        //        bodyText += $"{producto.Nombre} - {producto.Precio}\n";
+        //    }
+        //    bodyText += $"Total: {model.Value} {model.Currency}\n";
+        //    builder.TextBody = bodyText;
+
+        //    // Generar el código QR y adjuntarlo al correo
+        //    var qrWriter = new ZXing.BarcodeWriterPixelData();
+        //    qrWriter.Format = ZXing.BarcodeFormat.QR_CODE;
+        //    var pixelData = qrWriter.Write(model.State_pol); // Aquí asumo que quieres el ReferenceCode en el QR
+        //    var bitmap = new Bitmap(pixelData.Width, pixelData.Height, PixelFormat.Format32bppRgb);
+        //    using (var ms = new MemoryStream(pixelData.Pixels))
+        //    {
+        //        bitmap = new Bitmap(ms);
+        //    }
+        //    var qrMemoryStream = new MemoryStream();
+        //    bitmap.Save(qrMemoryStream, ImageFormat.Png);
+        //    builder.Attachments.Add("codigoQR.png", qrMemoryStream.ToArray());
+
+        //    message.Body = builder.ToMessageBody();
+
+        //    using (var client = new MailKit.Net.Smtp.SmtpClient())
+        //    {
+        //        client.Connect("smtp.gmail.com", 587, false);
+        //        client.Authenticate("tucorreo@gmail.com", "tuContraseñaDeAplicación");
+        //        client.Send(message);
+        //        client.Disconnect(true);
+        //    }
+        //}
 
         private int UsuarioInfo(string buyerEmail, int phone, string fullName, string address, string document, string documentNumber, string company, string country, string state, string city, int PostalCode, MySqlConnection connection, MySqlTransaction transaction)
         {
@@ -230,6 +321,40 @@ namespace Tienda.Controllers
                 command.Parameters.AddWithValue("@Estado", 1); // estado de la transacción
 
                 return Convert.ToInt32(command.ExecuteScalar()); // Devuelve el ID de la orden recién creada.
+            }
+        }
+
+        private string GenerarReferencia()
+        {
+            using (var connection = _dataConexion.CreateConnection())
+            {
+                connection.Open();
+
+                // Consulta para obtener el último referenceCode
+                string query = @"SELECT refere FROM td_orden ORDER BY Id DESC LIMIT 1;";
+
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    object result = command.ExecuteScalar();
+
+                    if (result == null || result == DBNull.Value)
+                    {
+                        // Si no hay registros, retorna "00001"
+                        return "00001";
+                    }
+                    else
+                    {
+                        // Extrae el número del último referenceCode
+                        string lastReference = result.ToString();
+                        string lastNumber = lastReference.Split('-').Last(); // Suponiendo que el formato es "TestPayU-00001"
+
+                        // Convierte ese número a int y súmale 1
+                        int nextNumber = Convert.ToInt32(lastNumber) + 1;
+
+                        // Retorna el número formateado a 5 dígitos
+                        return nextNumber.ToString("D5");
+                    }
+                }
             }
         }
 
@@ -566,11 +691,5 @@ namespace Tienda.Controllers
             return View();
         }
        
-        
-        public ActionResult Confirmation() // Acción para mostrar la confirmación de la compra
-        {
-
-            return View();
-        }
     }
 }

@@ -23,10 +23,9 @@
     <div class="details">
         <h4>Detalles del Pago:</h4>
         <p><strong>ID de la Transacción:</strong> @Model.TransactionId</p>
-        <p><strong>Estado:</strong> @Model.TransactionStatus</p>
-        <p><strong>Monto:</strong> @Model.Amount</p>
+        <p><strong>Estado:</strong> @Model.Message</p>
+        <p><strong>Monto:</strong> @Model.TX_VALUE</p>
         <p><strong>Descripción:</strong> @Model.Description</p>
-        <!-- Aquí puedes agregar más campos según lo que te devuelva PayU -->
     </div>
 
     <a href="/" class="btn btn-primary mt-4">Regresar al Inicio</a>
