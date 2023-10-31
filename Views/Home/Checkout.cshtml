@@ -5,12 +5,12 @@
     <h1>Página de Pago</h1>
 </div>
 
-@*<div style="margin-top: 20px; margin-bottom: 20px;">
+<!--<div style="margin-top: 20px; margin-bottom: 20px;">
     ¿Tienes un cupón? <span id="coupon-link" class="text-danger" style="cursor:pointer;">Haz clic aquí para introducir tu código</span>
-</div>*@
+</div>-->
 
 <!-- Div oculto para introducir el código de cupón -->
-@*<div id="coupon-div" style="display:none; margin-bottom: 20px;">
+<!--<div id="coupon-div" style="display:none; margin-bottom: 20px;">
     <div>
         Si tienes un código de cupón, por favor, aplícalo abajo.
     </div>
@@ -20,7 +20,7 @@
             <button type="button" class="btn btn-secondary" style="margin-left: 20px;">Aplicar cupón</button>
         </div>
     </div>
-</div>*@
+</div>-->
 
 <div id="error-message" class="alert alert-danger" style="display:none;">
     Por favor, complete todos los campos obligatorios:
@@ -49,7 +49,6 @@
 
         <!-- Renglón de Tipo y Número de Documento -->
         <div class="row">
-            <!-- Cambié form-row a row -->
             <div class="form-group col-md-6">
                 <label for="documentType">Tipo de Documento</label>
                 <select id="documentType" name="documentType" class="form-control" required>
@@ -64,14 +63,12 @@
                 <label for="documentNumber">Número de Documento <span class="text-danger">*</span></label>
                 <input type="number" class="form-control" id="documentNumber" name="documentNumber" required />
             </div>
-
             <div class="form-group col-md-6" id="dvVerificationDigit" style="display: none;">
                 <label for="verificationDigit">Dígito de Verificación</label>
-                <input type="number" class="form-control" id="verificationDigit" name="verificationDigit" />
+                <input type="number" class="form-control" id="verificationDigit" name="verificationDigit" min="0" max="9" inputmode="numeric" pattern="[0-9]" title="Por favor, introduce solo un número." />
             </div>
-
-
         </div>
+
         <div class="form-group">
             <label for="companyName">Nombre de la empresa (opcional)</label>
             <input type="text" class="form-control" id="companyName" name="companyName" autocomplete="organization" />
@@ -104,7 +101,7 @@
         <div class="row">
             <div class="form-group col-md-6">
                 <label for="phone">Teléfono <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="phone" name="phone" required autocomplete="tel" />
+                <input type="tel" class="form-control" id="phone" name="phone" required pattern="\d{7,15}" title="Por favor, introduce un número de teléfono válido." autocomplete="tel" />
             </div>
             <div class="form-group col-md-6">
                 <label for="email">Dirección de correo electrónico <span class="text-danger">*</span></label>
@@ -180,17 +177,32 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script type="text/javascript">
     // Función para mostrar/ocultar el div de código de cupón
-    document.getElementById('coupon-link').onclick = function () {
-        var couponDiv = document.getElementById('coupon-div');
-        if (couponDiv.style.display === 'none') {
-            couponDiv.style.display = 'block';
-        } else {
-            couponDiv.style.display = 'none';
-        }
-    }
+    //document.getElementById('coupon-link').onclick = function () {
+    //    var couponDiv = document.getElementById('coupon-div');
+    //    if (couponDiv.style.display === 'none') {
+    //        couponDiv.style.display = 'block';
+    //    } else {
+    //        couponDiv.style.display = 'none';
+    //    }
+    //}
 
     // Función para mostrar/ocultar los campos faltan por rellenar antes de enviar el formulario
     $(document).ready(function () {
+
+        $("#documentType").change(function () {
+            var selectedValue = $(this).val();
+            var verificationDigitInput = $("#verificationDigit");
+
+            if (selectedValue === "NIT") {
+                $("#dvVerificationDigit").show();
+                verificationDigitInput.attr('required', true); // Añadir el atributo 'required'
+            } else {
+                $("#dvVerificationDigit").hide();
+                verificationDigitInput.removeAttr('required'); // Eliminar el atributo 'required'
+                verificationDigitInput.val(''); // Opcional: limpiar el valor
+            }
+        });
+
         $('#submit-button').click(function (e) {
             var isValid = true;
             var errorList = $('#error-list');
@@ -211,17 +223,8 @@
                 window.scrollTo(0, 0);  // Desplazar la ventana al inicio de la página
             }
         });
+
     });
 
-    $(document).ready(function () {
-        $("#documentType").change(function () {
-            var selectedValue = $(this).val();
-            if (selectedValue === "NIT") {
-                $("#dvVerificationDigit").show();
-            } else {
-                $("#dvVerificationDigit").hide();
-            }
-        });
-    });
 </script>
 

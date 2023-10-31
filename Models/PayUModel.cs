@@ -21,8 +21,8 @@ namespace Tienda.Models
         public string Signature { get; set; }
         public string ResponseUrl { get; set; }
         public string ConfirmationUrl { get; set; }
-        public int Telephone { get; set; }
+        public long Telephone { get; set; }
         public string BuyerfullName { get; set; }
-        public string PaymentMethod { get; set; }
+        public string paymentMethods { get; set; }
     }
 }

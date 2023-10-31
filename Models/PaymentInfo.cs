@@ -19,9 +19,10 @@ namespace Tienda.Models
         public string State { get; set; }
         public string City { get; set; }
         public string StreetAddress { get; set; }
+        public int VerificationDigit { get; set; }
         public string SostalCode { get; set; }
         public string Email { get; set; }
-        public int Phone { get; set; }
+        public long Phone { get; set; }
         public int postalCode { get; set; }
 
     }

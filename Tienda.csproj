@@ -202,6 +202,7 @@
     <Content Include="Imagenes\payu.jpg" />
     <Content Include="Imagenes\payu.png" />
     <Content Include="Imagenes\pse.jpg" />
+    <Content Include="Imagenes\rm.png" />
     <Content Include="Imagenes\sured.jpg" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
