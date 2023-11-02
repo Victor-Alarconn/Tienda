@@ -71,8 +71,8 @@ namespace Tienda.Controllers
             var city = model.City; // Guardad en base de datos
             var PostalCode = model.postalCode; // Guardad en base de datos
             var paymentMethods = "MASTERCARD,PSE,VISA";
-            var responseUrl = "https://dc72-181-59-112-133.ngrok-free.app/Home/PayUResponse";
-            var confirmationUrl = "https://dc72-181-59-112-133.ngrok-free.app/Home/Confirmation";
+            var responseUrl = "https://2726-190-143-9-17.ngrok-free.app/Home/PayUResponse";
+            var confirmationUrl = "https://2726-190-143-9-17.ngrok-free.app/Home/Confirmation";
             // Genera la firma
             var formattedAmount = amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             var signature = GenerarFirma(apiKey, merchantId, referenceCode, formattedAmount, currency, paymentMethods); // Llama al método para generar la firma
@@ -157,13 +157,14 @@ namespace Tienda.Controllers
         {
             System.Diagnostics.Debug.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(model)); // para imprimir todo el modelo recibido.
             string apiKey = "4Vj8eK4rloUd272L48hsrarnUA";
-            string generatedSignature = CreateSignature(apiKey, model.Account_id, model.Reference_sale, model.Value, model.Currency, model.State_pol);
+            string generatedSignature = CreateSignature(apiKey, model.Account_id, model.Reference_sale, model.Currency, model.State_pol);
             var productos = ObtenerProductosPorOrden(model.Reference_sale);
             EnviarEmail(model, productos);  // Enviar correo con el resumen de la compra y el código QR
+            GuardarBase(model);  // Guardar en la base de datos
             if (generatedSignature.Equals(model.Sign, StringComparison.OrdinalIgnoreCase))
             {
                 // La firma es válida
-               // GuardarBase(model);  // Guardar en la base de datos
+               
                // 
             }
             else
@@ -178,7 +179,7 @@ namespace Tienda.Controllers
         public ActionResult PayUResponse(PayUResponse model)
         {
             string apiKey = "4Vj8eK4rloUd272L48hsrarnUA";
-            string generatedSignature = CreateSignature2(apiKey, model.MerchantId, model.ReferenceCode, model.TX_VALUE, model.Currency, model.TransactionState);
+            string generatedSignature = CreateSignature2(apiKey, model.MerchantId, model.ReferenceCode, model.Currency, model.TransactionState);
 
             if (generatedSignature.Equals(model.Signature, StringComparison.OrdinalIgnoreCase))
             {
@@ -197,13 +198,37 @@ namespace Tienda.Controllers
 
 
         // Método para crear la firma de confirmación
-        private string CreateSignature(string apiKey, int merchantId, string referenceCode, decimal txValue, string currency, string transactionState)
+        private string CreateSignature(string apiKey, int merchantId, string referenceCode, string currency, string transactionState)
         {
             // Aproxima TX_VALUE a un decimal usando el método de redondeo Round half to even
-            decimal newValue = Math.Round(txValue, 1, MidpointRounding.ToEven);
+            decimal txValue = GetTotalFromDatabase(referenceCode);
 
             // Genera la cadena para la firma
-            string rawSignature = $"{apiKey}~{merchantId}~{referenceCode}~{newValue}~{currency}~{transactionState}";
+            var rawSignature = $"{apiKey}~{merchantId}~{referenceCode}~{txValue}~{currency}~{transactionState}";
+
+            // Calcula el hash MD5
+            using (var md5 = System.Security.Cryptography.MD5.Create())
+            {
+                byte[] inputBytes = Encoding.ASCII.GetBytes(rawSignature);
+                byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < hashBytes.Length; i++)
+                {
+                    sb.Append(hashBytes[i].ToString("x2"));
+                }
+                return sb.ToString();
+            }
+        }
+
+
+        private string CreateSignature2(string apiKey, long merchantId, string referenceCode, string currency, int transactionState)
+        {
+            // Obtener el valor de la base de datos
+            decimal txValue = GetTotalFromDatabase(referenceCode);
+
+            // Genera la cadena para la firma
+            string rawSignature = $"{apiKey}~{merchantId}~{referenceCode}~{txValue}~{currency}~{transactionState}";
 
             // Calcula el hash MD5
             using (MD5 md5Hash = MD5.Create())
@@ -218,25 +243,32 @@ namespace Tienda.Controllers
             }
         }
 
-        private string CreateSignature2(string apiKey, long merchantId, string referenceCode, decimal txValue, string currency, int transactionState)
+        private decimal GetTotalFromDatabase(string referenceCode)
         {
-            // Aproxima TX_VALUE a un decimal usando el método de redondeo Round half to even
-            decimal newValue = Math.Round(txValue, 1, MidpointRounding.ToEven);
+            decimal totalValue = 0;
 
-            // Genera la cadena para la firma
-            string rawSignature = $"{apiKey}~{merchantId}~{referenceCode}~{newValue.ToString("F1")}~{currency}~{transactionState}";
-
-            // Calcula el hash MD5
-            using (MD5 md5Hash = MD5.Create())
+            using (var connection = _dataConexion.CreateConnection())
             {
-                byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(rawSignature));
-                StringBuilder sBuilder = new StringBuilder();
-                for (int i = 0; i < data.Length; i++)
+                connection.Open();
+
+                string query = "SELECT total FROM td_orden WHERE refere = @ReferenceCode";
+
+                using (MySqlCommand cmd = new MySqlCommand(query, connection))
                 {
-                    sBuilder.Append(data[i].ToString("x2"));
+                    cmd.Parameters.AddWithValue("@ReferenceCode", referenceCode);
+
+                    object result = cmd.ExecuteScalar();
+
+                    if (result != null && result != DBNull.Value)
+                    {
+                        totalValue = Convert.ToDecimal(result);
+                    }
                 }
-                return sBuilder.ToString();
+
+                connection.Close();
             }
+
+            return totalValue;
         }
 
 
@@ -244,16 +276,15 @@ namespace Tienda.Controllers
         {
             try
             {
-
                 var message = new MimeMessage();
                 message.From.Add(new MailboxAddress("RmSoft", "victor.alarcon@utp.edu.co"));
-                message.To.Add(new MailboxAddress(model.Email_buyer, "alarcongt4@gmail.com"));
+                message.To.Add(new MailboxAddress(model.Email_buyer, "soporte3.rmsoft@gmail.com"));
                 message.Subject = "Detalles de tu compra";
 
                 var builder = new BodyBuilder();
 
                 // Personalizar el mensaje con HTML
-                var htmlContent = $"<div style='border: 1px solid black; padding: 5px;'>"; // Div con bordes
+                var htmlContent = $"<div style='border: 1px solid black; padding: 10px;'>"; // Div con bordes
                 htmlContent += $"<h2 style='text-align:center;'>Estimado(a) cliente - {model.Cc_holder}</h2>";
                 htmlContent += $"<p style='text-align:center;'>Gracias por tu compra.</p>";
                 htmlContent += "<h1 style='color:blue;text-align:center;'>Ha recibido una factura</h1>";
@@ -264,27 +295,25 @@ namespace Tienda.Controllers
                 htmlContent += $"<p style='text-align:center;'>Fecha de emisión: {model.Transaction_date}</p>";
                 htmlContent += "<h3 style='text-align:center;'>Productos</h3>";
                 htmlContent += "<ul style='text-align:center;'>";
+
                 foreach (var producto in productos)
                 {
                     htmlContent += $"<li>{producto.Nombre} - {producto.Precio}</li>";
                 }
                 htmlContent += $"</ul><p style='text-align:center;'><strong>Total:</strong> {model.Value} {model.Currency}</p>";
 
-                // Generar el código QR
-                var qrWriter = new ZXing.BarcodeWriterPixelData
+                // Generar el código de barras
+                var barcodeWriter = new ZXing.BarcodeWriterPixelData
                 {
-                    Format = ZXing.BarcodeFormat.QR_CODE,
-                    Options = new ZXing.QrCode.QrCodeEncodingOptions
+                    Format = ZXing.BarcodeFormat.CODE_128, // Usamos CODE_128 para el código de barras
+                    Options = new ZXing.Common.EncodingOptions
                     {
-                        Height = 300,
-                        Width = 300,
-                        Margin = 2,
-                        ErrorCorrection = ZXing.QrCode.Internal.ErrorCorrectionLevel.H,
-                        CharacterSet = "UTF-8"
+                        Height = 120, // Ajusta la altura según prefieras
+                        Width = 300,  // Ajusta el ancho según prefieras
                     }
                 };
 
-                var pixelData = qrWriter.Write(model.State_pol);
+                var pixelData = barcodeWriter.Write(model.Reference_pol);
                 var bitmap = new Bitmap(pixelData.Width, pixelData.Height, PixelFormat.Format32bppRgb);
 
                 for (int y = 0; y < pixelData.Height; y++)
@@ -297,16 +326,17 @@ namespace Tienda.Controllers
                     }
                 }
 
-                var qrMemoryStream = new MemoryStream();
-                bitmap.Save(qrMemoryStream, ImageFormat.Png);
+                var barcodeMemoryStream = new MemoryStream();
+                bitmap.Save(barcodeMemoryStream, ImageFormat.Png);
 
-                // Añadir el QR directamente en el cuerpo del correo
-                var attachment = builder.Attachments.Add("codigoQR.png", qrMemoryStream.ToArray(), new ContentType("image", "png"));
-                attachment.ContentId = "codigoQR"; // Aquí estamos especificando el Content-ID para el adjunto
-                htmlContent += $"<p style='text-align:center;'><img src=\"cid:{attachment.ContentId}\" alt=\"Código QR\" /></p>"; // Aquí referenciamos ese Content-ID
+                // Añadir el código de barras directamente en el cuerpo del correo
+                htmlContent += $"<p style='text-align:center;'><img src=\"cid:codigoBarra\" alt=\"Código de Barras\" /></p>";
                 htmlContent += "</div>"; // Cierre del div con bordes
 
                 builder.HtmlBody = htmlContent;
+                builder.Attachments.Add("codigoBarra.png", barcodeMemoryStream.ToArray(), new ContentType("image", "png"));
+
+                message.Body = builder.ToMessageBody();
 
                 using (var client = new MailKit.Net.Smtp.SmtpClient())
                 {
@@ -321,6 +351,8 @@ namespace Tienda.Controllers
                 Console.WriteLine($"Error al enviar el correo: {ex.Message}");
             }
         }
+
+
 
 
 
@@ -399,6 +431,90 @@ namespace Tienda.Controllers
             return productos;
         }
 
+
+        public void GuardarBase(PayUConfirmation model)
+        {
+            using (var connection = _dataConexion.CreateConnection())
+            {
+                try
+                {
+                    connection.Open();
+
+                    // Primera consulta: obtener el User_Id
+                    string queryUserId = "SELECT User_Id FROM td_orden WHERE refere = @Refere";
+                    int userId;
+                    using (var commandUserId = new MySqlCommand(queryUserId, connection))
+                    {
+                        commandUserId.Parameters.AddWithValue("@Refere", model.Reference_sale);
+                        object result = commandUserId.ExecuteScalar();
+
+                        if (result == null || result == DBNull.Value)
+                            throw new Exception("Reference_sale no encontrado en td_orden");
+
+                        userId = Convert.ToInt32(result);
+                    }
+
+                    // Segunda consulta: obtener datos del usuario
+                    string email, telef, nombre, tipo_doc, numer_doc, depart, city;
+                    int td_nit;
+                    string nomb_empr;
+
+                    string queryUserData = "SELECT email, telef, nombre, tipo_doc, numer_doc, td_nit, nomb_empr, depart, city FROM td_user WHERE User_Id = @UserId";
+                    using (var commandUserData = new MySqlCommand(queryUserData, connection))
+                    {
+                        commandUserData.Parameters.AddWithValue("@UserId", userId);
+                        using (var reader = commandUserData.ExecuteReader())
+                        {
+                            if (!reader.Read())
+                                throw new Exception("User_Id no encontrado en td_user");
+
+                            email = reader["email"].ToString();
+                            telef = reader["telef"].ToString();
+                            nombre = reader["nombre"].ToString();
+                            tipo_doc = reader["tipo_doc"].ToString();
+                            numer_doc = reader["numer_doc"].ToString();
+                            td_nit = Convert.ToInt32(reader["td_nit"]);
+                            nomb_empr = reader["nomb_empr"].ToString();
+                            depart = reader["depart"].ToString();
+                            city = reader["city"].ToString();
+                        }
+                    }
+
+                    // Inserción en td_fac con los datos recopilados
+                    string queryInsert = @"
+                    INSERT INTO td_fac (codigo_R, estado, referencia, valortotal, fecha_trans, email_buyer, descrip, telefono, nombre_C, id_transa, depart, ciudad, tipo_doc, nit, nombre_empr)
+                    VALUES (@Codigo_R, @Estado, @Referencia, @Valortotal, @Fecha_trans, @Email_buyer, @Descrip, @Telefono, @Nombre_C, @Id_transa, @Depart, @Ciudad, @Tipo_doc, @Nit, @Nombre_empr)";
+
+                    using (var commandInsert = new MySqlCommand(queryInsert, connection))
+                    {
+                        commandInsert.Parameters.AddWithValue("@Codigo_R", model.Account_id);
+                        commandInsert.Parameters.AddWithValue("@Estado", model.State_pol);
+                        commandInsert.Parameters.AddWithValue("@Referencia", model.Reference_sale);
+                        commandInsert.Parameters.AddWithValue("@Valortotal", model.Value);
+                        commandInsert.Parameters.AddWithValue("@Fecha_trans", model.Operation_date);
+                        commandInsert.Parameters.AddWithValue("@Email_buyer", email);
+                        commandInsert.Parameters.AddWithValue("@Descrip", model.Description);
+                        commandInsert.Parameters.AddWithValue("@Telefono", telef);
+                        commandInsert.Parameters.AddWithValue("@Nombre_C", nombre);
+                        commandInsert.Parameters.AddWithValue("@Id_transa", model.Reference_pol);
+                        commandInsert.Parameters.AddWithValue("@Depart", depart);
+                        commandInsert.Parameters.AddWithValue("@Ciudad", city);
+                        commandInsert.Parameters.AddWithValue("@Tipo_doc", tipo_doc);
+                        commandInsert.Parameters.AddWithValue("@Nit", td_nit);
+                        commandInsert.Parameters.AddWithValue("@Nombre_empr", nomb_empr);
+
+                        commandInsert.ExecuteNonQuery();
+                    }
+
+                    connection.Close();
+                }
+                catch (Exception ex)
+                {
+                    // Aquí puedes manejar el error, por ejemplo, registrar el error en un log, mostrar un mensaje, etc.
+                    Console.WriteLine($"Error al guardar en td_fac: {ex.Message}");
+                }
+            }
+        }
 
 
 
