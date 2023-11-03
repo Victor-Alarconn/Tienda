@@ -61,15 +61,6 @@ namespace Tienda.Controllers
             var test = "1";
             var phone = model.Phone; // Guardad en base de datos
             var fullName = $"{model.FirstName} {model.LastName}";  // Combina FirstName y LastName
-            var address = model.StreetAddress; // Guardad en base de datos
-            var document = model.DocumentType; // Guardad en base de datos
-            var nit = model.VerificationDigit;
-            var documentNumber = model.DocumentNumber; // Guardad en base de datos
-            var company = model.CompanyName; // Guardad en base de datos
-            var country = model.Country; // Guardad en base de datos
-            var state = model.State; // Guardad en base de datos
-            var city = model.City; // Guardad en base de datos
-            var PostalCode = model.postalCode; // Guardad en base de datos
             var paymentMethods = "MASTERCARD,PSE,VISA";
             var responseUrl = "https://2726-190-143-9-17.ngrok-free.app/Home/PayUResponse";
             var confirmationUrl = "https://2726-190-143-9-17.ngrok-free.app/Home/Confirmation";
@@ -93,8 +84,7 @@ namespace Tienda.Controllers
                 {
                     try
                     {
-                        int userId = UsuarioInfo(buyerEmail, phone, fullName, address, document, documentNumber, company, country, state, city, PostalCode, nit, connection, transaction);
-                        int orderId = Orden(userId, referenceCode, amount, productDescription, connection, transaction);
+                        int orderId = Orden( model, connection, transaction);
                         GuardarProductos(orderId, model.Cart, connection, transaction);
 
                         // Si todo ha ido bien
@@ -196,7 +186,6 @@ namespace Tienda.Controllers
         }
 
 
-
         // Método para crear la firma de confirmación
         private string CreateSignature(string apiKey, int merchantId, string referenceCode, string currency, string transactionState)
         {
@@ -220,7 +209,6 @@ namespace Tienda.Controllers
                 return sb.ToString();
             }
         }
-
 
         private string CreateSignature2(string apiKey, long merchantId, string referenceCode, string currency, int transactionState)
         {
@@ -270,7 +258,6 @@ namespace Tienda.Controllers
 
             return totalValue;
         }
-
 
         private void EnviarEmail(PayUConfirmation model, List<Producto> productos)
         {
@@ -352,12 +339,6 @@ namespace Tienda.Controllers
             }
         }
 
-
-
-
-
-
-
         private List<Producto> ObtenerProductosPorOrden(string reference_sale)
         {
             var productos = new List<Producto>();
@@ -431,7 +412,6 @@ namespace Tienda.Controllers
             return productos;
         }
 
-
         public void GuardarBase(PayUConfirmation model)
         {
             using (var connection = _dataConexion.CreateConnection())
@@ -441,7 +421,7 @@ namespace Tienda.Controllers
                     connection.Open();
 
                     // Primera consulta: obtener el User_Id
-                    string queryUserId = "SELECT User_Id FROM td_orden WHERE refere = @Refere";
+                    string queryUserId = "SELECT Id FROM td_orden WHERE refere = @Refere";
                     int userId;
                     using (var commandUserId = new MySqlCommand(queryUserId, connection))
                     {
@@ -454,26 +434,27 @@ namespace Tienda.Controllers
                         userId = Convert.ToInt32(result);
                     }
 
-                    // Segunda consulta: obtener datos del usuario
+                    // Segunda consulta: obtener datos del usuario desde td_orden
                     string email, telef, nombre, tipo_doc, numer_doc, depart, city;
-                    int td_nit;
+                    int? td_nit = null;
+
                     string nomb_empr;
 
-                    string queryUserData = "SELECT email, telef, nombre, tipo_doc, numer_doc, td_nit, nomb_empr, depart, city FROM td_user WHERE User_Id = @UserId";
+                    string queryUserData = "SELECT email, telef, nombre, tipo_doc, numer_doc, td_nit, nomb_empr, depart, city FROM td_orden WHERE Id = @Id"; 
                     using (var commandUserData = new MySqlCommand(queryUserData, connection))
                     {
-                        commandUserData.Parameters.AddWithValue("@UserId", userId);
+                        commandUserData.Parameters.AddWithValue("@Id", userId);
                         using (var reader = commandUserData.ExecuteReader())
                         {
                             if (!reader.Read())
-                                throw new Exception("User_Id no encontrado en td_user");
+                                throw new Exception("User_Id no encontrado en td_orden"); // Cambiamos el mensaje de error para que sea más específico
 
                             email = reader["email"].ToString();
                             telef = reader["telef"].ToString();
                             nombre = reader["nombre"].ToString();
                             tipo_doc = reader["tipo_doc"].ToString();
                             numer_doc = reader["numer_doc"].ToString();
-                            td_nit = Convert.ToInt32(reader["td_nit"]);
+                            td_nit = reader["td_nit"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["td_nit"]);
                             nomb_empr = reader["nomb_empr"].ToString();
                             depart = reader["depart"].ToString();
                             city = reader["city"].ToString();
@@ -482,8 +463,8 @@ namespace Tienda.Controllers
 
                     // Inserción en td_fac con los datos recopilados
                     string queryInsert = @"
-                    INSERT INTO td_fac (codigo_R, estado, referencia, valortotal, fecha_trans, email_buyer, descrip, telefono, nombre_C, id_transa, depart, ciudad, tipo_doc, nit, nombre_empr)
-                    VALUES (@Codigo_R, @Estado, @Referencia, @Valortotal, @Fecha_trans, @Email_buyer, @Descrip, @Telefono, @Nombre_C, @Id_transa, @Depart, @Ciudad, @Tipo_doc, @Nit, @Nombre_empr)";
+             INSERT INTO td_fac (codigo_R, estado, referencia, valortotal, fecha_trans, email_buyer, descrip, telefono, nombre, id_transa, depart, ciudad, tipo_doc, nit, nombre_empr,numer_doc)
+             VALUES (@Codigo_R, @Estado, @Referencia, @Valortotal, @Fecha_trans, @Email_buyer, @Descrip, @Telefono, @Nombre_C, @Id_transa, @Depart, @Ciudad, @Tipo_doc, @Nit, @Nombre_empr,@NumeroD)";
 
                     using (var commandInsert = new MySqlCommand(queryInsert, connection))
                     {
@@ -502,72 +483,69 @@ namespace Tienda.Controllers
                         commandInsert.Parameters.AddWithValue("@Tipo_doc", tipo_doc);
                         commandInsert.Parameters.AddWithValue("@Nit", td_nit);
                         commandInsert.Parameters.AddWithValue("@Nombre_empr", nomb_empr);
+                        commandInsert.Parameters.AddWithValue("@NumeroD", numer_doc);
 
                         commandInsert.ExecuteNonQuery();
                     }
 
                     connection.Close();
+
                 }
                 catch (Exception ex)
                 {
-                    // Aquí puedes manejar el error, por ejemplo, registrar el error en un log, mostrar un mensaje, etc.
                     Console.WriteLine($"Error al guardar en td_fac: {ex.Message}");
                 }
             }
         }
 
-
-
-
-        private int UsuarioInfo(string buyerEmail, long phone, string fullName, string address, string document, string documentNumber, string company, string country, string state, string city, int PostalCode, int? nit, MySqlConnection connection, MySqlTransaction transaction)
+        private int Orden(PaymentInfo model, MySqlConnection connection, MySqlTransaction transaction)
         {
-            // Definir la consulta SQL para insertar la información del usuario en la base de datos.
-            string query = @"INSERT INTO td_user(email, telef, nombre, direc, tipo_doc, numer_doc, nomb_empr, pais, depart, city, postalnum, td_nit) 
-                     VALUES (@Email, @Phone, @FullName, @Address, @DocumentType, @DocumentNumber, @CompanyName, @Country, @State, @City, @PostalCode, @nit);
-                     SELECT LAST_INSERT_ID();";
+            // La consulta SQL y la lógica se mantienen, solo cambiamos cómo accedemos a las propiedades
+            string query = @"
+        INSERT INTO td_orden(email, telef, nombre, direc, tipo_doc, numer_doc, nomb_empr, pais, depart, city, 
+                             postalnum, td_nit, refere, total, descrip, td_estado)
+        VALUES (@Email, @Phone, @FullName, @Address, @DocumentType, @DocumentNumber, @CompanyName, 
+                @Country, @State, @City, @PostalCode, @nit, @ReferenceCode, @Amount, @ProductDescription, @Estado);
+        SELECT LAST_INSERT_ID();";
 
             using (var command = new MySqlCommand(query, connection, transaction))
             {
-                // Asignar valores a los parámetros de la consulta SQL.
-                command.Parameters.AddWithValue("@Email", buyerEmail);
-                command.Parameters.AddWithValue("@Phone", phone);
-                command.Parameters.AddWithValue("@FullName", fullName);
-                command.Parameters.AddWithValue("@Address", address);
-                command.Parameters.AddWithValue("@DocumentType", document);
-                command.Parameters.AddWithValue("@DocumentNumber", documentNumber);
-                command.Parameters.AddWithValue("@CompanyName", company);
-                command.Parameters.AddWithValue("@Country", country);
-                command.Parameters.AddWithValue("@State", state);
-                command.Parameters.AddWithValue("@City", city);
-                command.Parameters.AddWithValue("@PostalCode", PostalCode);
-                // Verificar si nit es nulo o no
-                if (nit.HasValue)
-                    command.Parameters.AddWithValue("@nit", nit);
+                // Asignación de valores a los parámetros de la consulta SQL usando el modelo directamente.
+                command.Parameters.AddWithValue("@Email", model.Email);
+                command.Parameters.AddWithValue("@Phone", model.Phone);
+                command.Parameters.AddWithValue("@FullName", $"{model.FirstName} {model.LastName}");
+                command.Parameters.AddWithValue("@Address", model.StreetAddress);
+                command.Parameters.AddWithValue("@DocumentType", model.DocumentType);
+                command.Parameters.AddWithValue("@DocumentNumber", model.DocumentNumber);
+                command.Parameters.AddWithValue("@CompanyName", model.CompanyName);
+                command.Parameters.AddWithValue("@Country", model.Country);
+                command.Parameters.AddWithValue("@State", model.State);
+                command.Parameters.AddWithValue("@City", model.City);
+                command.Parameters.AddWithValue("@PostalCode", model.postalCode);
+
+                if (model.VerificationDigit.HasValue)
+                    command.Parameters.AddWithValue("@nit", model.VerificationDigit);
                 else
                     command.Parameters.AddWithValue("@nit", DBNull.Value);
 
-                // Ejecutar la consulta SQL.
-                return Convert.ToInt32(command.ExecuteScalar()); // Devuelve el ID del usuario recién creado.
-            }
-        }
+                command.Parameters.AddWithValue("@ReferenceCode", GenerarReferencia()); // Aquí supongo que aún querrás generar una referencia nueva para cada orden.
+                command.Parameters.AddWithValue("@Amount", model.Cart.TotalPrice());
 
-
-        private int Orden(int userId, string referenceCode, decimal amount, string productDescription, MySqlConnection connection, MySqlTransaction transaction)
-        {
-            // Ahora, además de los otros campos, también insertamos el estado en la consulta SQL.
-            string orderInsertQuery = @"INSERT INTO td_orden(User_Id, refere, total, descrip, td_estado)
-                    VALUES (@UserId, @ReferenceCode, @Amount, @ProductDescription, @Estado);
-                    SELECT LAST_INSERT_ID();"; // Devuelve el ID recién creado.
-
-            using (var command = new MySqlCommand(orderInsertQuery, connection, transaction))
-            {
-                command.Parameters.AddWithValue("@UserId", userId);
-                command.Parameters.AddWithValue("@ReferenceCode", referenceCode);
-                command.Parameters.AddWithValue("@Amount", amount);
+                StringBuilder productNames = new StringBuilder();
+                foreach (var item in model.Cart.Items)
+                {
+                    if (productNames.Length > 0)
+                    {
+                        productNames.Append(", ");
+                    }
+                    productNames.Append(item.Product.Nombre);
+                }
+                string productDescription = productNames.ToString();
                 command.Parameters.AddWithValue("@ProductDescription", productDescription);
                 command.Parameters.AddWithValue("@Estado", 1); // estado de la transacción
 
-                return Convert.ToInt32(command.ExecuteScalar()); // Devuelve el ID de la orden recién creada.
+                // Ejecuta la consulta SQL y devuelve el ID recién creado.
+                return Convert.ToInt32(command.ExecuteScalar());
             }
         }
 
@@ -604,7 +582,6 @@ namespace Tienda.Controllers
                 }
             }
         }
-
 
 
         private void GuardarProductos(int orderId, Cart cart, MySqlConnection connection, MySqlTransaction transaction)
@@ -742,7 +719,6 @@ namespace Tienda.Controllers
 
             return Json(new { success = true });
         }
-
 
         private Producto GetProductById(int productId) // Método para obtener un producto por su ID
         {
