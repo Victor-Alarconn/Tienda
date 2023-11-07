@@ -34,9 +34,12 @@
                 <br>
                 <a href="@Url.Action("Carrito", "Home")">Ver carrito</a>
             </span>
+            <div class="input-group mb-3">
+                <p>Categoria: <span class="text-danger">@Model.Product.GrupoNombre</span></p>
+            </div>
         </div>
 
-    </div>
+        </div>
     <div class="col-12">
         <h1 class="border-bottom">Descripción</h1>
         <p>@Model.Product.Descripcion</p>

@@ -935,7 +935,12 @@ namespace Tienda.Controllers
                 connection.Open();
 
                 // Modificar la consulta para incluir una cláusula WHERE
-                string query = "SELECT * FROM td_main WHERE id_main = @Id";
+               string query = @"
+                            SELECT m.*, g.td_nombre AS NombreGrupo 
+                            FROM td_main m
+                            LEFT JOIN td_grupos g ON m.id_grupo = g.id_grupo
+                            WHERE m.id_main = @Id";
+
                 using (var command = new MySqlCommand(query, connection))
                 {
                     // Añadir el parámetro ID al comando
@@ -943,7 +948,6 @@ namespace Tienda.Controllers
 
                     using (var reader = command.ExecuteReader())
                     {
-                        // Usar if en lugar de while ya que sólo estás buscando un único producto
                         if (reader.Read())
                         {
                             product = new Producto
@@ -953,11 +957,12 @@ namespace Tienda.Controllers
                                 Descripcion = reader.GetString("td_descri"),
                                 Precio = reader.GetDecimal("td_precio"),
                                 Imagen = reader.GetString("td_img"),
-                                Id_Grupo = reader.GetInt32("id_grupo"),
+                                GrupoNombre = reader.IsDBNull(reader.GetOrdinal("NombreGrupo")) ? null : reader.GetString("NombreGrupo"), // Se Utiliza IsDBNull para comprobar si el campo es NULL
                                 Detalle = reader.GetString("td_detall")
                             };
                         }
                     }
+
                 }
                 // Obtén el id_grupo del producto actual
                 var groupId = product.Id_Grupo;

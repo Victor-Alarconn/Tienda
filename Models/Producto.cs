@@ -14,5 +14,6 @@ namespace Tienda.Models
         public string Imagen { get; set; }
         public int Id_Grupo { get; set; }
         public string Detalle { get; set; }
+        public string GrupoNombre { get; set; }
     }
 }
