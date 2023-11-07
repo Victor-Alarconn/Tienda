@@ -534,9 +534,9 @@ namespace Tienda.Controllers
             // La consulta SQL y la lógica se mantienen, solo cambiamos cómo accedemos a las propiedades
             string query = @"
         INSERT INTO td_orden(email, telef, nombre, nombre2, apellido, apellido2, direc, tipo_doc, numer_doc, nomb_empr, pais, depart, city, 
-                             postalnum, td_nit, refere, total, descrip, td_estado)
+                             postalnum, td_nit, refere, total, descrip, td_estado, codigo_dcity)
         VALUES (@Email, @Phone, @FullName, @Nombre2, @Apellido, @Apellido2, @Address, @DocumentType, @DocumentNumber, @CompanyName, 
-                @Country, @State, @City, @PostalCode, @nit, @ReferenceCode, @Amount, @ProductDescription, @Estado);
+                @Country, @State, @City, @PostalCode, @nit, @ReferenceCode, @Amount, @ProductDescription, @Estado, @CodigoD);
         SELECT LAST_INSERT_ID();";
 
             using (var command = new MySqlCommand(query, connection, transaction))
@@ -556,6 +556,7 @@ namespace Tienda.Controllers
                 command.Parameters.AddWithValue("@State", model.State);
                 command.Parameters.AddWithValue("@City", model.City);
                 command.Parameters.AddWithValue("@PostalCode", model.postalCode);
+                command.Parameters.AddWithValue("@CodigoD", model.CityCode);
 
                 if (model.VerificationDigit.HasValue)
                     command.Parameters.AddWithValue("@nit", model.VerificationDigit);
@@ -582,6 +583,69 @@ namespace Tienda.Controllers
                 return Convert.ToInt32(command.ExecuteScalar());
             }
         }
+
+        public JsonResult GetDepartamentos()
+        {
+            try
+            {
+                using (var connection = _dataConexion.CreateConnection())
+                {
+                connection.Open();
+                var departamentos = new List<string>();
+                using (var command = new MySqlCommand("SELECT DISTINCT CityNdepto FROM xxxxcity", connection))
+                    {
+                    using (var reader = command.ExecuteReader())
+                        {
+                        while (reader.Read())
+                            {
+                            departamentos.Add(reader.GetString("CityNdepto"));
+                        }
+                    }
+                }
+                return Json(departamentos, JsonRequestBehavior.AllowGet);
+            }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener departamentos: {ex.Message}");
+                return Json(new { success = false, error = ex.Message });
+            }
+        }
+
+        public JsonResult GetCiudadesPorDepartamento(string departamento)
+        {
+            try
+            {
+                using (var connection = _dataConexion.CreateConnection())
+                {
+                    connection.Open();
+                    var ciudades = new List<object>(); // Modificado para contener objetos con ciudad y código
+                    using (var command = new MySqlCommand("SELECT citynomb, citycodigo FROM xxxxcity WHERE CityNdepto = @departamento", connection))
+                    {
+                        command.Parameters.AddWithValue("@departamento", departamento);
+                        using (var reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                string ciudadCompleta = reader.GetString("citynomb");
+                                string ciudad = ciudadCompleta.Split(',')[0]; // Tomar solo el nombre de la ciudad
+                                string codigo = reader.GetString("citycodigo"); // Obtener el código de la ciudad
+                                ciudades.Add(new { Ciudad = ciudad, Codigo = codigo });
+                            }
+                        }
+                    }
+                    return Json(ciudades, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener ciudades: {ex.Message}");
+                return Json(new { success = false, error = ex.Message });
+            }
+
+        }
+
+
 
         private string GenerarReferencia()
         {

@@ -52,15 +52,26 @@
                 </div>
             </div>
 
-            @*<div id="myCarousel" class="carousel slide" data-ride="carousel" data-interval="2000">
+            <div id="myCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
                 <div class="carousel-inner">
+                    <!-- Primer conjunto de imágenes -->
                     <div class="carousel-item active">
-                        <img src="~/Imagenes/efecty.jpg" class="d-block w-25 h-25 carousel-image" alt="Imagen 1">
-                        <img src="~/Imagenes/bancobogota.jpg" class="d-block w-25 h-25 carousel-image" alt="Imagen 2">
-                        <img src="~/Imagenes/american.jpg" class="d-block w-25 h-25 carousel-image" alt="Imagen 3">
+                        <div class="d-flex justify-content-center">
+                            <img src="~/Imagenes/pse.jpg" class="d-block" alt="Imagen PSE" style="max-width: 33%;">
+                            <img src="~/Imagenes/mastercard.jpg" class="d-block" alt="Imagen Mastercard" style="max-width: 33%;">
+                            <img src="~/Imagenes/Visa.jpg" class="d-block" alt="Imagen Visa" style="max-width: 33%;">
+                        </div>
+                    </div>
+                    <!-- Segundo conjunto de imágenes -->
+                    <div class="carousel-item">
+                        <div class="d-flex justify-content-center">
+                            <img src="~/Imagenes/Nequi.jpg" class="d-block" alt="Imagen Nequi" style="max-width: 33%;">
+                            <img src="~/Imagenes/Daviplata.jpg" class="d-block" alt="Imagen Daviplata" style="max-width: 33%;">
+                            <!-- Agregar una tercera imagen si es necesario -->
+                        </div>
                     </div>
                 </div>
-            </div>*@
+            </div>
 
             <div class="container my-5 bg-dark">
                 <!-- my-5 añade margen arriba y abajo -->
@@ -83,7 +94,18 @@
                     </div>
                     <div class="col-md-4">
                         <h2>Redes sociales</h2>
-                        <!-- Puedes añadir aquí tus enlaces a redes sociales, por ejemplo, con íconos -->
+                        <a href="https://www.facebook.com/BioparqueUkumariPereira/" target="_blank" class="social-icon">
+                            <img src="~/Imagenes/Facebook.svg" alt="Facebook" style="width: 80px; height: 60px;">
+                        </a>
+                        <a href="https://twitter.com/ukumaripereira" target="_blank" class="social-icon">
+                            <img src="~/Imagenes/Twitter.svg" alt="Twitter" style="width: 80px; height: 60px;">
+                        </a>
+                        <a href="https://www.instagram.com/bioparqueukumari/" target="_blank" class="social-icon">
+                            <img src="~/Imagenes/Instagram.svg" alt="Instagram" style="width: 80px; height: 60px;">
+                        </a>
+                        <a href="https://www.youtube.com/channel/UCSiERFPD0kXZD604Ewgt3XA" target="_blank" class="social-icon">
+                            <img src="/Imagenes/YouTube.svg" alt="Youtube" style="width: 80px; height: 60px;">
+                        </a>
                     </div>
                 </div>
             </div>
@@ -100,17 +122,27 @@
         </footer>
     </div>
 
-    @*<style>
-        .carousel-inner {
-            display: flex;
-            overflow: auto;
+    <style>
+        #myCarousel .carousel-inner .carousel-item .d-flex img {
+            max-height: 100px;
+            padding: 5px;
         }
 
-        .carousel-item {
-            flex: 0 0 auto;
-            width: 100%;
+        .social-icon {
+            width: 80px;
+            height: 60px;
+            margin-right: -25px; /* Ajusta el espacio entre los íconos */
+            border: none; /* Esto elimina cualquier borde */
+            display: inline-block; /* Esto asegura que se alineen en línea */
+            text-decoration: none; /* Esto elimina cualquier subrayado de texto */
         }
-    </style>*@
+
+            /* Puedes querer aplicar esto a los enlaces directamente para eliminar el borde azul */
+            .social-icon a {
+                border: none;
+                text-decoration: none;
+            }
+    </style>
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")

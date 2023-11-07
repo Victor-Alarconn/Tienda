@@ -26,6 +26,6 @@ namespace Tienda.Models
         public string Email { get; set; }
         public long Phone { get; set; }
         public int postalCode { get; set; }
-
+        public string CityCode { get; set; }
     }
 }

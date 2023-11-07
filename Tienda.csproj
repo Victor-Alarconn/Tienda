@@ -169,6 +169,7 @@
     </Compile>
     <Compile Include="Models\Cart.cs" />
     <Compile Include="Models\Categoria.cs" />
+    <Compile Include="Models\Ciudad.cs" />
     <Compile Include="Models\DatosCliente.cs" />
     <Compile Include="Models\PaymentInfo.cs" />
     <Compile Include="Models\PayUConfirmation.cs" />
@@ -198,19 +199,19 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
-    <Content Include="Imagenes\american.jpg" />
-    <Content Include="Imagenes\bancobogota.jpg" />
-    <Content Include="Imagenes\bancolombia.jpg" />
-    <Content Include="Imagenes\codensa.jpg" />
+    <Content Include="Imagenes\Daviplata.jpg" />
     <Content Include="Imagenes\davivienda.jpg" />
-    <Content Include="Imagenes\diners.jpg" />
-    <Content Include="Imagenes\efecty.jpg" />
+    <Content Include="Imagenes\Facebook.svg" />
+    <Content Include="Imagenes\Instagram.svg" />
     <Content Include="Imagenes\mastercard.jpg" />
+    <Content Include="Imagenes\Nequi.jpg" />
     <Content Include="Imagenes\payu.jpg" />
     <Content Include="Imagenes\payu.png" />
     <Content Include="Imagenes\pse.jpg" />
     <Content Include="Imagenes\rm.png" />
-    <Content Include="Imagenes\sured.jpg" />
+    <Content Include="Imagenes\Twitter.svg" />
+    <Content Include="Imagenes\Visa.jpg" />
+    <Content Include="Imagenes\YouTube.svg" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -238,7 +239,6 @@
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
-    <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
@@ -249,6 +249,7 @@
     <Content Include="Views\Home\Politica.cshtml" />
     <Content Include="Views\Home\PayUForm.cshtml" />
     <Content Include="Views\Home\PayUResponse.cshtml" />
+    <Content Include="Views\Shared\_Layout.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -88,12 +88,15 @@
         <div class="row">
             <div class="form-group col-md-6">
                 <label for="state">Departamento <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="state" name="state" required autocomplete="address-level1" />
+                <select class="form-control" id="state" name="state" required></select>
+                <input type="text" id="stateManual" name="stateManual" class="form-control" style="display:none;" placeholder="Escribe el departamento" />
             </div>
             <div class="form-group col-md-6">
                 <label for="city">Ciudad <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="city" name="city" required autocomplete="address-level2" />
+                <select class="form-control" id="city" name="city" required></select>
+                <input type="text" id="cityManual" name="cityManual" class="form-control" style="display:none;" placeholder="Escribe la ciudad" />
             </div>
+            <input type="text" id="cityCode" name="cityCode" class="form-control" style="display:none;" placeholder="Código de la ciudad" />
         </div>
         <div class="row">
             <div class="form-group col-md-6">
@@ -192,6 +195,56 @@
     //        couponDiv.style.display = 'none';
     //    }
     //}
+
+    // Accion para obtener los departamentos y las ciudades
+
+    $(document).ready(function () {
+        // Cargar departamentos al cargar la página
+        $.getJSON('/Home/GetDepartamentos', function (response) {
+            if (response.error) {
+                // Manejar el error y habilitar la entrada manual
+                alert("Error al cargar los departamentos: " + response.message);
+                // Suponiendo que tienes un input de texto con id 'stateManual' que está oculto por defecto
+                $('#state').hide();
+                $('#stateManual').show();
+            } else {
+                var items = '<option value="">Seleccione un departamento</option>';
+                $.each(response, function (i, departamento) {
+                    items += "<option value='" + departamento + "'>" + departamento + "</option>";
+                });
+                $('#state').html(items);
+            }
+        });
+
+        // Evento de cambio para cargar las ciudades basadas en el departamento seleccionado
+        $('#state').change(function () {
+            var departamentoSeleccionado = $(this).val();
+            $.getJSON('/Home/GetCiudadesPorDepartamento', { departamento: departamentoSeleccionado }, function (data) {
+                if (data.error) {
+                    // Manejar el error y habilitar la entrada manual
+                    alert("Error al cargar las ciudades: " + data.error);
+                    $('#city').hide();
+                    $('#cityManual').show();
+                } else {
+                    var items = '<option value="">Seleccione una ciudad</option>';
+                    $.each(data, function (i, item) {
+                        items += "<option value='" + item.Ciudad + "' data-codigo='" + item.Codigo + "'>" + item.Ciudad + "</option>";
+                    });
+                    $('#city').html(items);
+                }
+            });
+        });
+
+        // Evento de cambio para el campo de ciudad
+        $('#city').change(function () {
+            var codigoCiudad = $('option:selected', this).attr('data-codigo'); // Cambiado a .attr() en lugar de .data()
+            $('#cityCode').val(codigoCiudad); // Asegúrate de que tienes un elemento con id 'cityCode'
+        });
+    });
+
+
+
+
 
     // Función para mostrar/ocultar los campos faltan por rellenar antes de enviar el formulario
     $(document).ready(function () {
