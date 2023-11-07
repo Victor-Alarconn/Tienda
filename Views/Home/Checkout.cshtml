@@ -37,15 +37,22 @@
         <!-- Renglón de Nombre y Apellidos -->
         <div class="row">
             <div class="form-group col-md-6">
-                <label for="firstName">Nombre <span class="text-danger">*</span></label>
+                <label for="firstName">Primer Nombre <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="firstName" name="firstName" required autocomplete="given-name" />
             </div>
             <div class="form-group col-md-6">
-                <label for="lastName">Apellidos <span class="text-danger">*</span></label>
+                <label for="middleName">Segundo Nombre</label>
+                <input type="text" class="form-control" id="middleName" name="middleName" autocomplete="additional-name" />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="lastName">Primer Apellido <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="lastName" name="lastName" required autocomplete="family-name" />
             </div>
+            <div class="form-group col-md-6">
+                <label for="secondLastName">Segundo Apellido</label>
+                <input type="text" class="form-control" id="secondLastName" name="secondLastName" autocomplete="additional-name" />
+            </div>
         </div>
-
 
         <!-- Renglón de Tipo y Número de Documento -->
         <div class="row">

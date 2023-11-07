@@ -60,10 +60,10 @@ namespace Tienda.Controllers
             var taxReturnBase = 0;
             var test = "1";
             var phone = model.Phone; // Guardad en base de datos
-            var fullName = $"{model.FirstName} {model.LastName}";  // Combina FirstName y LastName
+            var fullName = $"{model.FirstName} {model.MiddleName} {model.LastName} {model.SecondLastName}";  // Combina FirstName y LastName
             var paymentMethods = "MASTERCARD,PSE,VISA";
-            var responseUrl = "https://2726-190-143-9-17.ngrok-free.app/Home/PayUResponse";
-            var confirmationUrl = "https://2726-190-143-9-17.ngrok-free.app/Home/Confirmation";
+            var responseUrl = "https://3153-186-87-167-53.ngrok-free.app/Home/PayUResponse";
+            var confirmationUrl = "https://3153-186-87-167-53.ngrok-free.app/Home/Confirmation";
             // Genera la firma
             var formattedAmount = amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             var signature = GenerarFirma(apiKey, merchantId, referenceCode, formattedAmount, currency, paymentMethods); // Llama al método para generar la firma
@@ -149,7 +149,8 @@ namespace Tienda.Controllers
             string apiKey = "4Vj8eK4rloUd272L48hsrarnUA";
             string generatedSignature = CreateSignature(apiKey, model.Account_id, model.Reference_sale, model.Currency, model.State_pol);
             var productos = ObtenerProductosPorOrden(model.Reference_sale);
-            EnviarEmail(model, productos);  // Enviar correo con el resumen de la compra y el código QR
+            var datos = Obtenerdatos(model.Reference_sale);
+            EnviarEmail(model, productos, datos);  // Enviar correo con el resumen de la compra y el código QR
             GuardarBase(model);  // Guardar en la base de datos
             if (generatedSignature.Equals(model.Sign, StringComparison.OrdinalIgnoreCase))
             {
@@ -259,20 +260,22 @@ namespace Tienda.Controllers
             return totalValue;
         }
 
-        private void EnviarEmail(PayUConfirmation model, List<Producto> productos)
+        private void EnviarEmail(PayUConfirmation model, List<Producto> productos, DatosCliente datos)
         {
             try
             {
                 var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("RmSoft", "victor.alarcon@utp.edu.co"));
-                message.To.Add(new MailboxAddress(model.Email_buyer, "soporte3.rmsoft@gmail.com"));
+                message.From.Add(new MailboxAddress("RmSoft", "sistemas.rmsoft@gmail.com"));
+                message.To.Add(new MailboxAddress(datos.Email, datos.Email)); // usando el email de datos
                 message.Subject = "Detalles de tu compra";
 
                 var builder = new BodyBuilder();
+                string nombreCompleto = $"{datos.Nombre} {datos.Nombre2} {datos.Apellido} {datos.Apellido2}".Trim();
+
 
                 // Personalizar el mensaje con HTML
                 var htmlContent = $"<div style='border: 1px solid black; padding: 10px;'>"; // Div con bordes
-                htmlContent += $"<h2 style='text-align:center;'>Estimado(a) cliente - {model.Cc_holder}</h2>";
+                htmlContent += $"<h2 style='text-align:center;'>Estimado(a) cliente - {nombreCompleto}</h2>";
                 htmlContent += $"<p style='text-align:center;'>Gracias por tu compra.</p>";
                 htmlContent += "<h1 style='color:blue;text-align:center;'>Ha recibido una factura</h1>";
                 htmlContent += "<h2 style='text-align:center;'>RESUMEN DEL DOCUMENTO</h2>";
@@ -287,48 +290,29 @@ namespace Tienda.Controllers
                 {
                     htmlContent += $"<li>{producto.Nombre} - {producto.Precio}</li>";
                 }
-                htmlContent += $"</ul><p style='text-align:center;'><strong>Total:</strong> {model.Value} {model.Currency}</p>";
+                htmlContent += $"</ul><p style='text-align:center;'><strong>Total:</strong> {datos.Total} {model.Currency}</p>";
 
-                // Generar el código de barras
-                var barcodeWriter = new ZXing.BarcodeWriterPixelData
-                {
-                    Format = ZXing.BarcodeFormat.CODE_128, // Usamos CODE_128 para el código de barras
-                    Options = new ZXing.Common.EncodingOptions
-                    {
-                        Height = 120, // Ajusta la altura según prefieras
-                        Width = 300,  // Ajusta el ancho según prefieras
-                    }
-                };
+                var qrGenerator = new QRCoder.QRCodeGenerator();
+                var qrData = qrGenerator.CreateQrCode(model.Reference_pol, QRCoder.QRCodeGenerator.ECCLevel.Q);
+                var qrCode = new QRCoder.QRCode(qrData);
 
-                var pixelData = barcodeWriter.Write(model.Reference_pol);
-                var bitmap = new Bitmap(pixelData.Width, pixelData.Height, PixelFormat.Format32bppRgb);
+                var qrBitmap = qrCode.GetGraphic(20); // Ajusta el valor '20' si necesitas un tamaño diferente para el QR Code
 
-                for (int y = 0; y < pixelData.Height; y++)
-                {
-                    for (int x = 0; x < pixelData.Width; x++)
-                    {
-                        int pixel = pixelData.Pixels[y * pixelData.Width + x];
-                        Color color = Color.FromArgb(255, (pixel >> 16) & 255, (pixel >> 8) & 255, pixel & 255);
-                        bitmap.SetPixel(x, y, color);
-                    }
-                }
+                var qrMemoryStream = new MemoryStream();
+                qrBitmap.Save(qrMemoryStream, ImageFormat.Png);
 
-                var barcodeMemoryStream = new MemoryStream();
-                bitmap.Save(barcodeMemoryStream, ImageFormat.Png);
-
-                // Añadir el código de barras directamente en el cuerpo del correo
-                htmlContent += $"<p style='text-align:center;'><img src=\"cid:codigoBarra\" alt=\"Código de Barras\" /></p>";
+                // Añadir el QR Code directamente en el cuerpo del correo
+                htmlContent += $"<p style='text-align:center;'><img src=\"cid:qrCodeImage\" alt=\"QR Code\" /></p>";
                 htmlContent += "</div>"; // Cierre del div con bordes
 
                 builder.HtmlBody = htmlContent;
-                builder.Attachments.Add("codigoBarra.png", barcodeMemoryStream.ToArray(), new ContentType("image", "png"));
-
+                builder.Attachments.Add("CodigoQrVenta.png", qrMemoryStream.ToArray(), new ContentType("image", "png"));
                 message.Body = builder.ToMessageBody();
 
                 using (var client = new MailKit.Net.Smtp.SmtpClient())
                 {
                     client.Connect("smtp.gmail.com", 587, false);
-                    client.Authenticate("victor.alarcon@utp.edu.co", "rlhx qtvu ewxo uliq");
+                    client.Authenticate("sistemas.rmsoft@gmail.com", "ektq xifn kjsc mwoy");
                     client.Send(message);
                     client.Disconnect(true);
                 }
@@ -411,6 +395,46 @@ namespace Tienda.Controllers
 
             return productos;
         }
+       
+
+        public DatosCliente Obtenerdatos(string reference_sale)
+        {
+            DatosCliente datos = null;
+            using (var connection = _dataConexion.CreateConnection())
+            {
+                try
+                {
+                    connection.Open();
+
+                    string query = "SELECT nombre,nombre2, apellido, apellido2, email, total FROM td_orden WHERE refere = @reference_sale";
+                    using (var command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@reference_sale", reference_sale);
+                        using (var reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                datos = new DatosCliente
+                                {
+                                    Nombre = reader["nombre"].ToString(),
+                                    Nombre2 = reader["nombre2"].ToString(),
+                                    Apellido = reader["apellido"].ToString(),
+                                    Apellido2 = reader["apellido2"].ToString(),
+                                    Email = reader["email"].ToString(),
+                                    Total = Convert.ToDecimal(reader["total"])
+                                };
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error al obtener datos del cliente: {ex.Message}");
+                    // Si quieres, puedes manejar el error más específicamente aquí. Por ejemplo, puedes decidir lanzar la excepción, registrar el error en un log, etc.
+                }
+            }
+            return datos;
+        }
 
         public void GuardarBase(PayUConfirmation model)
         {
@@ -435,12 +459,12 @@ namespace Tienda.Controllers
                     }
 
                     // Segunda consulta: obtener datos del usuario desde td_orden
-                    string email, telef, nombre, tipo_doc, numer_doc, depart, city;
+                    string email, telef, nombre, nombre2, apellido, apellido2, tipo_doc, numer_doc, depart, city;
                     int? td_nit = null;
-
+                    decimal total;
                     string nomb_empr;
 
-                    string queryUserData = "SELECT email, telef, nombre, tipo_doc, numer_doc, td_nit, nomb_empr, depart, city FROM td_orden WHERE Id = @Id"; 
+                    string queryUserData = "SELECT email, telef, nombre, nombre2, apellido, apellido2, tipo_doc, numer_doc, td_nit, nomb_empr, depart, city, total FROM td_orden WHERE Id = @Id"; 
                     using (var commandUserData = new MySqlCommand(queryUserData, connection))
                     {
                         commandUserData.Parameters.AddWithValue("@Id", userId);
@@ -452,31 +476,38 @@ namespace Tienda.Controllers
                             email = reader["email"].ToString();
                             telef = reader["telef"].ToString();
                             nombre = reader["nombre"].ToString();
+                            nombre2 = reader["nombre2"].ToString();
+                            apellido = reader["apellido"].ToString();
+                            apellido2 = reader["apellido2"].ToString();
                             tipo_doc = reader["tipo_doc"].ToString();
                             numer_doc = reader["numer_doc"].ToString();
                             td_nit = reader["td_nit"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["td_nit"]);
                             nomb_empr = reader["nomb_empr"].ToString();
                             depart = reader["depart"].ToString();
                             city = reader["city"].ToString();
+                            total = reader.GetDecimal("total");
                         }
                     }
 
                     // Inserción en td_fac con los datos recopilados
                     string queryInsert = @"
-             INSERT INTO td_fac (codigo_R, estado, referencia, valortotal, fecha_trans, email_buyer, descrip, telefono, nombre, id_transa, depart, ciudad, tipo_doc, nit, nombre_empr,numer_doc)
-             VALUES (@Codigo_R, @Estado, @Referencia, @Valortotal, @Fecha_trans, @Email_buyer, @Descrip, @Telefono, @Nombre_C, @Id_transa, @Depart, @Ciudad, @Tipo_doc, @Nit, @Nombre_empr,@NumeroD)";
+             INSERT INTO td_fac (codigo_R, estado, referencia, valortotal, fecha_trans, email_buyer, descrip, telefono, nombre, nombre2, apellido, apellido2, id_transa, depart, ciudad, tipo_doc, nit, nombre_empr,numer_doc)
+             VALUES (@Codigo_R, @Estado, @Referencia, @Valortotal, @Fecha_trans, @Email_buyer, @Descrip, @Telefono, @Nombre_C, @Nombre2, @Apellido, @Apellido2, @Id_transa, @Depart, @Ciudad, @Tipo_doc, @Nit, @Nombre_empr,@NumeroD)";
 
                     using (var commandInsert = new MySqlCommand(queryInsert, connection))
                     {
-                        commandInsert.Parameters.AddWithValue("@Codigo_R", model.Account_id);
+                        commandInsert.Parameters.AddWithValue("@Codigo_R", model.Sign);
                         commandInsert.Parameters.AddWithValue("@Estado", model.State_pol);
                         commandInsert.Parameters.AddWithValue("@Referencia", model.Reference_sale);
-                        commandInsert.Parameters.AddWithValue("@Valortotal", model.Value);
+                        commandInsert.Parameters.AddWithValue("@Valortotal", total);
                         commandInsert.Parameters.AddWithValue("@Fecha_trans", model.Operation_date);
                         commandInsert.Parameters.AddWithValue("@Email_buyer", email);
                         commandInsert.Parameters.AddWithValue("@Descrip", model.Description);
                         commandInsert.Parameters.AddWithValue("@Telefono", telef);
                         commandInsert.Parameters.AddWithValue("@Nombre_C", nombre);
+                        commandInsert.Parameters.AddWithValue("@Nombre2", nombre2);
+                        commandInsert.Parameters.AddWithValue("@Apellido", apellido);
+                        commandInsert.Parameters.AddWithValue("@Apellido2", apellido2);
                         commandInsert.Parameters.AddWithValue("@Id_transa", model.Reference_pol);
                         commandInsert.Parameters.AddWithValue("@Depart", depart);
                         commandInsert.Parameters.AddWithValue("@Ciudad", city);
@@ -502,9 +533,9 @@ namespace Tienda.Controllers
         {
             // La consulta SQL y la lógica se mantienen, solo cambiamos cómo accedemos a las propiedades
             string query = @"
-        INSERT INTO td_orden(email, telef, nombre, direc, tipo_doc, numer_doc, nomb_empr, pais, depart, city, 
+        INSERT INTO td_orden(email, telef, nombre, nombre2, apellido, apellido2, direc, tipo_doc, numer_doc, nomb_empr, pais, depart, city, 
                              postalnum, td_nit, refere, total, descrip, td_estado)
-        VALUES (@Email, @Phone, @FullName, @Address, @DocumentType, @DocumentNumber, @CompanyName, 
+        VALUES (@Email, @Phone, @FullName, @Nombre2, @Apellido, @Apellido2, @Address, @DocumentType, @DocumentNumber, @CompanyName, 
                 @Country, @State, @City, @PostalCode, @nit, @ReferenceCode, @Amount, @ProductDescription, @Estado);
         SELECT LAST_INSERT_ID();";
 
@@ -513,7 +544,10 @@ namespace Tienda.Controllers
                 // Asignación de valores a los parámetros de la consulta SQL usando el modelo directamente.
                 command.Parameters.AddWithValue("@Email", model.Email);
                 command.Parameters.AddWithValue("@Phone", model.Phone);
-                command.Parameters.AddWithValue("@FullName", $"{model.FirstName} {model.LastName}");
+                command.Parameters.AddWithValue("@FullName", model.FirstName);
+                command.Parameters.AddWithValue("@Nombre2", model.MiddleName);
+                command.Parameters.AddWithValue("@Apellido", model.LastName);
+                command.Parameters.AddWithValue("@Apellido2", model.SecondLastName);
                 command.Parameters.AddWithValue("@Address", model.StreetAddress);
                 command.Parameters.AddWithValue("@DocumentType", model.DocumentType);
                 command.Parameters.AddWithValue("@DocumentNumber", model.DocumentNumber);
@@ -589,13 +623,20 @@ namespace Tienda.Controllers
 
             foreach (var item in cart.Items)
                 {
-                 string orderProductInsertQuery = "INSERT INTO td_produc(OrderId, ProductId, cantidad) VALUES (@OrderId, @ProductId, @Quantity)";
+                decimal valor = item.Product.Precio;
+                int quantity = item.Quantity;
+                decimal total = valor * quantity;
+
+                string orderProductInsertQuery = "INSERT INTO td_produc(OrderId, ProductId, cantidad, td_valor, valortotal, td_detalle) VALUES (@OrderId, @ProductId, @Quantity, @Valor, @Total, @Detalle)";
 
                 using (var command = new MySqlCommand(orderProductInsertQuery, connection, transaction))
                 {
                     command.Parameters.AddWithValue("@OrderId", orderId);
-                    command.Parameters.AddWithValue("@ProductId", item.Product.Id);  
-                    command.Parameters.AddWithValue("@Quantity", item.Quantity); 
+                    command.Parameters.AddWithValue("@ProductId", item.Product.Id);
+                    command.Parameters.AddWithValue("@Quantity", item.Quantity);
+                    command.Parameters.AddWithValue("@Valor", item.Product.Precio);
+                    command.Parameters.AddWithValue("@Total", total);
+                    command.Parameters.AddWithValue("@Detalle", item.Product.Detalle);
                     command.ExecuteNonQuery();
                 }
             }

@@ -10,7 +10,9 @@ namespace Tienda.Models
        
         public Cart Cart { get; set; } = new Cart();
         public string FirstName { get; set; }
+        public string MiddleName { get; set; }
         public string LastName { get; set; }
+        public string SecondLastName { get; set; }
         public string CouponCode { get; set; }
         public string DocumentType { get; set; }
         public string DocumentNumber { get; set; }
