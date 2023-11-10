@@ -1,14 +1,50 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
     <title>@ViewBag.Title - Mi Tienda</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
 </head>
 <body>
+    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <div class="zoom-background">
+                    <img src="~/Imagenes/hipopotamo.svg" class="d-block w-100" alt="Imagen de Fondo 1">
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="zoom-background">
+                    <img src="~/Imagenes/suricata.svg" class="d-block w-100" alt="Imagen de Fondo 2">
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="zoom-background">
+                    <img src="~/Imagenes/oso.svg" class="d-block w-100" alt="Imagen de Fondo 3">
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="zoom-background">
+                    <img src="~/Imagenes/puma.svg" class="d-block w-100" alt="Imagen de Fondo 4">
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="zoom-background">
+                    <img src="~/Imagenes/rinoceronte.svg" class="d-block w-100" alt="Imagen de Fondo 5">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="static-images">
+        <img src="~/Imagenes/pereira.png" alt="Imagen Estática 1">
+        <img src="~/Imagenes/ukumarii.png" alt="Imagen Estática 2">
+    </div>
+
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-white nav-top">
         <div class="container">
             @Html.ActionLink("Tienda virtual", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
@@ -52,7 +88,7 @@
                 </div>
             </div>
 
-            <div id="myCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+            <div id="myCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
                 <div class="carousel-inner">
                     <!-- Primer conjunto de imágenes -->
                     <div class="carousel-item active">
@@ -142,7 +178,92 @@
                 border: none;
                 text-decoration: none;
             }
+/* Estilos para el carrusel */
+     .carousel-inner {
+  max-height: 145px;
+  overflow: hidden;
+}
+
+.zoom-background img {
+  width: 100%;
+  height: 50%;
+  object-fit: cover;
+  object-position: center;
+  animation: zoom 7s ease-in-out infinite alternate;
+}
+
+@@keyframes zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.1);
+  }
+}
+
+.static-images {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 145px;
+  z-index: 10;
+}
+
+.static-images img {
+  width: 145px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Ajustar la posición de las imágenes estáticas */
+.static-images img:first-child {
+  left: 18%; /* Ajusta este valor según sea necesario */
+}
+
+.static-images img:last-child {
+  left: 35%; /* Ajusta este valor según sea necesario */
+}
+
+/* Media query para tablets */
+@@media (max-width: 768px) {
+  .static-images img {
+    width: 120px; /* Ajusta el tamaño para tablets */
+  }
+
+  .static-images img:first-child {
+    left: 10%; /* Ajusta la posición para tablets */
+  }
+
+  .static-images img:last-child {
+    left: 30%; /* Ajusta la posición para tablets */
+  }
+}
+
+/* Media query para móviles */
+@@media (max-width: 576px) {
+  .static-images img {
+    width: 100px; /* Ajusta el tamaño para móviles */
+  }
+
+  .static-images img:first-child {
+    left: 5%; /* Ajusta la posición para móviles */
+  }
+
+  .static-images img:last-child {
+    left: 28%; /* Ajusta la posición para móviles */
+  }
+}
+
     </style>
+    <script>
+        var myCarousel = document.querySelector('#carouselExampleIndicators')
+        var carousel = new bootstrap.Carousel(myCarousel, {
+            interval: 7000,
+            wrap: true
+        });
+    </script>
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
