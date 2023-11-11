@@ -62,8 +62,8 @@ namespace Tienda.Controllers
             var phone = model.Phone; // Guardad en base de datos
             var fullName = $"{model.FirstName} {model.MiddleName} {model.LastName} {model.SecondLastName}";  // Combina FirstName y LastName
             var paymentMethods = "MASTERCARD,PSE,VISA";
-            var responseUrl = "https://1d09-186-86-216-106.ngrok-free.app/Home/PayUResponse";
-            var confirmationUrl = "https://1d09-186-86-216-106.ngrok-free.app/Home/Confirmation";
+            var responseUrl = "https://86fa-186-147-92-254.ngrok-free.app/Home/PayUResponse";
+            var confirmationUrl = "https://86fa-186-147-92-254.ngrok-free.app/Home/Confirmation";
             // Genera la firma
             var formattedAmount = amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             var signature = GenerarFirma(apiKey, merchantId, referenceCode, formattedAmount, currency, paymentMethods); // Llama al método para generar la firma
@@ -84,7 +84,7 @@ namespace Tienda.Controllers
                 {
                     try
                     {
-                        int orderId = Orden( model, connection, transaction);
+                        int orderId = Orden( model, referenceCode, connection, transaction);
                         GuardarProductos(orderId, model.Cart, connection, transaction);
 
                         // Si todo ha ido bien
@@ -143,7 +143,6 @@ namespace Tienda.Controllers
 
         [HttpPost]
         public ActionResult Confirmation(PayUConfirmation model)
-        
         {
             System.Diagnostics.Debug.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(model)); // para imprimir todo el modelo recibido.
             string apiKey = "4Vj8eK4rloUd272L48hsrarnUA";
@@ -325,7 +324,7 @@ namespace Tienda.Controllers
                 var qrData = qrGenerator.CreateQrCode(model.Reference_pol, QRCoder.QRCodeGenerator.ECCLevel.Q);
                 var qrCode = new QRCoder.QRCode(qrData);
 
-                var qrBitmap = qrCode.GetGraphic(20); // Ajusta el valor '20' si necesitas un tamaño diferente para el QR Code
+                var qrBitmap = qrCode.GetGraphic(10); // Ajusta el valor '20' si necesitas un tamaño diferente para el QR Code
 
                 var qrMemoryStream = new MemoryStream();
                 qrBitmap.Save(qrMemoryStream, ImageFormat.Png);
@@ -556,8 +555,8 @@ namespace Tienda.Controllers
 
                     // Inserción en td_fac con los datos recopilados
                     string queryInsert = @"
-             INSERT INTO td_fac (codigo_R, estado, referencia, valortotal, fecha_trans, email_buyer, descrip, telefono, nombre, nombre2, apellido, apellido2, id_transa, depart, ciudad, tipo_doc, nit, nombre_empr,numer_doc, codigo_dcity, postalnum)
-             VALUES (@Codigo_R, @Estado, @Referencia, @Valortotal, @Fecha_trans, @Email_buyer, @Descrip, @Telefono, @Nombre_C, @Nombre2, @Apellido, @Apellido2, @Id_transa, @Depart, @Ciudad, @Tipo_doc, @Nit, @Nombre_empr,@NumeroD, @CodigoD, @Postal )";
+                     INSERT INTO td_fac (codigo_R, estado, referencia, valortotal, fecha_trans, email_buyer, descrip, telefono, nombre, nombre2, apellido, apellido2, id_transa, depart, ciudad, tipo_doc, nit, nombre_empr,numer_doc, codigo_dcity, postalnum)
+                     VALUES (@Codigo_R, @Estado, @Referencia, @Valortotal, @Fecha_trans, @Email_buyer, @Descrip, @Telefono, @Nombre_C, @Nombre2, @Apellido, @Apellido2, @Id_transa, @Depart, @Ciudad, @Tipo_doc, @Nit, @Nombre_empr,@NumeroD, @CodigoD, @Postal )";
 
                     using (var commandInsert = new MySqlCommand(queryInsert, connection))
                     {
@@ -586,6 +585,13 @@ namespace Tienda.Controllers
                         commandInsert.ExecuteNonQuery();
                     }
 
+                    string queryDelete = "DELETE FROM td_orden WHERE Id = @Id";
+                    using (var commandDelete = new MySqlCommand(queryDelete, connection))
+                    {
+                        commandDelete.Parameters.AddWithValue("@Id", userId);
+                        commandDelete.ExecuteNonQuery();
+                    }
+
                     connection.Close();
 
                 }
@@ -596,7 +602,7 @@ namespace Tienda.Controllers
             }
         }
 
-        private int Orden(PaymentInfo model, MySqlConnection connection, MySqlTransaction transaction) // Método para guardar los datos de la orden
+        private int Orden(PaymentInfo model, string referencia, MySqlConnection connection, MySqlTransaction transaction) // Método para guardar los datos de la orden
         {
             // La consulta SQL y la lógica se mantienen, solo cambiamos cómo accedemos a las propiedades
             string query = @"
@@ -630,7 +636,7 @@ namespace Tienda.Controllers
                 else
                     command.Parameters.AddWithValue("@nit", DBNull.Value);
 
-                command.Parameters.AddWithValue("@ReferenceCode", GenerarReferencia()); // Aquí supongo que aún querrás generar una referencia nueva para cada orden.
+                command.Parameters.AddWithValue("@ReferenceCode", referencia); // Aquí supongo que aún querrás generar una referencia nueva para cada orden.
                 command.Parameters.AddWithValue("@Amount", model.Cart.TotalPrice());
 
                 StringBuilder productNames = new StringBuilder();
@@ -714,39 +720,46 @@ namespace Tienda.Controllers
 
 
 
-        private string GenerarReferencia() // Método para generar una referencia única
+        private string GenerarReferencia()
         {
             using (var connection = _dataConexion.CreateConnection())
             {
                 connection.Open();
 
-                // Consulta para obtener el último referenceCode
-                string query = @"SELECT refere FROM td_orden ORDER BY Id DESC LIMIT 1;";
+                // Consulta para obtener la referencia actual
+                string queryObtenerReferencia = "SELECT ID FROM referencia LIMIT 1;";
 
-                using (var command = new MySqlCommand(query, connection))
+                string referenciaActual;
+                using (var commandObtener = new MySqlCommand(queryObtenerReferencia, connection))
                 {
-                    object result = command.ExecuteScalar();
-
-                    if (result == null || result == DBNull.Value)
-                    {
-                        // Si no hay registros, retorna "00001"
-                        return "00001";
-                    }
-                    else
-                    {
-                        // Extrae el número del último referenceCode
-                        string lastReference = result.ToString();
-                        string lastNumber = lastReference.Split('-').Last(); // Suponiendo que el formato es "TestPayU-00001"
-
-                        // Convierte ese número a int y súmale 1
-                        int nextNumber = Convert.ToInt32(lastNumber) + 1;
-
-                        // Retorna el número formateado a 5 dígitos
-                        return nextNumber.ToString("D5");
-                    }
+                    object result = commandObtener.ExecuteScalar();
+                    referenciaActual = result == null || result == DBNull.Value ? "00001" : result.ToString();
                 }
+
+                // Eliminar la referencia actual
+                string queryEliminarReferencia = "DELETE FROM referencia;";
+                using (var commandEliminar = new MySqlCommand(queryEliminarReferencia, connection))
+                {
+                    commandEliminar.ExecuteNonQuery();
+                }
+
+                // Calcular la siguiente referencia
+                int numeroReferencia = Convert.ToInt32(referenciaActual);
+                numeroReferencia++;
+                string nuevaReferencia = numeroReferencia.ToString("D5");
+
+                // Insertar la nueva referencia
+                string queryInsertarReferencia = "INSERT INTO referencia (ID) VALUES (@nuevaReferencia);";
+                using (var commandInsertar = new MySqlCommand(queryInsertarReferencia, connection))
+                {
+                    commandInsertar.Parameters.AddWithValue("@nuevaReferencia", nuevaReferencia);
+                    commandInsertar.ExecuteNonQuery();
+                }
+
+                return referenciaActual;
             }
         }
+
 
         private void GuardarProductos(int orderId, Cart cart, MySqlConnection connection, MySqlTransaction transaction)
         {
