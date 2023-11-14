@@ -45,9 +45,9 @@
         <img src="~/Imagenes/ukumarii.png" alt="Imagen Estática 2">
     </div>
 
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-white nav-top">
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark nav-top">
         <div class="container">
-            @Html.ActionLink("Tienda virtual", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            @Html.ActionLink("Tienda virtual", "Index", "Home", new { area = "" }, new { @class = "navbar-brand custom-nav-link" })
             <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Alternar navegación" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -60,10 +60,10 @@
             </div>
         </div>
     </nav>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-dark nav-botto">
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-verde nav-botto">
         <div class="container">
             <div class="collapse navbar-collapse justify-content-center ">
-                @Html.Action("CategoryNav", "Home")
+                <span style="font-weight: bold;">@Html.Action("CategoryNav", "Home")</span>
             </div>
         </div>
     </nav>
@@ -109,7 +109,7 @@
                 </div>
             </div>
 
-            <div class="container my-5 bg-dark">
+            <div class="container my-5 bg-verde">
                 <!-- my-5 añade margen arriba y abajo -->
                 <div class="row text-white">
                     <div class="col-md-4">
@@ -159,6 +159,50 @@
     </div>
 
     <style>
+        /* Estilo para el título "Tienda Virtual" */
+        .navbar-brand {
+            color: #7a7a7a; /* Color del texto */
+        }
+
+        /* Estilo base para la clase custom-nav-link */
+        .custom-nav-link {
+            color: #7a7a7a !important; /* Cambia el color del texto */
+            font-weight: bold; /* Texto en negrita */
+        }
+
+            /* Estilo para el efecto hover */
+            .custom-nav-link:hover {
+                background-color: #61CE70 !important; /* Color de fondo verde al pasar el mouse */
+                color: white !important; /* Color del texto blanco al pasar el mouse */
+                border-radius: 5px; /* Radio de la esquina del recuadro */
+            }
+
+
+        /* Estilo para el título "Tienda Virtual" */
+        .navbar-brand {
+            color: #7a7a7a; /* Color del texto */
+            font-weight: bold !important; /* Fuente en negrita con !important para asegurar la aplicación del estilo */
+        }
+
+        /* Estilo para los elementos del menú */
+        .navbar .navbar-nav .nav-link {
+            color: #7a7a7a; /* Color del texto */
+            font-weight: bold; /* Fuente en negrita */
+        }
+
+            /* Efecto hover para los elementos del menú */
+            .navbar .navbar-nav .nav-link:hover {
+                background-color: #61CE70; /* Color de fondo al pasar el mouse */
+                color: white; /* Color del texto al pasar el mouse */
+                border-radius: 5px; /* Radio de la esquina del recuadro */
+            }
+
+
+
+        .bg-verde {
+            background-color: rgb(35, 164, 84); /* Color verde en formato RGB */
+        }
+
         #myCarousel .carousel-inner .carousel-item .d-flex img {
             max-height: 100px;
             padding: 5px;

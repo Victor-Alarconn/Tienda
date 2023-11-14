@@ -16,6 +16,7 @@ using System.Web.Mvc;
 using Tienda.Data;
 using Tienda.Models;
 using System.Net.Mail;
+using System.Windows.Controls.Primitives;
 
 namespace Tienda.Controllers
 {
@@ -62,8 +63,8 @@ namespace Tienda.Controllers
             var phone = model.Phone; // Guardad en base de datos
             var fullName = $"{model.FirstName} {model.MiddleName} {model.LastName} {model.SecondLastName}";  // Combina FirstName y LastName
             var paymentMethods = "MASTERCARD,PSE,VISA";
-            var responseUrl = "https://86fa-186-147-92-254.ngrok-free.app/Home/PayUResponse";
-            var confirmationUrl = "https://86fa-186-147-92-254.ngrok-free.app/Home/Confirmation";
+            var responseUrl = "https://fb57-186-147-92-254.ngrok-free.app/Home/PayUResponse";
+            var confirmationUrl = "https://fb57-186-147-92-254.ngrok-free.app/Home/Confirmation";
             // Genera la firma
             var formattedAmount = amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             var signature = GenerarFirma(apiKey, merchantId, referenceCode, formattedAmount, currency, paymentMethods); // Llama al método para generar la firma
@@ -303,22 +304,23 @@ namespace Tienda.Controllers
                 // Tabla de productos
                 htmlContent += "<table width='100%' style='border-collapse: collapse; margin-top: 20px;'>";
                 htmlContent += "<tr style='background-color: #f2f2f2;'>";
-                htmlContent += "<th>Producto</th>";
-                htmlContent += "<th>Cantidad</th>";
-                htmlContent += "<th>Valor Unidad</th>";
-                htmlContent += "<th>Valor Total</th>";
+                htmlContent += "<th style='text-align: center;'>Producto</th>";
+                htmlContent += "<th style='text-align: center;'>Cantidad</th>";
+                htmlContent += "<th style='text-align: center;'>Valor Unidad</th>";
+                htmlContent += "<th style='text-align: center;'>Valor Total</th>";
                 htmlContent += "</tr>";
 
                 foreach (var producto in productos)
                 {
                     htmlContent += "<tr>";
-                    htmlContent += $"<td>{producto.Nombre}</td>";
-                    //htmlContent += $"<td>{producto.Cantidad}</td>";
-                    htmlContent += $"<td>{producto.Precio}</td>";
-                    //htmlContent += $"<td>{producto.PrecioTotal}</td>";
-                    htmlContent += "<tr style='border-bottom: 1px solid #000;'>";
+                    htmlContent += $"<td style='text-align: center;'>{producto.Nombre}</td>";
+                    htmlContent += $"<td style='text-align: center;'>{producto.Cantidad}</td>";
+                    htmlContent += $"<td style='text-align: center;'>{producto.Precio:C}</td>"; // Formato de moneda para el precio
+                    htmlContent += $"<td style='text-align: center;'>{producto.ValorTotal:C}</td>"; // Formato de moneda para el valor total
                     htmlContent += "</tr>";
                 }
+                htmlContent += "</table>";
+
 
                 var qrGenerator = new QRCoder.QRCodeGenerator();
                 var qrData = qrGenerator.CreateQrCode(model.Reference_pol, QRCoder.QRCodeGenerator.ECCLevel.Q);
@@ -402,43 +404,23 @@ namespace Tienda.Controllers
 
                         if (orderId != null)
                         {
-                            // Paso 2: Obtener ProductIds usando orderId
-                            string producQuery = "SELECT ProductId FROM td_produc WHERE OrderId = @orderId";
+                            // Paso 2: Obtener detalles de productos (incluyendo cantidad y valortotal) usando orderId
+                            string producQuery = "SELECT p.ProductId, p.cantidad, p.valortotal, m.td_nombre, m.td_precio FROM td_produc p INNER JOIN td_main m ON p.ProductId = m.id_main WHERE p.OrderId = @orderId";
                             using (var producCommand = new MySqlCommand(producQuery, connection))
                             {
                                 producCommand.Parameters.AddWithValue("@orderId", orderId);
                                 using (var reader = producCommand.ExecuteReader())
                                 {
-                                    var productIds = new List<string>();
                                     while (reader.Read())
                                     {
-                                        productIds.Add(reader["ProductId"].ToString());
-                                    }
-
-                                    reader.Close(); // Cierra el reader después de usarlo
-
-                                    // Ahora puedes ejecutar la siguiente consulta fuera del bloque anterior
-                                    foreach (var productId in productIds)
-                                    {
-                                        // Paso 3: Obtener detalles del producto usando productId
-                                        string mainQuery = "SELECT * FROM td_main WHERE id_main = @productId";
-                                        using (var mainCommand = new MySqlCommand(mainQuery, connection))
+                                        var producto = new Producto
                                         {
-                                            mainCommand.Parameters.AddWithValue("@productId", productId);
-                                            using (var mainReader = mainCommand.ExecuteReader())
-                                            {
-                                                if (mainReader.Read())
-                                                {
-                                                    var producto = new Producto
-                                                    {
-                                                        Nombre = mainReader["td_nombre"].ToString(),
-                                                        Precio = decimal.Parse(mainReader["td_precio"].ToString()),
-                                                        
-                                                    };
-                                                    productos.Add(producto);
-                                                }
-                                            }
-                                        }
+                                            Nombre = reader["td_nombre"].ToString(),
+                                            Precio = decimal.Parse(reader["td_precio"].ToString()),
+                                            Cantidad = int.Parse(reader["cantidad"].ToString()),
+                                            ValorTotal = reader["valortotal"].ToString()
+                                        };
+                                        productos.Add(producto);
                                     }
                                 }
                             }
@@ -447,16 +429,14 @@ namespace Tienda.Controllers
                 }
                 catch (Exception ex)
                 {
-                    // Aquí puedes manejar el error, por ejemplo, registrar el error en un log, mostrar un mensaje, etc.
                     Console.WriteLine($"Error al obtener los productos: {ex.Message}");
-                    // O también puedes decidir relanzar la excepción si es necesario
-                    // throw;
                 }
             }
 
             return productos;
         }
-       
+
+
 
         public DatosCliente Obtenerdatos(string reference_sale) // Método para obtener los datos del cliente
         {
@@ -505,95 +485,14 @@ namespace Tienda.Controllers
                 {
                     connection.Open();
 
-                    // Primera consulta: obtener el User_Id
-                    string queryUserId = "SELECT Id FROM td_orden WHERE refere = @Refere";
-                    int userId;
-                    using (var commandUserId = new MySqlCommand(queryUserId, connection))
-                    {
-                        commandUserId.Parameters.AddWithValue("@Refere", model.Reference_sale);
-                        object result = commandUserId.ExecuteScalar();
-
-                        if (result == null || result == DBNull.Value)
-                            throw new Exception("Reference_sale no encontrado en td_orden");
-
-                        userId = Convert.ToInt32(result);
-                    }
-
-                    // Segunda consulta: obtener datos del usuario desde td_orden
-                    string email, telef, nombre, nombre2, apellido, apellido2, tipo_doc, numer_doc, depart, city, codigo_city;
-                    int? td_nit = null;
-                    int postalnum;
-                    decimal total;
-                    string nomb_empr;
-
-                    string queryUserData = "SELECT email, telef, nombre, nombre2, apellido, apellido2, tipo_doc, numer_doc, td_nit, nomb_empr, depart, city, total, codigo_dcity, postalnum FROM td_orden WHERE Id = @Id"; 
-                    using (var commandUserData = new MySqlCommand(queryUserData, connection))
-                    {
-                        commandUserData.Parameters.AddWithValue("@Id", userId);
-                        using (var reader = commandUserData.ExecuteReader())
-                        {
-                            if (!reader.Read())
-                                throw new Exception("User_Id no encontrado en td_orden"); // Cambiamos el mensaje de error para que sea más específico
-
-                            email = reader["email"].ToString();
-                            telef = reader["telef"].ToString();
-                            nombre = reader["nombre"].ToString();
-                            nombre2 = reader["nombre2"].ToString();
-                            apellido = reader["apellido"].ToString();
-                            apellido2 = reader["apellido2"].ToString();
-                            tipo_doc = reader["tipo_doc"].ToString();
-                            numer_doc = reader["numer_doc"].ToString();
-                            td_nit = reader["td_nit"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["td_nit"]);
-                            nomb_empr = reader["nomb_empr"].ToString();
-                            depart = reader["depart"].ToString();
-                            city = reader["city"].ToString();
-                            total = reader.GetDecimal("total");
-                            codigo_city = reader["codigo_dcity"].ToString();
-                            postalnum = reader.GetInt32("postalnum");
-                        }
-                    }
-
-                    // Inserción en td_fac con los datos recopilados
-                    string queryInsert = @"
-                     INSERT INTO td_fac (codigo_R, estado, referencia, valortotal, fecha_trans, email_buyer, descrip, telefono, nombre, nombre2, apellido, apellido2, id_transa, depart, ciudad, tipo_doc, nit, nombre_empr,numer_doc, codigo_dcity, postalnum)
-                     VALUES (@Codigo_R, @Estado, @Referencia, @Valortotal, @Fecha_trans, @Email_buyer, @Descrip, @Telefono, @Nombre_C, @Nombre2, @Apellido, @Apellido2, @Id_transa, @Depart, @Ciudad, @Tipo_doc, @Nit, @Nombre_empr,@NumeroD, @CodigoD, @Postal )";
-
-                    using (var commandInsert = new MySqlCommand(queryInsert, connection))
-                    {
-                        commandInsert.Parameters.AddWithValue("@Codigo_R", model.Sign);
-                        commandInsert.Parameters.AddWithValue("@Estado", model.State_pol);
-                        commandInsert.Parameters.AddWithValue("@Referencia", model.Reference_sale);
-                        commandInsert.Parameters.AddWithValue("@Valortotal", total);
-                        commandInsert.Parameters.AddWithValue("@Fecha_trans", model.Operation_date);
-                        commandInsert.Parameters.AddWithValue("@Email_buyer", email);
-                        commandInsert.Parameters.AddWithValue("@Descrip", model.Description);
-                        commandInsert.Parameters.AddWithValue("@Telefono", telef);
-                        commandInsert.Parameters.AddWithValue("@Nombre_C", nombre);
-                        commandInsert.Parameters.AddWithValue("@Nombre2", nombre2);
-                        commandInsert.Parameters.AddWithValue("@Apellido", apellido);
-                        commandInsert.Parameters.AddWithValue("@Apellido2", apellido2);
-                        commandInsert.Parameters.AddWithValue("@Id_transa", model.Reference_pol);
-                        commandInsert.Parameters.AddWithValue("@Depart", depart);
-                        commandInsert.Parameters.AddWithValue("@Ciudad", city);
-                        commandInsert.Parameters.AddWithValue("@Tipo_doc", tipo_doc);
-                        commandInsert.Parameters.AddWithValue("@Nit", td_nit);
-                        commandInsert.Parameters.AddWithValue("@Nombre_empr", nomb_empr);
-                        commandInsert.Parameters.AddWithValue("@NumeroD", numer_doc);
-                        commandInsert.Parameters.AddWithValue("@CodigoD", codigo_city);
-                        commandInsert.Parameters.AddWithValue("@Postal", postalnum);
-
-                        commandInsert.ExecuteNonQuery();
-                    }
-
-                    string queryDelete = "DELETE FROM td_orden WHERE Id = @Id";
-                    using (var commandDelete = new MySqlCommand(queryDelete, connection))
-                    {
-                        commandDelete.Parameters.AddWithValue("@Id", userId);
-                        commandDelete.ExecuteNonQuery();
-                    }
+                    int userId = ObtenerUserId(model.Reference_sale, connection);
+                    var datosUsuario = ObtenerDatosUsuario(userId, connection);
+                    int idFac = InsertarEnTdFac(datosUsuario, model, connection);
+                    ConsultarYTransferirProductos(userId, idFac, connection);
+                    EliminarDeTdOrden(userId, connection);
+                  //  EliminarProductosDeTdProduc(userId, connection);
 
                     connection.Close();
-
                 }
                 catch (Exception ex)
                 {
@@ -601,6 +500,198 @@ namespace Tienda.Controllers
                 }
             }
         }
+
+        private int ObtenerUserId(string referenceSale, MySqlConnection connection)
+        {
+            // Consulta para obtener el User_Id
+            string queryUserId = "SELECT Id FROM td_orden WHERE refere = @Refere";
+
+            using (var commandUserId = new MySqlCommand(queryUserId, connection))
+            {
+                commandUserId.Parameters.AddWithValue("@Refere", referenceSale);
+                object result = commandUserId.ExecuteScalar();
+
+                if (result == null || result == DBNull.Value)
+                {
+                    throw new Exception("Reference_sale no encontrado en td_orden");
+                }
+
+                return Convert.ToInt32(result);
+            }
+        }
+        private DatosCliente ObtenerDatosUsuario(int userId, MySqlConnection connection)
+        {
+            DatosCliente datosUsuario = new DatosCliente();
+
+            try
+            {
+                string queryUserData = "SELECT email, telef, nombre, nombre2, apellido, apellido2, tipo_doc, numer_doc, td_nit, nomb_empr, depart, city, total, codigo_dcity, postalnum FROM td_orden WHERE Id = @Id";
+                using (var commandUserData = new MySqlCommand(queryUserData, connection))
+                {
+                    commandUserData.Parameters.AddWithValue("@Id", userId);
+                    using (var reader = commandUserData.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            datosUsuario.Email = reader["email"].ToString();
+                            datosUsuario.Telef = reader["telef"].ToString();
+                            datosUsuario.Nombre = reader["nombre"].ToString();
+                            datosUsuario.Nombre2 = reader["nombre2"].ToString();
+                            datosUsuario.Apellido = reader["apellido"].ToString();
+                            datosUsuario.Apellido2 = reader["apellido2"].ToString();
+                            datosUsuario.Tipo_doc = reader["tipo_doc"].ToString();
+                            datosUsuario.Numer_doc = reader["numer_doc"].ToString();
+                            datosUsuario.Td_nit = reader["td_nit"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["td_nit"]);
+                            datosUsuario.Nomb_empr = reader["nomb_empr"].ToString();
+                            datosUsuario.Depart = reader["depart"].ToString();
+                            datosUsuario.City = reader["city"].ToString();
+                            datosUsuario.Total = reader.GetDecimal("total");
+                            datosUsuario.CodigoCity = reader["codigo_dcity"].ToString();
+                            datosUsuario.PostalNum = reader.GetInt32("postalnum");
+                        }
+                        else
+                        {
+                            throw new Exception("User_Id no encontrado en td_orden");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al obtener datos del usuario: {ex.Message}");
+            }
+
+            return datosUsuario;
+        }
+
+        private int InsertarEnTdFac(DatosCliente datosUsuario, PayUConfirmation model, MySqlConnection connection)
+        {
+            try
+            {
+                string queryInsert = @"
+            INSERT INTO td_fac (codigo_R, estado, referencia, valortotal, fecha_trans, email_buyer, descrip, telefono, nombre, nombre2, apellido, apellido2, id_transa, depart, ciudad, tipo_doc, nit, nombre_empr,numer_doc, codigo_dcity, postalnum)
+            VALUES (@Codigo_R, @Estado, @Referencia, @Valortotal, @Fecha_trans, @Email_buyer, @Descrip, @Telefono, @Nombre_C, @Nombre2, @Apellido, @Apellido2, @Id_transa, @Depart, @Ciudad, @Tipo_doc, @Nit, @Nombre_empr,@NumeroD, @CodigoD, @Postal);
+            SELECT LAST_INSERT_ID();";
+
+                using (var commandInsert = new MySqlCommand(queryInsert, connection))
+                {
+                    commandInsert.Parameters.AddWithValue("@Codigo_R", model.Sign);
+                    commandInsert.Parameters.AddWithValue("@Estado", model.State_pol);
+                    commandInsert.Parameters.AddWithValue("@Referencia", model.Reference_sale);
+                    commandInsert.Parameters.AddWithValue("@Valortotal", datosUsuario.Total);
+                    commandInsert.Parameters.AddWithValue("@Fecha_trans", model.Operation_date);
+                    commandInsert.Parameters.AddWithValue("@Email_buyer", datosUsuario.Email);
+                    commandInsert.Parameters.AddWithValue("@Descrip", model.Description);
+                    commandInsert.Parameters.AddWithValue("@Telefono", datosUsuario.Telef);
+                    commandInsert.Parameters.AddWithValue("@Nombre_C", datosUsuario.Nombre);
+                    commandInsert.Parameters.AddWithValue("@Nombre2", datosUsuario.Nombre2);
+                    commandInsert.Parameters.AddWithValue("@Apellido", datosUsuario.Apellido);
+                    commandInsert.Parameters.AddWithValue("@Apellido2", datosUsuario.Apellido2);
+                    commandInsert.Parameters.AddWithValue("@Id_transa", model.Reference_pol);
+                    commandInsert.Parameters.AddWithValue("@Depart", datosUsuario.Depart);
+                    commandInsert.Parameters.AddWithValue("@Ciudad", datosUsuario.City);
+                    commandInsert.Parameters.AddWithValue("@Tipo_doc", datosUsuario.Tipo_doc);
+                    commandInsert.Parameters.AddWithValue("@Nit", datosUsuario.Td_nit);
+                    commandInsert.Parameters.AddWithValue("@Nombre_empr", datosUsuario.Nomb_empr);
+                    commandInsert.Parameters.AddWithValue("@NumeroD", datosUsuario.Numer_doc);
+                    commandInsert.Parameters.AddWithValue("@CodigoD", datosUsuario.CodigoCity);
+                    commandInsert.Parameters.AddWithValue("@Postal", datosUsuario.PostalNum);
+
+                    return Convert.ToInt32(commandInsert.ExecuteScalar());
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al insertar en td_fac: {ex.Message}");
+            }
+        }
+
+        private void EliminarDeTdOrden(int userId, MySqlConnection connection)
+        {
+            try
+            {
+                string queryDelete = "DELETE FROM td_orden WHERE Id = @Id";
+                using (var commandDelete = new MySqlCommand(queryDelete, connection))
+                {
+                    commandDelete.Parameters.AddWithValue("@Id", userId);
+                    commandDelete.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al eliminar de td_orden: {ex.Message}");
+            }
+        }
+
+        private void ConsultarYTransferirProductos(int userId, int idFac, MySqlConnection connection)
+        {
+            try
+            {
+                // Consulta de productos en td_produc
+                string querySelectProducts = "SELECT ProductId, cantidad, td_valor, valortotal, td_detalle FROM td_produc WHERE OrderId = @UserId";
+                List<Producto> productos = new List<Producto>();
+
+                using (var commandSelectProducts = new MySqlCommand(querySelectProducts, connection))
+                {
+                    commandSelectProducts.Parameters.AddWithValue("@UserId", userId);
+                    using (var reader = commandSelectProducts.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Producto producto = new Producto
+                            {
+                                Id = reader.GetInt32("ProductId"),
+                                Cantidad = reader.GetInt32("cantidad"),
+                                Precio2 = reader.GetString("td_valor"),
+                                ValorTotal = reader.GetString("valortotal"),
+                                Detalle = reader.GetString("td_detalle")
+                            };
+                            productos.Add(producto);
+                        }
+                    }
+                }
+
+                // Transferencia de productos a td_producx
+                foreach (var producto in productos)
+                {
+                    string queryInsertProductx = "INSERT INTO td_producx (OrderId, ProductId, cantidad, td_valor, valortotal, td_detalle) VALUES (@OrdenId, @ProductId, @Cantidad, @ValorUnitario, @ValorTotal, @Detalle)";
+                    using (var commandInsertProductx = new MySqlCommand(queryInsertProductx, connection))
+                    {
+                        commandInsertProductx.Parameters.AddWithValue("@OrdenId", idFac);
+                        commandInsertProductx.Parameters.AddWithValue("@ProductId", producto.Id);
+                        commandInsertProductx.Parameters.AddWithValue("@Cantidad", producto.Cantidad);
+                        commandInsertProductx.Parameters.AddWithValue("@ValorUnitario", producto.Precio2);
+                        commandInsertProductx.Parameters.AddWithValue("@ValorTotal", producto.ValorTotal);
+                        commandInsertProductx.Parameters.AddWithValue("@Detalle", producto.Detalle);
+
+                        commandInsertProductx.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al consultar y transferir productos: {ex.Message}");
+            }
+        }
+
+        private void EliminarProductosDeTdProduc(int userId, MySqlConnection connection)
+        {
+            try
+            {
+                // Eliminar productos de td_produc
+                string queryDeleteProducts = "DELETE FROM td_produc WHERE OrderId = @UserId";
+                using (var commandDeleteProducts = new MySqlCommand(queryDeleteProducts, connection))
+                {
+                    commandDeleteProducts.Parameters.AddWithValue("@UserId", userId);
+                    commandDeleteProducts.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al eliminar productos de td_produc: {ex.Message}");
+            }
+        }
+
 
         private int Orden(PaymentInfo model, string referencia, MySqlConnection connection, MySqlTransaction transaction) // Método para guardar los datos de la orden
         {

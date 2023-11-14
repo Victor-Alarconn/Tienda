@@ -11,10 +11,12 @@ namespace Tienda.Models
         public string Nombre { get; set; }
         public string Descripcion { get; set; }
         public decimal Precio { get; set; }
+        public string Precio2 { get; set; }
         public string Imagen { get; set; }
         public int Id_Grupo { get; set; }
         public string Detalle { get; set; }
         public string GrupoNombre { get; set; }
-
+        public int Cantidad { get; set; }
+        public string ValorTotal { get; set; }
     }
 }
