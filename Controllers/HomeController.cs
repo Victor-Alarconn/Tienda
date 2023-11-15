@@ -17,17 +17,21 @@ using Tienda.Data;
 using Tienda.Models;
 using System.Net.Mail;
 using System.Windows.Controls.Primitives;
+using Tienda.Interfaces;
+using Tienda.Servicios;
 
 namespace Tienda.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IReferenciaService _referenciaService;
         private readonly DataConexion _dataConexion; // Se crea una instancia de la clase DataConexion
         private readonly Cart _cart; // Se crea una instancia de la clase Cart
         public HomeController() // Constructor de la clase
         {
             _dataConexion = new DataConexion();
             _cart = new Cart();
+            _referenciaService = new ReferenciaService(_dataConexion);
         }
 
         [HttpGet] // Acción para mostrar el formulario de pago
@@ -52,7 +56,7 @@ namespace Tienda.Controllers
             // Se prepara los datos para PayU
             var merchantId = "508029";
             var apiKey = "4Vj8eK4rloUd272L48hsrarnUA";
-            var referenceCode = GenerarReferencia();
+            var referenceCode = _referenciaService.GenerarReferencia();
             var amount = model.Cart.TotalPrice();
             var currency = "COP";
             var buyerEmail = model.Email; // Guardad en base de datos
@@ -63,8 +67,8 @@ namespace Tienda.Controllers
             var phone = model.Phone; // Guardad en base de datos
             var fullName = $"{model.FirstName} {model.MiddleName} {model.LastName} {model.SecondLastName}";  // Combina FirstName y LastName
             var paymentMethods = "MASTERCARD,PSE,VISA";
-            var responseUrl = "https://fb57-186-147-92-254.ngrok-free.app/Home/PayUResponse";
-            var confirmationUrl = "https://fb57-186-147-92-254.ngrok-free.app/Home/Confirmation";
+            var responseUrl = "https://55a2-181-59-112-164.ngrok-free.app/Home/PayUResponse";
+            var confirmationUrl = "https://55a2-181-59-112-164.ngrok-free.app/Home/Confirmation";
             // Genera la firma
             var formattedAmount = amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             var signature = GenerarFirma(apiKey, merchantId, referenceCode, formattedAmount, currency, paymentMethods); // Llama al método para generar la firma
@@ -811,45 +815,7 @@ namespace Tienda.Controllers
 
 
 
-        private string GenerarReferencia()
-        {
-            using (var connection = _dataConexion.CreateConnection())
-            {
-                connection.Open();
-
-                // Consulta para obtener la referencia actual
-                string queryObtenerReferencia = "SELECT ID FROM referencia LIMIT 1;";
-
-                string referenciaActual;
-                using (var commandObtener = new MySqlCommand(queryObtenerReferencia, connection))
-                {
-                    object result = commandObtener.ExecuteScalar();
-                    referenciaActual = result == null || result == DBNull.Value ? "00001" : result.ToString();
-                }
-
-                // Eliminar la referencia actual
-                string queryEliminarReferencia = "DELETE FROM referencia;";
-                using (var commandEliminar = new MySqlCommand(queryEliminarReferencia, connection))
-                {
-                    commandEliminar.ExecuteNonQuery();
-                }
-
-                // Calcular la siguiente referencia
-                int numeroReferencia = Convert.ToInt32(referenciaActual);
-                numeroReferencia++;
-                string nuevaReferencia = numeroReferencia.ToString("D5");
-
-                // Insertar la nueva referencia
-                string queryInsertarReferencia = "INSERT INTO referencia (ID) VALUES (@nuevaReferencia);";
-                using (var commandInsertar = new MySqlCommand(queryInsertarReferencia, connection))
-                {
-                    commandInsertar.Parameters.AddWithValue("@nuevaReferencia", nuevaReferencia);
-                    commandInsertar.ExecuteNonQuery();
-                }
-
-                return referenciaActual;
-            }
-        }
+       
 
 
         private void GuardarProductos(int orderId, Cart cart, MySqlConnection connection, MySqlTransaction transaction)
