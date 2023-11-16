@@ -19,12 +19,18 @@ using System.Net.Mail;
 using System.Windows.Controls.Primitives;
 using Tienda.Interfaces;
 using Tienda.Servicios;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Tienda.Controllers
 {
     public class HomeController : Controller
     {
         private readonly IReferenciaService _referenciaService;
+        private readonly IOrdenService _ordenService;
+        private readonly IFactura _facturaService;
+        private readonly IProductoService _productoService;
+        private readonly IMainService _mainService;
+       
         private readonly DataConexion _dataConexion; // Se crea una instancia de la clase DataConexion
         private readonly Cart _cart; // Se crea una instancia de la clase Cart
         public HomeController() // Constructor de la clase
@@ -32,6 +38,10 @@ namespace Tienda.Controllers
             _dataConexion = new DataConexion();
             _cart = new Cart();
             _referenciaService = new ReferenciaService(_dataConexion);
+            _ordenService = new OrdenService(_dataConexion); // Inicializar _ordenService
+            _facturaService = new FacturaService(_dataConexion);
+            _productoService = new ProductoService(_dataConexion);
+            _mainService = new MainService(_dataConexion);
         }
 
         [HttpGet] // Acción para mostrar el formulario de pago
@@ -67,8 +77,8 @@ namespace Tienda.Controllers
             var phone = model.Phone; // Guardad en base de datos
             var fullName = $"{model.FirstName} {model.MiddleName} {model.LastName} {model.SecondLastName}";  // Combina FirstName y LastName
             var paymentMethods = "MASTERCARD,PSE,VISA";
-            var responseUrl = "https://55a2-181-59-112-164.ngrok-free.app/Home/PayUResponse";
-            var confirmationUrl = "https://55a2-181-59-112-164.ngrok-free.app/Home/Confirmation";
+            var responseUrl = "https://ad5d-181-59-112-164.ngrok-free.app/Home/PayUResponse";
+            var confirmationUrl = "https://ad5d-181-59-112-164.ngrok-free.app/Home/Confirmation";
             // Genera la firma
             var formattedAmount = amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             var signature = GenerarFirma(apiKey, merchantId, referenceCode, formattedAmount, currency, paymentMethods); // Llama al método para generar la firma
@@ -89,8 +99,8 @@ namespace Tienda.Controllers
                 {
                     try
                     {
-                        int orderId = Orden( model, referenceCode, connection, transaction);
-                        GuardarProductos(orderId, model.Cart, connection, transaction);
+                        int orderId = _ordenService.Orden(model, referenceCode, connection, transaction);
+                        _productoService.GuardarProductos(orderId, model.Cart, connection, transaction);
 
                         // Si todo ha ido bien
                         transaction.Commit();
@@ -127,6 +137,9 @@ namespace Tienda.Controllers
             return View("PayUForm", payUModel);
         }
 
+
+
+
         // Método para generar la firma de la solicitud
         private string GenerarFirma(string apiKey, string merchantId, string referencia, string precio, string currency, string paymentMethods)
         {
@@ -152,19 +165,17 @@ namespace Tienda.Controllers
             System.Diagnostics.Debug.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(model)); // para imprimir todo el modelo recibido.
             string apiKey = "4Vj8eK4rloUd272L48hsrarnUA";
             string generatedSignature = CreateSignature(apiKey, model.Account_id, model.Reference_sale, model.Currency, model.State_pol);
-            var productos = ObtenerProductosPorOrden(model.Reference_sale);
-            var datos = Obtenerdatos(model.Reference_sale);
-            EnviarEmail(model, productos, datos);  // Enviar correo con el resumen de la compra y el código QR
-            GuardarBase(model);  // Guardar en la base de datos
-            if (generatedSignature.Equals(model.Sign, StringComparison.OrdinalIgnoreCase))
+           
+            if (model.Response_message_pol == "APPROVED" && model.State_pol == "4")
             {
-                // La firma es válida
-               
-               // 
+                var productos = _ordenService.ObtenerProductosPorOrden(model.Reference_sale);
+                var datos = _ordenService.Obtenerdatos(model.Reference_sale);
+                EnviarEmail(model, productos, datos);  // Enviar correo con el resumen de la compra y el código QR
+                GuardarBase(model);  // Guardar en la base de datos
             }
             else
             {
-                // La firma no es válida. 
+                GuardarBase(model);
             }
 
             return new EmptyResult();
@@ -176,26 +187,27 @@ namespace Tienda.Controllers
             string apiKey = "4Vj8eK4rloUd272L48hsrarnUA";
             string generatedSignature = CreateSignature2(apiKey, model.MerchantId, model.ReferenceCode, model.Currency, model.TransactionState);
 
-            if (generatedSignature.Equals(model.Signature, StringComparison.OrdinalIgnoreCase))
+            if (model.Message == "APPROVED" && model.TransactionState == 4)
             {
-                model.IsSuccess = true;  // La firma es válida
+                model.IsSuccess = true;  // La firma es válida y la transacción está aprobada
                 model.Message = "La transacción fue exitosa."; // Puedes configurar un mensaje de éxito aquí si lo deseas
             }
             else
             {
-                model.IsSuccess = false;  // La firma no es válida
-                model.Message = "Hubo un problema con la firma de la transacción."; // Puedes configurar un mensaje de error aquí
+                model.IsSuccess = false;  // La firma no es válida o la transacción no está aprobada
+                model.Message = "Hubo un problema con la transacción."; // Puedes configurar un mensaje de error aquí
             }
 
             return View(model);  // Esta vista simplemente informa al usuario sobre el estado de la transacción
         }
 
 
+
         // Método para crear la firma de confirmación
         private string CreateSignature(string apiKey, int merchantId, string referenceCode, string currency, string transactionState)
         {
             // Aproxima TX_VALUE a un decimal usando el método de redondeo Round half to even
-            decimal txValue = GetTotalFromDatabase(referenceCode);
+            decimal txValue = _ordenService.GetTotalFromDatabase(referenceCode);
 
             // Genera la cadena para la firma
             var rawSignature = $"{apiKey}~{merchantId}~{referenceCode}~{txValue}~{currency}~{transactionState}";
@@ -218,7 +230,7 @@ namespace Tienda.Controllers
         private string CreateSignature2(string apiKey, long merchantId, string referenceCode, string currency, int transactionState)
         {
             // Obtener el valor de la base de datos
-            decimal txValue = GetTotalFromDatabase(referenceCode);
+            decimal txValue = _ordenService.GetTotalFromDatabase(referenceCode);
 
             // Genera la cadena para la firma
             string rawSignature = $"{apiKey}~{merchantId}~{referenceCode}~{txValue}~{currency}~{transactionState}";
@@ -234,34 +246,6 @@ namespace Tienda.Controllers
                 }
                 return sBuilder.ToString();
             }
-        }
-
-        private decimal GetTotalFromDatabase(string referenceCode)
-        {
-            decimal totalValue = 0;
-
-            using (var connection = _dataConexion.CreateConnection())
-            {
-                connection.Open();
-
-                string query = "SELECT total FROM td_orden WHERE refere = @ReferenceCode";
-
-                using (MySqlCommand cmd = new MySqlCommand(query, connection))
-                {
-                    cmd.Parameters.AddWithValue("@ReferenceCode", referenceCode);
-
-                    object result = cmd.ExecuteScalar();
-
-                    if (result != null && result != DBNull.Value)
-                    {
-                        totalValue = Convert.ToDecimal(result);
-                    }
-                }
-
-                connection.Close();
-            }
-
-            return totalValue;
         }
 
         private void EnviarEmail(PayUConfirmation model, List<Producto> productos, DatosCliente datos)
@@ -389,98 +373,6 @@ namespace Tienda.Controllers
             }
         }
 
-        private List<Producto> ObtenerProductosPorOrden(string reference_sale)
-        {
-            var productos = new List<Producto>();
-
-            using (var connection = _dataConexion.CreateConnection())
-            {
-                try
-                {
-                    connection.Open();
-
-                    // Paso 1: Obtener el Id de la orden usando reference_sale
-                    string ordenQuery = "SELECT Id FROM td_orden WHERE refere = @reference_sale";
-                    using (var command = new MySqlCommand(ordenQuery, connection))
-                    {
-                        command.Parameters.AddWithValue("@reference_sale", reference_sale);
-                        var orderId = command.ExecuteScalar();
-
-                        if (orderId != null)
-                        {
-                            // Paso 2: Obtener detalles de productos (incluyendo cantidad y valortotal) usando orderId
-                            string producQuery = "SELECT p.ProductId, p.cantidad, p.valortotal, m.td_nombre, m.td_precio FROM td_produc p INNER JOIN td_main m ON p.ProductId = m.id_main WHERE p.OrderId = @orderId";
-                            using (var producCommand = new MySqlCommand(producQuery, connection))
-                            {
-                                producCommand.Parameters.AddWithValue("@orderId", orderId);
-                                using (var reader = producCommand.ExecuteReader())
-                                {
-                                    while (reader.Read())
-                                    {
-                                        var producto = new Producto
-                                        {
-                                            Nombre = reader["td_nombre"].ToString(),
-                                            Precio = decimal.Parse(reader["td_precio"].ToString()),
-                                            Cantidad = int.Parse(reader["cantidad"].ToString()),
-                                            ValorTotal = reader["valortotal"].ToString()
-                                        };
-                                        productos.Add(producto);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error al obtener los productos: {ex.Message}");
-                }
-            }
-
-            return productos;
-        }
-
-
-
-        public DatosCliente Obtenerdatos(string reference_sale) // Método para obtener los datos del cliente
-        {
-            DatosCliente datos = null;
-            using (var connection = _dataConexion.CreateConnection())
-            {
-                try
-                {
-                    connection.Open();
-
-                    string query = "SELECT nombre,nombre2, apellido, apellido2, email, total FROM td_orden WHERE refere = @reference_sale";
-                    using (var command = new MySqlCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@reference_sale", reference_sale);
-                        using (var reader = command.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                datos = new DatosCliente
-                                {
-                                    Nombre = reader["nombre"].ToString(),
-                                    Nombre2 = reader["nombre2"].ToString(),
-                                    Apellido = reader["apellido"].ToString(),
-                                    Apellido2 = reader["apellido2"].ToString(),
-                                    Email = reader["email"].ToString(),
-                                    Total = Convert.ToDecimal(reader["total"])
-                                };
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error al obtener datos del cliente: {ex.Message}");
-                    // Si quieres, puedes manejar el error más específicamente aquí. Por ejemplo, puedes decidir lanzar la excepción, registrar el error en un log, etc.
-                }
-            }
-            return datos;
-        }
-
         public void GuardarBase(PayUConfirmation model)
         {
             using (var connection = _dataConexion.CreateConnection())
@@ -489,11 +381,11 @@ namespace Tienda.Controllers
                 {
                     connection.Open();
 
-                    int userId = ObtenerUserId(model.Reference_sale, connection);
-                    var datosUsuario = ObtenerDatosUsuario(userId, connection);
-                    int idFac = InsertarEnTdFac(datosUsuario, model, connection);
-                    ConsultarYTransferirProductos(userId, idFac, connection);
-                    EliminarDeTdOrden(userId, connection);
+                    int userId = _ordenService.ObtenerUserId(model.Reference_sale, connection);
+                    var datosUsuario = _ordenService.ObtenerDatosUsuario(userId, connection);
+                    int idFac = _facturaService.InsertarEnTdFac(datosUsuario, model, connection);
+                    _productoService.ConsultarYTransferirProductos(userId, idFac, connection);
+                    _ordenService.EliminarDeTdOrden(userId, connection);
                   //  EliminarProductosDeTdProduc(userId, connection);
 
                     connection.Close();
@@ -505,252 +397,23 @@ namespace Tienda.Controllers
             }
         }
 
-        private int ObtenerUserId(string referenceSale, MySqlConnection connection)
-        {
-            // Consulta para obtener el User_Id
-            string queryUserId = "SELECT Id FROM td_orden WHERE refere = @Refere";
-
-            using (var commandUserId = new MySqlCommand(queryUserId, connection))
-            {
-                commandUserId.Parameters.AddWithValue("@Refere", referenceSale);
-                object result = commandUserId.ExecuteScalar();
-
-                if (result == null || result == DBNull.Value)
-                {
-                    throw new Exception("Reference_sale no encontrado en td_orden");
-                }
-
-                return Convert.ToInt32(result);
-            }
-        }
-        private DatosCliente ObtenerDatosUsuario(int userId, MySqlConnection connection)
-        {
-            DatosCliente datosUsuario = new DatosCliente();
-
-            try
-            {
-                string queryUserData = "SELECT email, telef, nombre, nombre2, apellido, apellido2, tipo_doc, numer_doc, td_nit, nomb_empr, depart, city, total, codigo_dcity, postalnum FROM td_orden WHERE Id = @Id";
-                using (var commandUserData = new MySqlCommand(queryUserData, connection))
-                {
-                    commandUserData.Parameters.AddWithValue("@Id", userId);
-                    using (var reader = commandUserData.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            datosUsuario.Email = reader["email"].ToString();
-                            datosUsuario.Telef = reader["telef"].ToString();
-                            datosUsuario.Nombre = reader["nombre"].ToString();
-                            datosUsuario.Nombre2 = reader["nombre2"].ToString();
-                            datosUsuario.Apellido = reader["apellido"].ToString();
-                            datosUsuario.Apellido2 = reader["apellido2"].ToString();
-                            datosUsuario.Tipo_doc = reader["tipo_doc"].ToString();
-                            datosUsuario.Numer_doc = reader["numer_doc"].ToString();
-                            datosUsuario.Td_nit = reader["td_nit"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["td_nit"]);
-                            datosUsuario.Nomb_empr = reader["nomb_empr"].ToString();
-                            datosUsuario.Depart = reader["depart"].ToString();
-                            datosUsuario.City = reader["city"].ToString();
-                            datosUsuario.Total = reader.GetDecimal("total");
-                            datosUsuario.CodigoCity = reader["codigo_dcity"].ToString();
-                            datosUsuario.PostalNum = reader.GetInt32("postalnum");
-                        }
-                        else
-                        {
-                            throw new Exception("User_Id no encontrado en td_orden");
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error al obtener datos del usuario: {ex.Message}");
-            }
-
-            return datosUsuario;
-        }
-
-        private int InsertarEnTdFac(DatosCliente datosUsuario, PayUConfirmation model, MySqlConnection connection)
-        {
-            try
-            {
-                string queryInsert = @"
-            INSERT INTO td_fac (codigo_R, estado, referencia, valortotal, fecha_trans, email_buyer, descrip, telefono, nombre, nombre2, apellido, apellido2, id_transa, depart, ciudad, tipo_doc, nit, nombre_empr,numer_doc, codigo_dcity, postalnum)
-            VALUES (@Codigo_R, @Estado, @Referencia, @Valortotal, @Fecha_trans, @Email_buyer, @Descrip, @Telefono, @Nombre_C, @Nombre2, @Apellido, @Apellido2, @Id_transa, @Depart, @Ciudad, @Tipo_doc, @Nit, @Nombre_empr,@NumeroD, @CodigoD, @Postal);
-            SELECT LAST_INSERT_ID();";
-
-                using (var commandInsert = new MySqlCommand(queryInsert, connection))
-                {
-                    commandInsert.Parameters.AddWithValue("@Codigo_R", model.Sign);
-                    commandInsert.Parameters.AddWithValue("@Estado", model.State_pol);
-                    commandInsert.Parameters.AddWithValue("@Referencia", model.Reference_sale);
-                    commandInsert.Parameters.AddWithValue("@Valortotal", datosUsuario.Total);
-                    commandInsert.Parameters.AddWithValue("@Fecha_trans", model.Operation_date);
-                    commandInsert.Parameters.AddWithValue("@Email_buyer", datosUsuario.Email);
-                    commandInsert.Parameters.AddWithValue("@Descrip", model.Description);
-                    commandInsert.Parameters.AddWithValue("@Telefono", datosUsuario.Telef);
-                    commandInsert.Parameters.AddWithValue("@Nombre_C", datosUsuario.Nombre);
-                    commandInsert.Parameters.AddWithValue("@Nombre2", datosUsuario.Nombre2);
-                    commandInsert.Parameters.AddWithValue("@Apellido", datosUsuario.Apellido);
-                    commandInsert.Parameters.AddWithValue("@Apellido2", datosUsuario.Apellido2);
-                    commandInsert.Parameters.AddWithValue("@Id_transa", model.Reference_pol);
-                    commandInsert.Parameters.AddWithValue("@Depart", datosUsuario.Depart);
-                    commandInsert.Parameters.AddWithValue("@Ciudad", datosUsuario.City);
-                    commandInsert.Parameters.AddWithValue("@Tipo_doc", datosUsuario.Tipo_doc);
-                    commandInsert.Parameters.AddWithValue("@Nit", datosUsuario.Td_nit);
-                    commandInsert.Parameters.AddWithValue("@Nombre_empr", datosUsuario.Nomb_empr);
-                    commandInsert.Parameters.AddWithValue("@NumeroD", datosUsuario.Numer_doc);
-                    commandInsert.Parameters.AddWithValue("@CodigoD", datosUsuario.CodigoCity);
-                    commandInsert.Parameters.AddWithValue("@Postal", datosUsuario.PostalNum);
-
-                    return Convert.ToInt32(commandInsert.ExecuteScalar());
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error al insertar en td_fac: {ex.Message}");
-            }
-        }
-
-        private void EliminarDeTdOrden(int userId, MySqlConnection connection)
-        {
-            try
-            {
-                string queryDelete = "DELETE FROM td_orden WHERE Id = @Id";
-                using (var commandDelete = new MySqlCommand(queryDelete, connection))
-                {
-                    commandDelete.Parameters.AddWithValue("@Id", userId);
-                    commandDelete.ExecuteNonQuery();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error al eliminar de td_orden: {ex.Message}");
-            }
-        }
-
-        private void ConsultarYTransferirProductos(int userId, int idFac, MySqlConnection connection)
-        {
-            try
-            {
-                // Consulta de productos en td_produc
-                string querySelectProducts = "SELECT ProductId, cantidad, td_valor, valortotal, td_detalle FROM td_produc WHERE OrderId = @UserId";
-                List<Producto> productos = new List<Producto>();
-
-                using (var commandSelectProducts = new MySqlCommand(querySelectProducts, connection))
-                {
-                    commandSelectProducts.Parameters.AddWithValue("@UserId", userId);
-                    using (var reader = commandSelectProducts.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            Producto producto = new Producto
-                            {
-                                Id = reader.GetInt32("ProductId"),
-                                Cantidad = reader.GetInt32("cantidad"),
-                                Precio2 = reader.GetString("td_valor"),
-                                ValorTotal = reader.GetString("valortotal"),
-                                Detalle = reader.GetString("td_detalle")
-                            };
-                            productos.Add(producto);
-                        }
-                    }
-                }
-
-                // Transferencia de productos a td_producx
-                foreach (var producto in productos)
-                {
-                    string queryInsertProductx = "INSERT INTO td_producx (OrderId, ProductId, cantidad, td_valor, valortotal, td_detalle) VALUES (@OrdenId, @ProductId, @Cantidad, @ValorUnitario, @ValorTotal, @Detalle)";
-                    using (var commandInsertProductx = new MySqlCommand(queryInsertProductx, connection))
-                    {
-                        commandInsertProductx.Parameters.AddWithValue("@OrdenId", idFac);
-                        commandInsertProductx.Parameters.AddWithValue("@ProductId", producto.Id);
-                        commandInsertProductx.Parameters.AddWithValue("@Cantidad", producto.Cantidad);
-                        commandInsertProductx.Parameters.AddWithValue("@ValorUnitario", producto.Precio2);
-                        commandInsertProductx.Parameters.AddWithValue("@ValorTotal", producto.ValorTotal);
-                        commandInsertProductx.Parameters.AddWithValue("@Detalle", producto.Detalle);
-
-                        commandInsertProductx.ExecuteNonQuery();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error al consultar y transferir productos: {ex.Message}");
-            }
-        }
-
-        private void EliminarProductosDeTdProduc(int userId, MySqlConnection connection)
-        {
-            try
-            {
-                // Eliminar productos de td_produc
-                string queryDeleteProducts = "DELETE FROM td_produc WHERE OrderId = @UserId";
-                using (var commandDeleteProducts = new MySqlCommand(queryDeleteProducts, connection))
-                {
-                    commandDeleteProducts.Parameters.AddWithValue("@UserId", userId);
-                    commandDeleteProducts.ExecuteNonQuery();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error al eliminar productos de td_produc: {ex.Message}");
-            }
-        }
-
-
-        private int Orden(PaymentInfo model, string referencia, MySqlConnection connection, MySqlTransaction transaction) // Método para guardar los datos de la orden
-        {
-            // La consulta SQL y la lógica se mantienen, solo cambiamos cómo accedemos a las propiedades
-            string query = @"
-        INSERT INTO td_orden(email, telef, nombre, nombre2, apellido, apellido2, direc, tipo_doc, numer_doc, nomb_empr, pais, depart, city, 
-                             postalnum, td_nit, refere, total, descrip, td_estado, codigo_dcity)
-        VALUES (@Email, @Phone, @FullName, @Nombre2, @Apellido, @Apellido2, @Address, @DocumentType, @DocumentNumber, @CompanyName, 
-                @Country, @State, @City, @PostalCode, @nit, @ReferenceCode, @Amount, @ProductDescription, @Estado, @CodigoD);
-        SELECT LAST_INSERT_ID();";
-
-            using (var command = new MySqlCommand(query, connection, transaction))
-            {
-                // Asignación de valores a los parámetros de la consulta SQL usando el modelo directamente.
-                command.Parameters.AddWithValue("@Email", model.Email);
-                command.Parameters.AddWithValue("@Phone", model.Phone);
-                command.Parameters.AddWithValue("@FullName", model.FirstName);
-                command.Parameters.AddWithValue("@Nombre2", model.MiddleName);
-                command.Parameters.AddWithValue("@Apellido", model.LastName);
-                command.Parameters.AddWithValue("@Apellido2", model.SecondLastName);
-                command.Parameters.AddWithValue("@Address", model.StreetAddress);
-                command.Parameters.AddWithValue("@DocumentType", model.DocumentType);
-                command.Parameters.AddWithValue("@DocumentNumber", model.DocumentNumber);
-                command.Parameters.AddWithValue("@CompanyName", model.CompanyName);
-                command.Parameters.AddWithValue("@Country", model.Country);
-                command.Parameters.AddWithValue("@State", model.State);
-                command.Parameters.AddWithValue("@City", model.City);
-                command.Parameters.AddWithValue("@PostalCode", model.postalCode);
-                command.Parameters.AddWithValue("@CodigoD", model.CityCode);
-
-                if (model.VerificationDigit.HasValue)
-                    command.Parameters.AddWithValue("@nit", model.VerificationDigit);
-                else
-                    command.Parameters.AddWithValue("@nit", DBNull.Value);
-
-                command.Parameters.AddWithValue("@ReferenceCode", referencia); // Aquí supongo que aún querrás generar una referencia nueva para cada orden.
-                command.Parameters.AddWithValue("@Amount", model.Cart.TotalPrice());
-
-                StringBuilder productNames = new StringBuilder();
-                foreach (var item in model.Cart.Items)
-                {
-                    if (productNames.Length > 0)
-                    {
-                        productNames.Append(", ");
-                    }
-                    productNames.Append(item.Product.Nombre);
-                }
-                string productDescription = productNames.ToString();
-                command.Parameters.AddWithValue("@ProductDescription", productDescription);
-                command.Parameters.AddWithValue("@Estado", 1); // estado de la transacción
-
-                // Ejecuta la consulta SQL y devuelve el ID recién creado.
-                return Convert.ToInt32(command.ExecuteScalar());
-            }
-        }
+        //private void EliminarProductosDeTdProduc(int userId, MySqlConnection connection)
+        //{
+        //    try
+        //    {
+        //        // Eliminar productos de td_produc
+        //        string queryDeleteProducts = "DELETE FROM td_produc WHERE OrderId = @UserId";
+        //        using (var commandDeleteProducts = new MySqlCommand(queryDeleteProducts, connection))
+        //        {
+        //            commandDeleteProducts.Parameters.AddWithValue("@UserId", userId);
+        //            commandDeleteProducts.ExecuteNonQuery();
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception($"Error al eliminar productos de td_produc: {ex.Message}");
+        //    }
+        //}
 
         public JsonResult GetDepartamentos() // Método para obtener los departamentos
         {
@@ -813,37 +476,6 @@ namespace Tienda.Controllers
 
         }
 
-
-
-       
-
-
-        private void GuardarProductos(int orderId, Cart cart, MySqlConnection connection, MySqlTransaction transaction)
-        {
-
-            foreach (var item in cart.Items)
-                {
-                decimal valor = item.Product.Precio;
-                int quantity = item.Quantity;
-                decimal total = valor * quantity;
-
-                string orderProductInsertQuery = "INSERT INTO td_produc(OrderId, ProductId, cantidad, td_valor, valortotal, td_detalle) VALUES (@OrderId, @ProductId, @Quantity, @Valor, @Total, @Detalle)";
-
-                using (var command = new MySqlCommand(orderProductInsertQuery, connection, transaction))
-                {
-                    command.Parameters.AddWithValue("@OrderId", orderId);
-                    command.Parameters.AddWithValue("@ProductId", item.Product.Id);
-                    command.Parameters.AddWithValue("@Quantity", item.Quantity);
-                    command.Parameters.AddWithValue("@Valor", item.Product.Precio);
-                    command.Parameters.AddWithValue("@Total", total);
-                    command.Parameters.AddWithValue("@Detalle", item.Product.Detalle);
-                    command.ExecuteNonQuery();
-                }
-            }
-        }
-
-
-
         [HttpPost] // Accion para agregar un producto al carrito
         public ActionResult AddToCart()
         {
@@ -873,7 +505,7 @@ namespace Tienda.Controllers
                 var quantity = data.ContainsKey("quantity") ? data["quantity"].ToObject<int>() : 1;
 
                 // Asumiendo que tienes una forma de obtener un producto por su ID
-                var product = GetProductById(productId);
+                var product = _mainService.GetProductById(productId);
                 if (product == null)
                 {
                     return Json(new { success = false, error = "Producto no encontrado" });
@@ -928,7 +560,6 @@ namespace Tienda.Controllers
             return RedirectToAction("Carrito");  // Retorna una respuesta exitosa si el producto fue eliminado correctamente
         }
 
-
         public ActionResult Carrito() // Acción para mostrar el carrito
         {
             var cart = Session["cart"] as Cart;
@@ -959,42 +590,6 @@ namespace Tienda.Controllers
             Session["cart"] = cart;  // Guarda el carrito actualizado en la sesión
 
             return Json(new { success = true });
-        }
-
-        private Producto GetProductById(int productId) // Método para obtener un producto por su ID
-        {
-            using (var connection = _dataConexion.CreateConnection())
-            {
-                connection.Open();
-
-                // Definir la consulta para obtener un producto específico por su ID.
-                string query = "SELECT * FROM td_main WHERE id_main = @ProductId";
-
-                using (var command = new MySqlCommand(query, connection))
-                {
-                    // Añadir el parámetro a la consulta.
-                    command.Parameters.AddWithValue("@ProductId", productId);
-
-                    using (var reader = command.ExecuteReader())
-                    {
-                        // Si se encuentra el producto, devolverlo.
-                        if (reader.Read())
-                        {
-                            return new Producto
-                            {
-                                Id = reader.GetInt32("id_main"),
-                                Nombre = reader.GetString("td_nombre"),
-                                Descripcion = reader.GetString("td_descri"),
-                                Precio = reader.GetDecimal("td_precio"),
-                                Detalle = reader.GetString("td_detall"),
-                                Imagen = reader.GetString("td_img")
-                            };
-                        }
-                    }
-                }
-            }
-            // Si no se encuentra el producto, devolver null.
-            return null;
         }
 
         public ActionResult CategoryNav() // Acción para mostrar las categorías en la barra de navegación
