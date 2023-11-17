@@ -56,8 +56,8 @@
             </button>
             <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-3">
-                    <li>@Html.ActionLink("Inicio", "About", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("Acerca de", "Contact", "Home", new { area = "" }, new { @class = "nav-link" })</li>
+                    <li><a href="https://ukumari.org/" class="nav-link">Bioparque Ukumarí</a></li>
+                    <li><a href="https://ukumari.org/contacto/" class="nav-link">Contacto</a></li>
                 </ul>
             </div>
         </div>
@@ -161,6 +161,15 @@
     </div>
 
     <style>
+        .navbar-toggleable-sm {
+            z-index: 1050; /* Asegúrate de que este valor sea más alto que el del carrusel y otras capas */
+        }
+
+
+        .navbar-toggler {
+            z-index: 1050; /* Asegúrate de que este valor sea más alto que el del carrusel y otras capas */
+        }
+
         /* Estilo para el título "Tienda Virtual" */
         .navbar-brand {
             color: #7a7a7a; /* Color del texto */
@@ -272,10 +281,15 @@
   left: 35%; /* Ajusta este valor según sea necesario */
 }
 
+        /* Estilo para el botón del menú cuando está en su estado colapsado */
+        .navbar-toggler {
+            background-color: #23A455 !important; /* Cambia el color del borde del botón si es necesario */
+        }
+
 /* Media query para tablets */
 @@media (max-width: 768px) {
   .static-images img {
-    width: 120px; /* Ajusta el tamaño para tablets */
+    width: 100px; /* Ajusta el tamaño para tablets */
   }
 
   .static-images img:first-child {
@@ -290,7 +304,7 @@
 /* Media query para móviles */
 @@media (max-width: 576px) {
   .static-images img {
-    width: 100px; /* Ajusta el tamaño para móviles */
+    width: 80px; /* Ajusta el tamaño para móviles */
   }
 
   .static-images img:first-child {
@@ -299,6 +313,22 @@
 
   .static-images img:last-child {
     left: 28%; /* Ajusta la posición para móviles */
+  }
+}
+
+@@media (max-width: 375px) {
+  .static-images img {
+    width: 60px; /* Ajusta el tamaño para móviles */
+  }
+
+  .static-images img:first-child {
+    left: 3%; /* Ajusta la posición para móviles */
+    top: 50%;
+  }
+
+  .static-images img:last-child {
+    left: 28%; /* Ajusta la posición para móviles */
+     top: 45%;
   }
 }
 

@@ -140,11 +140,11 @@
                     }
                 </tbody>
                 <tfoot>
-                    <tr>
+                    <tr class="bg-custom">
                         <th>Subtotal</th>
                         <td>@Model.Cart.TotalPrice().ToString("C")</td>
                     </tr>
-                    <tr>
+                    <tr class="bg-custom">
                         <th>Total</th>
                         <td>@Model.Cart.TotalPrice().ToString("C")</td>
                     </tr>
@@ -181,9 +181,18 @@
 </div>
 <style>
     .btn-purple {
-        background-color: purple;
+        background-color: #5C469C;
         color: white;
         border: none;
+    }
+        .btn-purple:hover {
+            background-color: purple; /* Color de fondo al pasar el mouse */
+            color: white; /* Color del texto al pasar el mouse (opcional) */
+        }
+
+    .bg-custom {
+        background-color: #CDF0EA;
+        color: black;
     }
 </style>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -287,6 +296,6 @@
         });
 
     });
-
+    
 </script>
 

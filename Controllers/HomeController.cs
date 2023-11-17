@@ -77,8 +77,8 @@ namespace Tienda.Controllers
             var phone = model.Phone; // Guardad en base de datos
             var fullName = $"{model.FirstName} {model.MiddleName} {model.LastName} {model.SecondLastName}";  // Combina FirstName y LastName
             var paymentMethods = "MASTERCARD,PSE,VISA";
-            var responseUrl = "https://ad5d-181-59-112-164.ngrok-free.app/Home/PayUResponse";
-            var confirmationUrl = "https://ad5d-181-59-112-164.ngrok-free.app/Home/Confirmation";
+            var responseUrl = "https://1000-181-59-112-186.ngrok-free.app/Home/PayUResponse";
+            var confirmationUrl = "https://1000-181-59-112-186.ngrok-free.app/Home/Confirmation";
             // Genera la firma
             var formattedAmount = amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             var signature = GenerarFirma(apiKey, merchantId, referenceCode, formattedAmount, currency, paymentMethods); // Llama al método para generar la firma
@@ -253,7 +253,7 @@ namespace Tienda.Controllers
             try
             {
                 var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("RmSoft", "sistemas.rmsoft@gmail.com"));
+                message.From.Add(new MailboxAddress("Bioparque Ukumarí", "sistemas.rmsoft@gmail.com"));
                 message.To.Add(new MailboxAddress(datos.Email, datos.Email)); // usando el email de datos
                 message.Subject = "Detalles de tu compra";
 
@@ -264,7 +264,7 @@ namespace Tienda.Controllers
                 var htmlContent = "<div style='border: 1px solid black; padding: 10px;'>";
 
                 // Añadir imagen de encabezado
-                htmlContent += "<img src='cid:logoImage' alt='Logo' style='width:100%; height:auto;'/>";
+                //htmlContent += "<img src='cid:logoImage' alt='Logo' style='width:100%; height:auto;'/>";
                 htmlContent += "<table width='100%' style='border-collapse: collapse;'>";
                 htmlContent += "<tr style='border-bottom: 1px solid #000;'>";
                 htmlContent += "<td><strong>Estimado cliente</strong></td>";
@@ -272,7 +272,7 @@ namespace Tienda.Controllers
                 htmlContent += "</tr>";
                 htmlContent += "<tr style='border-bottom: 1px solid #000;'>";
                 htmlContent += "<td><strong>Emisor</strong></td>";
-                htmlContent += "<td align='right'><strong>RM Soft Casa De Software SAS</strong></td>";
+                htmlContent += "<td align='right'><strong>Parque Temático De Flora Y Fauna De Pereira SAS</strong></td>";
                 htmlContent += "</tr>";
                 htmlContent += "<tr>";
                 htmlContent += $"<td><strong>Tipo de Documento:</strong></td>";
@@ -314,15 +314,16 @@ namespace Tienda.Controllers
                 var qrData = qrGenerator.CreateQrCode(model.Reference_pol, QRCoder.QRCodeGenerator.ECCLevel.Q);
                 var qrCode = new QRCoder.QRCode(qrData);
 
-                var qrBitmap = qrCode.GetGraphic(10); // Ajusta el valor '20' si necesitas un tamaño diferente para el QR Code
+                var qrBitmap = qrCode.GetGraphic(10); // Ajusta el valor '10' si necesitas un tamaño diferente para el QR Code
 
                 var qrMemoryStream = new MemoryStream();
                 qrBitmap.Save(qrMemoryStream, ImageFormat.Png);
 
+
                 // Total
                 htmlContent += "<tr style='border-top: 2px solid #000;'>";
                 htmlContent += "<td colspan='3' align='right'><strong>Valor Total: </strong></td>";
-                htmlContent += $"<td><strong>{datos.Total}</strong></td>";
+                htmlContent += $"<td><strong>{datos.Total:C}</strong></td>";
                 htmlContent += "</tr>";
                 htmlContent += "</table>";
 
@@ -331,16 +332,21 @@ namespace Tienda.Controllers
                 htmlContent += "<p style='text-align:center;'><img src='cid:qrCodeImage' alt='QR Code' /></p>";
                 htmlContent += "<p style='text-align:center;'>Muestra el código QR en la entrada del Parque para ingresar. </p>";
                 htmlContent += "</div>"; // Cierre del div con bordes
-           
-                // Para agregar la imagen del encabezado y el código QR como imágenes incrustadas en el correo
-                var logoPath = System.Web.HttpContext.Current.Server.MapPath("~/Imagenes/Ukumari.png"); // Ajusta la ruta según donde tengas la imagen
-                var logoImage = new MimePart("image", "png")
-                {
-                    Content = new MimeContent(System.IO.File.OpenRead(logoPath), ContentEncoding.Base64),
-                    ContentId = "logoImage",
-                    ContentDisposition = new ContentDisposition { FileName = Path.GetFileName(logoPath) },
-                    ContentTransferEncoding = ContentEncoding.Base64
-                };
+
+
+                //qrMemoryStream.Position = 0;
+
+                //// Para agregar la imagen del encabezado y el código QR como imágenes incrustadas en el correo
+                //var logoPath = System.Web.HttpContext.Current.Server.MapPath("~/Imagenes/Ukumari.jpg"); // Ajusta la ruta según donde tengas la imagen
+                //var logoBytes = System.IO.File.ReadAllBytes(logoPath);
+                //var logoImage = new MimePart("image", "jpeg")
+                //{
+                //    Content = new MimeContent(new MemoryStream(logoBytes), ContentEncoding.Base64),
+                //    ContentId = "logoImage",
+                //    ContentDisposition = new ContentDisposition { FileName = Path.GetFileName(logoPath) },
+                //    ContentTransferEncoding = ContentEncoding.Base64
+                //};
+
 
 
                 // Ahora convertimos el MemoryStream del QR en MimePart
@@ -354,7 +360,7 @@ namespace Tienda.Controllers
                 builder.HtmlBody = htmlContent;
 
                 // Agregar imágenes como incrustadas
-                builder.LinkedResources.Add(logoImage);
+                //builder.LinkedResources.Add(logoImage);
                 builder.LinkedResources.Add(qrCodeImage);
 
                 message.Body = builder.ToMessageBody();
