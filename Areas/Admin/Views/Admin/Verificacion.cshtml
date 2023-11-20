@@ -1,17 +1,67 @@
-﻿
+﻿@model IEnumerable<Tienda.Areas.Admin.Models.Usuario>
+
+
 @{
     Layout = null;
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+
 }
 
-<!DOCTYPE html>
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-sm-6 col-md-4">
+            <div class="card p-3 shadow">
+                <div class="card-body text-center">
+                    <img src="~/Imagenes/Ukumari.png" class="rounded-circle img-fluid mb-3" alt="Logo Empresarial">
 
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Inicio</title>
-</head>
-<body>
-    <div> 
+                    <h4>Iniciar sesión</h4>
+                    <form method="post" action="@Url.Action("Verificacion", "Admin")">
+                        <div class="form-group mb-3">
+                            <input type="text" class="form-control" placeholder="Nombre de usuario" name="clave">
+                        </div>
+                        <div class="form-group mb-3">
+                            <input type="password" class="form-control" placeholder="Contraseña" name="pw">
+                        </div>
+                        @if (ViewData["Mensaje"] != null)
+                        {
+                            <div class="alert alert-danger" role="alert">
+                                @ViewData["Mensaje"]
+                            </div>
+                        }
+                        <button type="submit" class="btn btn-primary btn-block mt-3">Ingresar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-</body>
-</html>
+</div>
+
+<style>
+    input.form-control {
+        background-color: #f3f3f3;
+        border-color: #d9d9d9;
+    }
+
+        input.form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            border-color: #80bdff;
+        }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+
+    .card.shadow {
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+    }
+</style>
+

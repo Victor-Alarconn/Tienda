@@ -743,20 +743,6 @@ namespace Tienda.Controllers
             return View(viewModel);
         }
 
-        public ActionResult About() // aun sin implementar
-        {
-            ViewBag.Message = "Your application description page.";
-
-            return View();
-        }
-
-        public ActionResult Contact() // aun sin implementar
-        {
-            ViewBag.Message = "Your contact page.";
-
-            return View();
-        }
-
         public ActionResult Politica() // Acción para mostrar la política de privacidad
         {
 

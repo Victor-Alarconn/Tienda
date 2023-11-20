@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - ADEZ</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
+        <div class="container">
+            @Html.ActionLink("ADEZ", "Buscar", "Historico", new { area = "" }, new { @class = "navbar-brand" })
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Alternar navegación" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
+                <ul class="navbar-nav flex-grow-1">
+                    <li>@Html.ActionLink("Buscar Nave", "Buscar", "Historico", new { area = "" }, new { @class = "nav-link fs-5" })</li>
+                    <li><br /></li>
+                    <li><br /></li>
+                    <li>@Html.ActionLink("Buscar Documento", "Busqueda", "Nave", new { area = "" }, new { @class = "nav-link fs-5" })</li>
+                    <li>@Html.ActionLink("Buscar Tripulante", "Tripulantes", "Nave", new { area = "" }, new { @class = "nav-link fs-5" })</li>
+                    @if (Session["NivelAcceso"] != null && Convert.ToInt32(Session["NivelAcceso"]) == 4)
+                    {
+                        <li>@Html.ActionLink("Eliminados", "Papelera", "Nave", new { area = "" }, new { @class = "nav-link fs-5" })</li>
+                    }
+                    <li>@Html.ActionLink("Salir", "CerrarSesion", "Verificacion", new { area = "" }, new { @class = "nav-link fs-5" })</li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container body-content text-md-center">
+        <h2>Módulo de gestión de documentos digitales</h2>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - RM Soft Software Empresarial</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+</body>
+</html>
+
