@@ -135,11 +135,38 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        // Actualizar el mensaje de confirmación
                         document.getElementById('confirmation-' + productId).classList.remove('d-none');
+
+                        // Actualizar el contador del carrito
+                        updateCartItemCount();
                     }
                 });
         });
     });
+
+
+    function updateCartItemCount() {
+        fetch('/Home/GetCartItemCount')
+            .then(response => response.json())
+            .then(data => {
+                var cartItemCount = data.itemCount;
+                var cartCounterElement = document.querySelector('.cart-item-count');
+                if (cartCounterElement) {
+                    cartCounterElement.textContent = cartItemCount;
+                } else {
+                    // Crear el contador si no existe
+                    var cartLink = document.querySelector('a[href$="/Carrito/Home"]');
+                    if (cartLink) {
+                        var span = document.createElement('span');
+                        span.className = 'badge bg-danger cart-item-count';
+                        span.textContent = cartItemCount;
+                        cartLink.appendChild(span);
+                    }
+                }
+            });
+    }
+
 
     function buyNow(productId) {
         var quantity = document.getElementById('product-quantity').value;

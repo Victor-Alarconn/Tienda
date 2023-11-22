@@ -305,5 +305,29 @@ namespace Tienda.Areas.Admin.Controllers
                 return View(ex);
             }
         }
+
+        [HttpPost]
+        public ActionResult BorrarProducto(int id)
+        {
+            try
+            {
+                // Lógica para borrar el producto de la base de datos
+                using (var connection = _dataConexion.CreateConnection())
+                {
+                    connection.Open();
+                    var command = new MySqlCommand("DELETE FROM td_main WHERE id_main = @id", connection);
+                    command.Parameters.AddWithValue("@id", id);
+                    command.ExecuteNonQuery();
+                }
+
+                return Json(new { success = true, message = "Producto borrado con éxito" });
+            }
+            catch (Exception ex)
+            {
+                // Manejar excepciones
+                return Json(new { success = false, error = ex.Message });
+            }
+        }
+
     }
 }

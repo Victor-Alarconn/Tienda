@@ -30,7 +30,7 @@ namespace Tienda.Controllers
         private readonly IFactura _facturaService;
         private readonly IProductoService _productoService;
         private readonly IMainService _mainService;
-       
+
         private readonly DataConexion _dataConexion; // Se crea una instancia de la clase DataConexion
         private readonly Cart _cart; // Se crea una instancia de la clase Cart
         public HomeController() // Constructor de la clase
@@ -165,7 +165,7 @@ namespace Tienda.Controllers
             System.Diagnostics.Debug.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(model)); // para imprimir todo el modelo recibido.
             string apiKey = "4Vj8eK4rloUd272L48hsrarnUA";
             string generatedSignature = CreateSignature(apiKey, model.Account_id, model.Reference_sale, model.Currency, model.State_pol);
-           
+
             if (model.Response_message_pol == "APPROVED" && model.State_pol == "4")
             {
                 var productos = _ordenService.ObtenerProductosPorOrden(model.Reference_sale);
@@ -392,7 +392,7 @@ namespace Tienda.Controllers
                     int idFac = _facturaService.InsertarEnTdFac(datosUsuario, model, connection);
                     _productoService.ConsultarYTransferirProductos(userId, idFac, connection);
                     _ordenService.EliminarDeTdOrden(userId, connection);
-                  //  EliminarProductosDeTdProduc(userId, connection);
+                    //  EliminarProductosDeTdProduc(userId, connection);
 
                     connection.Close();
                 }
@@ -427,20 +427,20 @@ namespace Tienda.Controllers
             {
                 using (var connection = _dataConexion.CreateConnection())
                 {
-                connection.Open();
-                var departamentos = new List<string>();
-                using (var command = new MySqlCommand("SELECT DISTINCT CityNdepto FROM xxxxcity", connection))
+                    connection.Open();
+                    var departamentos = new List<string>();
+                    using (var command = new MySqlCommand("SELECT DISTINCT CityNdepto FROM xxxxcity", connection))
                     {
-                    using (var reader = command.ExecuteReader())
+                        using (var reader = command.ExecuteReader())
                         {
-                        while (reader.Read())
+                            while (reader.Read())
                             {
-                            departamentos.Add(reader.GetString("CityNdepto"));
+                                departamentos.Add(reader.GetString("CityNdepto"));
+                            }
                         }
                     }
+                    return Json(departamentos, JsonRequestBehavior.AllowGet);
                 }
-                return Json(departamentos, JsonRequestBehavior.AllowGet);
-            }
             }
             catch (Exception ex)
             {
@@ -526,7 +526,8 @@ namespace Tienda.Controllers
 
                 // Añadir el producto al carrito.
                 cart.AddProduct(product, quantity);
-
+                int itemCount = cart.GetTotalItemCount();
+                Session["cartItemCount"] = itemCount;
                 Session["cart"] = cart;
 
                 return Json(new { success = true });
@@ -674,7 +675,7 @@ namespace Tienda.Controllers
                 connection.Open();
 
                 // Modificar la consulta para incluir una cláusula WHERE
-               string query = @"
+                string query = @"
                             SELECT m.*, g.td_nombre AS NombreGrupo 
                             FROM td_main m
                             LEFT JOIN td_grupos g ON m.id_grupo = g.id_grupo
@@ -748,6 +749,48 @@ namespace Tienda.Controllers
 
             return View();
         }
-       
+
+        [HttpGet]
+        public ActionResult CalcularDigitoVerificacion(string nit)
+        {
+            try
+            {
+                int dv = Calcular(nit);
+                return Json(new { success = true, digitoVerificacion = dv }, JsonRequestBehavior.AllowGet);
+            }
+            catch
+            {
+                return Json(new { success = false }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
+        public static int Calcular(string nit)
+        {
+            int[] pesos = { 71, 67, 59, 53, 47, 43, 41, 37, 29, 23, 19, 17, 13, 7, 3 };
+            int suma = 0;
+            nit = nit.PadLeft(15, '0');
+
+            for (int i = 0; i < 15; i++)
+            {
+                suma += (int)char.GetNumericValue(nit[i]) * pesos[i];
+            }
+
+            int modulo = suma % 11;
+            return (modulo < 2) ? modulo : 11 - modulo;
+        }
+
+        [HttpGet]
+        public ActionResult GetCartItemCount()
+        {
+            var cart = Session["cart"] as Cart;
+            if (cart != null)
+            {
+                return Json(new { itemCount = cart.GetTotalItemCount() }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { itemCount = 0 }, JsonRequestBehavior.AllowGet);
+        }
+
+
     }
 }

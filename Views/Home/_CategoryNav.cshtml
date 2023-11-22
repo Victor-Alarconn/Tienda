@@ -3,8 +3,22 @@
 <ul class="navbar-nav flex-grow-2">
     @foreach (var categoria in Model)
     {
-       <li>@Html.ActionLink(categoria.Nombre, "Index", "Home", new { categoryId = categoria.Id }, new { @class = "nav-link text-white" })</li>
+        <li>
+            <a href="@Url.Action("Index", "Home", new { categoryId = categoria.Id })" class="nav-link text-white">@categoria.Nombre</a>
+        </li>
     }
-    <li>@Html.ActionLink("Carrito de Compras", "Carrito", "Home", new { area = "" }, new { @class = "nav-link text-white" })</li>
+<li>
+    <a href="@Url.Action("Carrito", "Home")" class="nav-link text-white">
+        Carrito de Compras <span class="badge bg-danger cart-item-count">@Session["cartItemCount"]</span>
+    </a>
+
+</li>
 </ul>
 
+
+<style>
+    .badge-danger {
+        vertical-align: super;
+        margin-left: 5px; /* Espacio entre el texto y el contador */
+    }
+</style>

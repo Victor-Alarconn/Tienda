@@ -255,8 +255,6 @@
 
 
 
-
-
     // Función para mostrar/ocultar los campos faltan por rellenar antes de enviar el formulario
     $(document).ready(function () {
 
@@ -296,6 +294,25 @@
         });
 
     });
-    
+
+    $("#documentNumber").change(function () {
+    var documentType = $("#documentType").val();
+    var nit = $(this).val();
+
+    if (documentType === "NIT" && nit) {
+        $.ajax({
+            url: '@Url.Action("CalcularDigitoVerificacion", "Home")',
+            type: 'GET',
+            data: { nit: nit },
+            success: function (data) {
+                if (data.success) {
+                    $("#verificationDigit").val(data.digitoVerificacion);
+                }
+            }
+        });
+    }
+});
+
+
 </script>
 

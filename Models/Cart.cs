@@ -32,6 +32,18 @@ namespace Tienda.Models
             }
             return total;
         }
+
+        public int GetTotalItemCount()
+        {
+            int totalItemCount = 0;
+            foreach (var item in Items)
+            {
+                totalItemCount += item.Quantity;
+            }
+            // Devuelve el número de productos únicos en el carrito, independientemente de su cantidad
+            return Items.Count;
+        }
+
     }
 
     public class CartItem
