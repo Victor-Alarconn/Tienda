@@ -4,7 +4,11 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - ADEZ</title>
+
+    <!-- Favicon SVG -->
+    <link rel="icon" href="~/Imagenes/Ukumari_logo.svg" type="image/svg+xml">
+        
+    <title>@ViewBag.Title - Bioparque Ukumari</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
 
@@ -12,37 +16,34 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
 </head>
 <body>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark mi-navbar">
         <div class="container">
-            @Html.ActionLink("ADEZ", "Buscar", "Historico", new { area = "" }, new { @class = "navbar-brand" })
+            @Html.ActionLink("ADMINISTRACION", "Inicio", "Admin", new { area = "" }, new { @class = "navbar-brand mi-navbar-brand" })
             <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Alternar navegación" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-1">
-                    <li>@Html.ActionLink("Buscar Nave", "Buscar", "Historico", new { area = "" }, new { @class = "nav-link fs-5" })</li>
-                    <li><br /></li>
-                    <li><br /></li>
-                    <li>@Html.ActionLink("Buscar Documento", "Busqueda", "Nave", new { area = "" }, new { @class = "nav-link fs-5" })</li>
-                    <li>@Html.ActionLink("Buscar Tripulante", "Tripulantes", "Nave", new { area = "" }, new { @class = "nav-link fs-5" })</li>
+                    <li>@Html.ActionLink("Gestíon de Productos", "Productos", "Admin", new { area = "Admin" }, new { @class = "mi-nav-link fs-5" })</li>
                     @if (Session["NivelAcceso"] != null && Convert.ToInt32(Session["NivelAcceso"]) == 4)
                     {
-                        <li>@Html.ActionLink("Eliminados", "Papelera", "Nave", new { area = "" }, new { @class = "nav-link fs-5" })</li>
+                        <li>@Html.ActionLink("Gestion de Categorías", "Categorias", "Admin", new { area = "Admin" }, new { @class = "mi-nav-link fs-5" })</li>
                     }
-                    <li>@Html.ActionLink("Salir", "CerrarSesion", "Verificacion", new { area = "" }, new { @class = "nav-link fs-5" })</li>
+                    <li>@Html.ActionLink("Gestión de Pedidos", "", "", new { area = "Admin" }, new { @class = "mi-nav-link fs-5" })</li>
+                    <li>@Html.ActionLink("Salir", "CerrarSesion", "Admin", new { area = "Admin" }, new { @class = "mi-nav-link fs-5" })</li>
                 </ul>
             </div>
         </div>
     </nav>
     <div class="container body-content text-md-center">
-        <h2>Módulo de gestión de documentos digitales</h2>
+        <h2>Módulo de gestión de Productos</h2>
     </div>
     <div class="container body-content">
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year - RM Soft Software Empresarial</p>
+            <p>&copy; @DateTime.Now.Year - Parque Temático De Flora Y Fauna De Pereira SAS</p>
         </footer>
     </div>
 
@@ -51,4 +52,43 @@
     @RenderSection("scripts", required: false)
 </body>
 </html>
+<style>
+    .mi-navbar {
+        background-color: #86B038; /* Color de fondo */
+    }
+
+    .mi-nav-link {
+        color: black; /* Color de la letra */
+        text-decoration: none; /* Elimina el subrayado */
+        text-align: center; /* Centra el texto */
+        display: block; /* Hace que el enlace llene todo el <li> */
+        margin: 0 10px; /* Agrega un margen a izquierda y derecha */
+        font-weight: bold; /* Letra en negrita */
+    }
+
+        .mi-nav-link:hover {
+            color: black; /* Color de la letra al pasar el ratón por encima */
+            text-decoration: none; /* Mantiene sin subrayado al pasar el ratón por encima */
+        }
+
+
+    .navbar-nav > li {
+        margin-right: 20px; /* Ajusta según necesidades */
+    }
+
+
+        .mi-nav-link:hover {
+            color: black; /* Color de la letra al pasar el ratón por encima */
+        }
+
+    .mi-nav-link {
+        line-height: 50px; /* Ajusta a la altura de tu navbar */
+    }
+
+    .mi-navbar-brand {
+        color: black !important; /* Color de letra negro */
+        font-weight: bold; /* Letra en negrita */
+    }
+
+</style>
 

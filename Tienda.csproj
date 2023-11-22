@@ -161,8 +161,10 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminController.cs" />
-    <Compile Include="Areas\Admin\Data\DataConexion.cs" />
+    <Compile Include="Areas\Admin\Models\Categorias.cs" />
+    <Compile Include="Areas\Admin\Models\Productos.cs" />
     <Compile Include="Areas\Admin\Models\Usuario.cs" />
+    <Compile Include="Areas\Admin\Permisos\ValidacionSession.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Data\DataConexion.cs" />
     <Compile Include="Global.asax.cs">
@@ -241,6 +243,10 @@
     <Content Include="Areas\Admin\Views\Admin\Verificacion.cshtml" />
     <Content Include="Areas\Admin\Views\Shared\_Panel.cshtml" />
     <Content Include="Areas\Admin\Views\Admin\Inicio.cshtml" />
+    <Content Include="Areas\Admin\Views\Admin\Productos.cshtml" />
+    <Content Include="Areas\Admin\Views\Admin\Categorias.cshtml" />
+    <Content Include="Areas\Admin\Views\Admin\EditarProducto.cshtml" />
+    <Content Include="Areas\Admin\Views\Admin\EditarCategoria.cshtml" />
     <None Include="Scripts\jquery-3.7.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.1.js" />
     <Content Include="Scripts\jquery-3.7.1.min.js" />

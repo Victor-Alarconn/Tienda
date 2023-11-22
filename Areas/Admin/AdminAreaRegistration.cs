@@ -16,7 +16,7 @@ namespace Tienda.Areas.Admin
         {
             context.MapRoute(
                 "Admin_default",
-                "Admin/{controller}/{action}/{id}",
+                "Admin/{controller}/{action}/{id}",  
                 new { action = "Verificacion", id = UrlParameter.Optional }
             );
         }

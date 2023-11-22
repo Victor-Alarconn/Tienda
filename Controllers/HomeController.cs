@@ -77,8 +77,8 @@ namespace Tienda.Controllers
             var phone = model.Phone; // Guardad en base de datos
             var fullName = $"{model.FirstName} {model.MiddleName} {model.LastName} {model.SecondLastName}";  // Combina FirstName y LastName
             var paymentMethods = "MASTERCARD,PSE,VISA";
-            var responseUrl = "https://1000-181-59-112-186.ngrok-free.app/Home/PayUResponse";
-            var confirmationUrl = "https://1000-181-59-112-186.ngrok-free.app/Home/Confirmation";
+            var responseUrl = "https://e22f-186-86-216-98.ngrok-free.app/Home/PayUResponse";
+            var confirmationUrl = "https://e22f-186-86-216-98.ngrok-free.app/Home/Confirmation";
             // Genera la firma
             var formattedAmount = amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             var signature = GenerarFirma(apiKey, merchantId, referenceCode, formattedAmount, currency, paymentMethods); // Llama al método para generar la firma

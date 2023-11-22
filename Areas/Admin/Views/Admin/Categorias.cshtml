@@ -1,0 +1,90 @@
+﻿@model IEnumerable<Tienda.Areas.Admin.Models.Categorias>
+@{
+    ViewBag.Title = "Categorias";
+    Layout = "~/Areas/Admin/Views/Shared/_Panel.cshtml";
+}
+
+@{
+    var mensajeExito = TempData["MensajeExito"] as string;
+    var mensajeError = TempData["MensajeError"] as string;
+}
+
+@if (!string.IsNullOrEmpty(mensajeExito))
+{
+    <script type="text/javascript">
+        window.onload = function() {
+            alert('@mensajeExito');
+        };
+    </script>
+}
+
+@if (!string.IsNullOrEmpty(mensajeError))
+{
+    <script type="text/javascript">
+        window.onload = function() {
+            alert('@mensajeError');
+        };
+    </script>
+}
+
+
+<div class="header-con-boton">
+    <h2>Categorias</h2>
+    <button class="btn btn-success" onclick="location.href='@Url.Action("Agregar", "Admin")'">Agregar Categoria +</button>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Acciones</th> <!-- Encabezado para las acciones -->
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Nombre</td>
+                <td class="celda-botones">
+                    <button class="btn btn-primary btn-editar btn-accion"
+                            data-id="@item.Id"
+                            data-url="@Url.Action("EditarCategoria", "Admin", new { area = "Admin", id = item.Id })">
+                        Editar
+                    </button>
+                    <button class="btn btn-danger btn-borrar btn-accion" data-id="@item.Id">Borrar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll('.btn-editar').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var url = this.getAttribute('data-url');
+                window.location.href = url;
+            });
+        });
+
+
+        document.querySelectorAll('.btn-borrar').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var id = this.getAttribute('data-id');
+                // Aquí puedes mostrar un modal de confirmación antes de borrar
+                if (confirm('¿Estás seguro de que quieres borrar el producto?')) {
+                    window.location.href = '/Admin/Admin/BorrarProducto/' + id;
+                }
+            });
+        });
+    });
+</script>
+<style>
+    .header-con-boton {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+</style>

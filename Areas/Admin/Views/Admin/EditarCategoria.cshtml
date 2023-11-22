@@ -1,0 +1,23 @@
+﻿@model Tienda.Areas.Admin.Models.Categorias
+
+@{
+    ViewBag.Title = "EditarCategoria";
+    Layout = "~/Areas/Admin/Views/Shared/_Panel.cshtml";
+}
+
+<h2>EditarCategoria</h2>
+
+@using (Html.BeginForm("ActualizarCategoria", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.HiddenFor(m => m.Id)
+
+    <div>
+        @Html.LabelFor(m => m.Nombre)
+        @Html.TextAreaFor(m => m.Nombre, new { @class = "input-grande"})
+    </div>
+
+    <div style="margin-top: 20px;">
+        <input type="submit" value="Guardar cambios" class="btn btn-primary" />
+        <input type="button" value="Cancelar" class="btn btn-secondary" onclick="location.href='@Url.Action("Productos", "Admin")'" />
+    </div>
+ }

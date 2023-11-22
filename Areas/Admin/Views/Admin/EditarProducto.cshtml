@@ -1,0 +1,65 @@
+﻿@model Tienda.Areas.Admin.Models.Productos
+@{
+    ViewBag.Title = "Editar";
+    Layout = "~/Areas/Admin/Views/Shared/_Panel.cshtml";
+}
+
+<h2>Editar Producto</h2>
+
+@using (Html.BeginForm("ActualizarProducto", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.HiddenFor(m => m.Id)
+
+    <div>
+        @Html.LabelFor(m => m.Nombre)
+        @Html.TextAreaFor(m => m.Nombre, new { @class = "input-grande", rows = 4 })
+    </div>
+
+    <div>
+        @Html.LabelFor(m => m.Descripcion)
+        @Html.TextAreaFor(m => m.Descripcion, new { @class = "input-grande", rows = 4 })
+    </div>
+
+    <div>
+        @Html.LabelFor(m => m.Precio)
+        @Html.TextBoxFor(m => m.Precio)
+    </div>
+
+    <div>
+        @Html.LabelFor(m => m.Imagen, "Imagen URL")
+        @Html.TextBoxFor(m => m.Imagen, new { @class = "input-grande" })
+        <br />
+        <img src="@Url.Content(Model.Imagen)" alt="Imagen del producto" style="max-width: 150px; max-height: 150px;" />
+        <br />
+        @Html.TextBoxFor(m => m.Imagen, new { type = "file" })
+        <br />
+        <span>Cargar imagen o ingresar URL.</span>
+    </div>
+
+    <div>
+        @Html.LabelFor(m => m.Categoria)
+        @Html.TextBoxFor(m => m.Categoria)
+    </div>
+
+    <div>
+        @Html.LabelFor(m => m.Detalle)
+        @Html.TextAreaFor(m => m.Detalle, new { @class = "input-grande", rows = 4 })
+    </div>
+
+    <div>
+        @Html.LabelFor(m => m.Stock)
+        @Html.CheckBoxFor(m => m.Stock)
+    </div>
+
+    <div>
+        @Html.LabelFor(m => m.Cantidad)
+        @Html.TextBoxFor(m => m.Cantidad)
+    </div>
+
+    <div style="margin-top: 20px;">
+        <input type="submit" value="Guardar cambios" class="btn btn-primary" />
+        <input type="button" value="Cancelar" class="btn btn-secondary" onclick="location.href='@Url.Action("Productos", "Admin")'" />
+    </div>
+
+
+}

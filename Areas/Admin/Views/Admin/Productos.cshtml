@@ -1,0 +1,136 @@
+﻿@model IEnumerable<Tienda.Areas.Admin.Models.Productos>
+
+@{
+    ViewBag.Title = "Productos";
+    Layout = "~/Areas/Admin/Views/Shared/_Panel.cshtml";
+}
+@{
+    var mensajeExito = TempData["MensajeExito"] as string;
+    var mensajeError = TempData["MensajeError"] as string;
+}
+
+@if (!string.IsNullOrEmpty(mensajeExito))
+{
+    <script type="text/javascript">
+        window.onload = function() {
+            alert('@mensajeExito');
+        };
+    </script>
+}
+
+@if (!string.IsNullOrEmpty(mensajeError))
+{
+    <script type="text/javascript">
+        window.onload = function() {
+            alert('@mensajeError');
+        };
+    </script>
+}
+
+
+
+<div class="header-con-boton">
+    <h2>Productos</h2>
+    <button class="btn btn-success" onclick="location.href='@Url.Action("Agregar", "Admin")'">Agregar Producto +</button>
+</div>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Precio</th>
+            @*<th>Imagen</th>*@
+            <th>Categoría</th>
+            @*<th>Detalle</th>*@
+            <th>En Stock</th>
+            <th>Cantidad</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr data-id="@item.Id">
+
+                <td>@item.Id</td>
+                <td>@item.Nombre</td>
+                <td>@item.Descripcion</td>
+                <td>@item.Precio</td>
+                @*<td><img src="@item.Imagen" alt="Imagen del producto" class="producto-imagen" /></td>*@
+                <td>@item.Categoria</td>
+                @*<td>@item.Detalle</td>*@
+                <td>@(item.Stock ? "Sí" : "No")</td>
+                <td>@item.Cantidad</td>
+                <td class="celda-botones">
+                    <button class="btn btn-primary btn-editar btn-accion"
+                            data-id="@item.Id"
+                            data-url="@Url.Action("EditarProducto", "Admin", new { area = "Admin", id = item.Id })">
+                        Editar
+                    </button>
+                    <button class="btn btn-danger btn-borrar btn-accion" data-id="@item.Id">Borrar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll('.btn-editar').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var url = this.getAttribute('data-url');
+                window.location.href = url;
+            });
+        });
+
+
+        document.querySelectorAll('.btn-borrar').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var id = this.getAttribute('data-id');
+                // Aquí puedes mostrar un modal de confirmación antes de borrar
+                if (confirm('¿Estás seguro de que quieres borrar el producto?')) {
+                    window.location.href = '/Admin/Admin/BorrarProducto/' + id;
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    .producto-imagen {
+        max-width: 60px;
+        max-height: 60px;
+    }
+
+    .btn-accion {
+        margin-top: 5px; /* Espacio a la derecha de cada botón */
+    }
+
+    .celda-botones {
+        text-align: center;
+    }
+
+    .btn-accion:last-child {
+        margin-right: 0;
+    }
+
+    td {
+        text-align: center; /* Centra el contenido de todas las celdas */
+    }
+
+    .header-con-boton {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+        .header-con-boton h2 {
+            margin-bottom: 0; /* Elimina el margen inferior predeterminado del título */
+        }
+
+        .header-con-boton .btn {
+            /* Estilos adicionales para el botón si es necesario */
+        }
+</style>
