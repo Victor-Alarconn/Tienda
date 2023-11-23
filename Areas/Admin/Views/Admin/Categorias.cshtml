@@ -58,6 +58,26 @@
             </tr>
         }
     </tbody>
+    <!-- Modal para confirmación de borrado -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Borrado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Por favor, ingresa la contraseña para confirmar el borrado:</p>
+                    <input type="password" class="form-control" id="deletePassword" placeholder="Contraseña">
+                    <div class="invalid-feedback" id="deleteError">No se ha digitado ninguna contraseña.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">Borrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </table>
 <script>
 
@@ -72,11 +92,26 @@
 
         document.querySelectorAll('.btn-borrar').forEach(function (button) {
             button.addEventListener('click', function () {
-                var id = this.getAttribute('data-id');
-                // Aquí puedes mostrar un modal de confirmación antes de borrar
-                if (confirm('¿Estás seguro de que quieres borrar el producto?')) {
-                    window.location.href = '/Admin/Admin/BorrarProducto/' + id;
-                }
+                var productId = this.getAttribute('data-id');
+                $('#confirmDeleteModal').modal('show');
+                $('#confirmDelete').off('click').on('click', function () {
+                    var password = $('#deletePassword').val();
+                    if (password === '1234') {
+                        fetch('/Admin/Admin/BorrarCategoria/' + productId, { method: 'POST' })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert(data.message); // Mostrar el mensaje de éxito
+                                    location.reload(); // Recargar la página para actualizar la lista de productos
+                                } else {
+                                    alert(data.error); // Mostrar mensaje de error si hay uno
+                                }
+                            });
+                        $('#confirmDeleteModal').modal('hide');
+                    } else {
+                        $('#deleteError').show();
+                    }
+                });
             });
         });
     });

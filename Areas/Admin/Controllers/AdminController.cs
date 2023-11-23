@@ -286,12 +286,13 @@ namespace Tienda.Areas.Admin.Controllers
                     connection.Open();
 
                     // Preparar la consulta SQL para actualizar los datos del producto
-                    string query = "UPDATE td_grupos SET td_nombre = @nombre,  WHERE id_grupo = @id";
+                    string query = "UPDATE td_grupos SET td_nombre = @nombre WHERE id_grupo = @id";
 
                     using (var command = new MySqlCommand(query, connection))
                     {
                         // Asignar valores a los parámetros
                         command.Parameters.AddWithValue("@nombre", categoria.Nombre);
+                        command.Parameters.AddWithValue("@id", categoria.Id); // Asumiendo que 'categoria.Id' contiene el ID de la categoría
 
                         // Ejecutar la consulta
                         command.ExecuteNonQuery();
@@ -302,9 +303,11 @@ namespace Tienda.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
+                // Manejar la excepción
                 return View(ex);
-            }
+            } 
         }
+
 
         [HttpPost]
         public ActionResult BorrarProducto(int id)
@@ -316,6 +319,29 @@ namespace Tienda.Areas.Admin.Controllers
                 {
                     connection.Open();
                     var command = new MySqlCommand("DELETE FROM td_main WHERE id_main = @id", connection);
+                    command.Parameters.AddWithValue("@id", id);
+                    command.ExecuteNonQuery();
+                }
+
+                return Json(new { success = true, message = "Producto borrado con éxito" });
+            }
+            catch (Exception ex)
+            {
+                // Manejar excepciones
+                return Json(new { success = false, error = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult BorrarCategoria(int id)
+        {
+            try
+            {
+                // Lógica para borrar el producto de la base de datos
+                using (var connection = _dataConexion.CreateConnection())
+                {
+                    connection.Open();
+                    var command = new MySqlCommand("DELETE FROM td_grupos WHERE id_grupo = @id", connection);
                     command.Parameters.AddWithValue("@id", id);
                     command.ExecuteNonQuery();
                 }
