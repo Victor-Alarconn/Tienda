@@ -28,6 +28,124 @@ namespace Tienda.Areas.Admin.Controllers
             return View();
         }
 
+        public ActionResult AgregarProducto()
+        {
+            var categorias = ObtenerCategorias();
+
+            ViewBag.Categorias = categorias.Select(c => new SelectListItem
+            {
+                Text = c.Nombre,
+                Value = c.Id.ToString()
+            }).ToList();
+
+            var producto = new Productos();
+
+            return View(producto);
+        }
+
+        [HttpPost]
+        public ActionResult AgregarProducto(Productos producto, HttpPostedFileBase ImagenArchivo)
+        {
+            try
+            {
+                using (var connection = _dataConexion.CreateConnection())
+                {
+                    connection.Open();
+
+                    // Manejar la carga de la imagen si es necesario
+                    if (ImagenArchivo != null && ImagenArchivo.ContentLength > 0)
+                    {
+                        var imagePath = Path.Combine(Server.MapPath("~/Archivos"), ImagenArchivo.FileName);
+                        ImagenArchivo.SaveAs(imagePath);
+                        producto.Imagen = "/~Archivos/" + ImagenArchivo.FileName;
+                    }
+
+                    string query = "INSERT INTO td_main (td_nombre, td_descri, td_precio, td_img, id_grupo, td_detall, td_exist, td_cantidad) VALUES (@nombre, @descri, @precio, @img, @categoria, @detall, @exist, @cantidad)";
+                    using (var command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@nombre", producto.Nombre);
+                        command.Parameters.AddWithValue("@descri", producto.Descripcion);
+                        command.Parameters.AddWithValue("@precio", producto.Precio);
+                        command.Parameters.AddWithValue("@img", producto.Imagen);
+                        command.Parameters.AddWithValue("@categoria", producto.Categoria);
+                        command.Parameters.AddWithValue("@detall", producto.Detalle);
+                        command.Parameters.AddWithValue("@exist", producto.Stock ? 1 : 0);
+                        command.Parameters.AddWithValue("@cantidad", producto.Cantidad);
+
+                        command.ExecuteNonQuery();
+                    }
+                }
+
+                TempData["MensajeExito"] = "Producto agregado con éxito.";
+                return RedirectToAction("AgregarProducto");
+            }
+            catch (Exception ex)
+            {
+                TempData["MensajeError"] = "Error al agregar el producto: " + ex.Message;
+                return View(producto);
+            }
+        }
+
+        public List<Categorias> ObtenerCategorias()
+        {
+            List<Categorias> listaCategorias = new List<Categorias>();
+            using (var connection = _dataConexion.CreateConnection())
+            {
+                connection.Open();
+                string query = "SELECT id_grupo, td_nombre FROM td_grupos";
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var categoria = new Categorias
+                            {
+                                Id = reader.GetInt32("id_grupo"),
+                                Nombre = reader.GetString("td_nombre")
+                            };
+                            listaCategorias.Add(categoria);
+                        }
+                    }
+                }
+            }
+            return listaCategorias;
+        }
+
+        public ActionResult AgregarCategoria()
+        {
+            var categorias = new Categorias();
+            return View(categorias);
+        }
+
+        [HttpPost]
+        public ActionResult AgregarCategoria(Categorias categoria)
+        {
+            try
+            {
+                using (var connection = _dataConexion.CreateConnection())
+                {
+                    connection.Open();
+
+                    string query = "INSERT INTO td_grupos (td_nombre) VALUES (@nombre)";
+                    using (var command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@nombre", categoria.Nombre);
+
+                        command.ExecuteNonQuery();
+                    }
+                }
+
+                TempData["MensajeExito"] = "Producto agregado con éxito.";
+                return RedirectToAction("AgregarProducto");
+            }
+            catch (Exception ex)
+            {
+                TempData["MensajeError"] = "Error al agregar el producto: " + ex.Message;
+                return View(categoria);
+            }
+        }
+
         [HttpPost]
         public ActionResult Verificacion(string clave, string pw)
         {
@@ -237,7 +355,6 @@ namespace Tienda.Areas.Admin.Controllers
                 return RedirectToAction("Productos");
             }
         }
-
 
         public ActionResult EditarCategoria(int id)
         {

@@ -1,0 +1,69 @@
+﻿@model Tienda.Areas.Admin.Models.Productos
+
+@{
+    ViewBag.Title = "Agregar Producto";
+    Layout = "~/Areas/Admin/Views/Shared/_Panel.cshtml";
+}
+
+<h2>Agregar Producto</h2>
+
+@using (Html.BeginForm("AgregarProducto", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div class="mb-3">
+        @Html.LabelFor(model => model.Nombre)
+        @Html.TextAreaFor(model => model.Nombre, new { @class = "form-control" })
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(model => model.Descripcion)
+        @Html.TextAreaFor(model => model.Descripcion, new { @class = "form-control" })
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(model => model.Precio)
+        @Html.TextBoxFor(model => model.Precio, new { @class = "form-control", type = "number" })
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(model => model.Imagen)
+        <input type="file" class="form-control" name="ImagenArchivo" />
+        @Html.TextBoxFor(model => model.Imagen, new { @class = "form-control", placeholder = "O ingresa URL de la imagen" })
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(model => model.Detalle)
+        @Html.TextAreaFor(model => model.Detalle, new { @class = "form-control" })
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(model => model.Categoria)
+        @Html.DropDownListFor(model => model.Categoria, ViewBag.Categorias as IEnumerable<SelectListItem>, "Seleccionar", new { @class = "form-control" })
+    </div>
+
+    <div class="mb-3 form-check">
+        @Html.CheckBoxFor(model => model.Stock, new { @class = "form-check-input" })
+        @Html.LabelFor(model => model.Stock, new { @class = "form-check-label" })
+    </div>
+
+    <div class="mb-3" id="cantidadStock" style="display:none;">
+        @Html.LabelFor(model => model.Cantidad)
+        @Html.TextBoxFor(model => model.Cantidad, new { @class = "form-control", type = "number" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+}
+
+<script>
+    $(document).ready(function () {
+        $('#Stock').change(function () {
+            if ($(this).is(':checked')) {
+                $('#cantidadStock').show();
+            } else {
+                $('#cantidadStock').hide();
+            }
+        });
+    });
+</script>
+
+
+
