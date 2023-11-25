@@ -5,6 +5,17 @@
     Layout = "~/Areas/Admin/Views/Shared/_Panel.cshtml";
 }
 
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success">@TempData["MensajeExito"].ToString()</div>
+}
+
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger">@TempData["MensajeError"].ToString()</div>
+}
+
+
 <h2>Agregar Producto</h2>
 
 @using (Html.BeginForm("AgregarProducto", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))

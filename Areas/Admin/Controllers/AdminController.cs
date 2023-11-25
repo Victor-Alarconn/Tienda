@@ -57,8 +57,9 @@ namespace Tienda.Areas.Admin.Controllers
                     {
                         var imagePath = Path.Combine(Server.MapPath("~/Archivos"), ImagenArchivo.FileName);
                         ImagenArchivo.SaveAs(imagePath);
-                        producto.Imagen = "/~Archivos/" + ImagenArchivo.FileName;
+                        producto.Imagen = "/Archivos/" + ImagenArchivo.FileName;
                     }
+
 
                     string query = "INSERT INTO td_main (td_nombre, td_descri, td_precio, td_img, id_grupo, td_detall, td_exist, td_cantidad) VALUES (@nombre, @descri, @precio, @img, @categoria, @detall, @exist, @cantidad)";
                     using (var command = new MySqlCommand(query, connection))
@@ -77,7 +78,9 @@ namespace Tienda.Areas.Admin.Controllers
                 }
 
                 TempData["MensajeExito"] = "Producto agregado con éxito.";
+                TempData.Keep("MensajeExito"); // Mantener TempData para el próximo request
                 return RedirectToAction("AgregarProducto");
+
             }
             catch (Exception ex)
             {
@@ -137,7 +140,9 @@ namespace Tienda.Areas.Admin.Controllers
                 }
 
                 TempData["MensajeExito"] = "Producto agregado con éxito.";
-                return RedirectToAction("AgregarProducto");
+                TempData.Keep("MensajeExito"); // Mantener TempData para el próximo request
+                return RedirectToAction("AgregarCategoria");
+
             }
             catch (Exception ex)
             {
@@ -267,6 +272,8 @@ namespace Tienda.Areas.Admin.Controllers
                 using (var connection = _dataConexion.CreateConnection())
                 {
                     connection.Open();
+
+
                     string query = "SELECT id_main, td_nombre, td_descri, td_precio, td_img, id_grupo, td_detall, td_exist, td_cantidad FROM td_main WHERE id_main = @id";
                     using (var command = new MySqlCommand(query, connection))
                     {
@@ -317,12 +324,9 @@ namespace Tienda.Areas.Admin.Controllers
 
                     if (imagenSubida != null && imagenSubida.ContentLength > 0)
                     {
-                        // Guardar la imagen en el servidor o en un almacenamiento de archivos
-                        var path = Path.Combine(Server.MapPath("~/Archivos"), imagenSubida.FileName);
-                        imagenSubida.SaveAs(path);
-
-                        // Actualiza la propiedad Imagen del producto con la nueva ruta de la imagen
-                        producto.Imagen = "~/Archivos" + imagenSubida.FileName;
+                        var imagePath = Path.Combine(Server.MapPath("~/Archivos"), imagenSubida.FileName);
+                        imagenSubida.SaveAs(imagePath);
+                        producto.Imagen = "/Archivos/" + imagenSubida.FileName;
                     }
                     // Si 'producto.Imagen' es una URL, no es necesario hacer nada 
 
