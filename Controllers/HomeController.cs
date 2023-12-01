@@ -20,6 +20,7 @@ using System.Windows.Controls.Primitives;
 using Tienda.Interfaces;
 using Tienda.Servicios;
 using static System.Net.Mime.MediaTypeNames;
+using System.Configuration;
 
 namespace Tienda.Controllers
 {
@@ -77,8 +78,8 @@ namespace Tienda.Controllers
             var phone = model.Phone; // Guardad en base de datos
             var fullName = $"{model.FirstName} {model.MiddleName} {model.LastName} {model.SecondLastName}";  // Combina FirstName y LastName
             var paymentMethods = "MASTERCARD,PSE,VISA";
-            var responseUrl = "https://722a-186-147-92-76.ngrok-free.app/Home/PayUResponse";
-            var confirmationUrl = "https://722a-186-147-92-76.ngrok-free.app/Home/Confirmation";
+            var responseUrl = "https://2f1d-186-147-92-43.ngrok-free.app/Home/PayUResponse";
+            var confirmationUrl = "https://2f1d-186-147-92-43.ngrok-free.app/Home/Confirmation";
             // Genera la firma
             var formattedAmount = amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             var signature = GenerarFirma(apiKey, merchantId, referenceCode, formattedAmount, currency, paymentMethods); // Llama al método para generar la firma
@@ -367,11 +368,16 @@ namespace Tienda.Controllers
 
                 using (var client = new MailKit.Net.Smtp.SmtpClient())
                 {
-                    client.Connect("smtp.gmail.com", 587, false);
-                    client.Authenticate("sistemas.rmsoft@gmail.com", "ektq xifn kjsc mwoy");
+                    client.Connect("smtp.gmail.com", 587, true); // Usar SSL/TLS
+
+                    var username = ConfigurationManager.AppSettings["EmailUsername"];
+                    var password = ConfigurationManager.AppSettings["EmailPassword"];
+
+                    client.Authenticate(username, password); // Autenticarse con las credenciales
                     client.Send(message);
                     client.Disconnect(true);
                 }
+
             }
             catch (Exception ex)
             {
