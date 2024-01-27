@@ -246,17 +246,19 @@ namespace Tienda.Areas.Admin.Controllers
                             var producto = new Productos
                             {
                                 Id = reader.GetInt32("id_main"),
-                                Nombre = reader.GetString("td_nombre"),
-                                Descripcion = reader.GetString("td_descri"),
-                                Precio = reader.GetDecimal("td_precio"),
-                                Imagen = reader.GetString("td_img"),
-                                Categoria = reader.GetInt32("id_grupo"),
-                                Detalle = reader.GetString("td_detall"),
-                                Stock = reader.GetBoolean("td_exist"),
-                                Cantidad = reader.GetInt32("td_cantidad")
+                                Nombre = reader.IsDBNull(reader.GetOrdinal("td_nombre")) ? null : reader.GetString("td_nombre"),
+                                Descripcion = reader.IsDBNull(reader.GetOrdinal("td_descri")) ? null : reader.GetString("td_descri"),
+                                Precio = reader.IsDBNull(reader.GetOrdinal("td_precio")) ? 0 : reader.GetDecimal("td_precio"), // Asumiendo que el precio es 0 si es NULL
+                                Imagen = reader.IsDBNull(reader.GetOrdinal("td_img")) ? null : reader.GetString("td_img"),
+                                Categoria = reader.IsDBNull(reader.GetOrdinal("id_grupo")) ? 0 : reader.GetInt32("id_grupo"), // Asumiendo un valor por defecto si es NULL
+                                Detalle = reader.IsDBNull(reader.GetOrdinal("td_detall")) ? null : reader.GetString("td_detall"),
+                                Stock = reader.IsDBNull(reader.GetOrdinal("td_exist")) ? false : reader.GetBoolean("td_exist"), // Asumiendo false si es NULL
+                                Cantidad = reader.IsDBNull(reader.GetOrdinal("td_cantidad")) ? 0 : reader.GetInt32("td_cantidad") // Asumiendo un valor por defecto si es NULL
                             };
+
                             listaProductos.Add(producto);
                         }
+
                     }
                 }
             }
@@ -286,16 +288,17 @@ namespace Tienda.Areas.Admin.Controllers
                                 producto = new Productos
                                 {
                                     Id = reader.GetInt32("id_main"),
-                                    Nombre = reader.GetString("td_nombre"),
-                                    Descripcion = reader.GetString("td_descri"),
-                                    Precio = reader.GetDecimal("td_precio"),
-                                    Imagen = reader.GetString("td_img"),
-                                    Categoria = reader.GetInt32("id_grupo"),
-                                    Detalle = reader.GetString("td_detall"),
-                                    Stock = reader.GetBoolean("td_exist"),
-                                    Cantidad = reader.GetInt32("td_cantidad")
+                                    Nombre = reader.IsDBNull(reader.GetOrdinal("td_nombre")) ? null : reader.GetString("td_nombre"),
+                                    Descripcion = reader.IsDBNull(reader.GetOrdinal("td_descri")) ? null : reader.GetString("td_descri"),
+                                    Precio = reader.IsDBNull(reader.GetOrdinal("td_precio")) ? 0 : reader.GetDecimal("td_precio"), // Suponiendo 0 como valor por defecto
+                                    Imagen = reader.IsDBNull(reader.GetOrdinal("td_img")) ? null : reader.GetString("td_img"),
+                                    Categoria = reader.IsDBNull(reader.GetOrdinal("id_grupo")) ? 0 : reader.GetInt32("id_grupo"), // Suponiendo 0 como valor por defecto
+                                    Detalle = reader.IsDBNull(reader.GetOrdinal("td_detall")) ? null : reader.GetString("td_detall"),
+                                    Stock = reader.IsDBNull(reader.GetOrdinal("td_exist")) ? false : reader.GetBoolean("td_exist"), // Suponiendo false como valor por defecto
+                                    Cantidad = reader.IsDBNull(reader.GetOrdinal("td_cantidad")) ? 0 : reader.GetInt32("td_cantidad") // Suponiendo 0 como valor por defecto
                                 };
                             }
+
                         }
                     }
                 }

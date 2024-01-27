@@ -22,6 +22,8 @@ namespace Tienda.Models
         public string City { get; set; }
         public string CodigoCity { get; set; }
         public int PostalNum { get; set; }
+        public string Razon { get; set; }
+        public string Legal { get; set; }
 
     }
 }

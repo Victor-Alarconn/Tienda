@@ -78,8 +78,8 @@ namespace Tienda.Controllers
             var phone = model.Phone; // Guardad en base de datos
             var fullName = $"{model.FirstName} {model.MiddleName} {model.LastName} {model.SecondLastName}";  // Combina FirstName y LastName
             var paymentMethods = "MASTERCARD,PSE,VISA";
-            var responseUrl = "https://2f1d-186-147-92-43.ngrok-free.app/Home/PayUResponse";
-            var confirmationUrl = "https://2f1d-186-147-92-43.ngrok-free.app/Home/Confirmation";
+            var responseUrl = "https://901d-181-59-112-193.ngrok-free.app/Home/PayUResponse";
+            var confirmationUrl = "https://901d-181-59-112-193.ngrok-free.app/Home/Confirmation";
             // Genera la firma
             var formattedAmount = amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             var signature = GenerarFirma(apiKey, merchantId, referenceCode, formattedAmount, currency, paymentMethods); // Llama al método para generar la firma
@@ -259,7 +259,26 @@ namespace Tienda.Controllers
                 message.Subject = "Detalles de tu compra";
 
                 var builder = new BodyBuilder();
-                string nombreCompleto = $"{datos.Nombre} {datos.Nombre2} {datos.Apellido} {datos.Apellido2}".Trim();
+                string nombreCompleto;
+                bool usarRazonSocial = false;
+
+                // Comprobar si alguno de los campos de nombre es nulo o vacío
+                if (string.IsNullOrEmpty(datos.Nombre) || string.IsNullOrEmpty(datos.Nombre2))
+                {
+                    usarRazonSocial = true;
+                }
+
+                if (usarRazonSocial)
+                {
+                    // Si alguno de los campos de nombre es nulo o vacío, usa 'datos.Razon'
+                    nombreCompleto = datos.Razon;
+                }
+                else
+                {
+                    // De lo contrario, construye el nombre completo
+                    nombreCompleto = $"{datos.Nombre} {datos.Nombre2} {datos.Apellido} {datos.Apellido2}".Trim();
+                }
+
 
                 // Personalizar el mensaje con HTML
                 var htmlContent = "<div style='border: 1px solid black; padding: 10px;'>";
@@ -368,7 +387,7 @@ namespace Tienda.Controllers
 
                 using (var client = new MailKit.Net.Smtp.SmtpClient())
                 {
-                    client.Connect("smtp.gmail.com", 587, true); // Usar SSL/TLS
+                    client.Connect("smtp.gmail.com", 587, false); // Usar SSL/TLS
 
                     var username = ConfigurationManager.AppSettings["EmailUsername"];
                     var password = ConfigurationManager.AppSettings["EmailPassword"];
@@ -564,6 +583,10 @@ namespace Tienda.Controllers
             // Eliminar el item del carrito
             cart.Items.Remove(itemToRemove);
 
+            // Actualizar el contador de elementos en el carrito
+            int itemCount = cart.GetTotalItemCount();
+            Session["cartItemCount"] = itemCount;
+
             // Guardar el carrito actualizado en la sesión
             Session["cart"] = cart;
 
@@ -572,6 +595,7 @@ namespace Tienda.Controllers
 
             return RedirectToAction("Carrito");  // Retorna una respuesta exitosa si el producto fue eliminado correctamente
         }
+
 
         public ActionResult Carrito() // Acción para mostrar el carrito
         {
@@ -655,15 +679,17 @@ namespace Tienda.Controllers
                     {
                         while (reader.Read())
                         {
-                            products.Add(new Producto
+                            var producto = new Producto
                             {
                                 Id = reader.GetInt32("id_main"),
-                                Nombre = reader.GetString("td_nombre"),
-                                Descripcion = reader.GetString("td_descri"),
-                                Precio = reader.GetDecimal("td_precio"),
-                                Imagen = reader.GetString("td_img"),
-                                Detalle = reader.GetString("td_detall")
-                            });
+                                Nombre = reader.IsDBNull(reader.GetOrdinal("td_nombre")) ? null : reader.GetString("td_nombre"),
+                                Descripcion = reader.IsDBNull(reader.GetOrdinal("td_descri")) ? null : reader.GetString("td_descri"),
+                                Precio = reader.IsDBNull(reader.GetOrdinal("td_precio")) ? 0 : reader.GetDecimal("td_precio"), // Asumiendo que el precio por defecto es 0 si es NULL
+                                Imagen = reader.IsDBNull(reader.GetOrdinal("td_img")) ? null : reader.GetString("td_img"),
+                                Detalle = reader.IsDBNull(reader.GetOrdinal("td_detall")) ? null : reader.GetString("td_detall")
+                            };
+
+                            products.Add(producto);
                         }
                     }
                 }
@@ -699,15 +725,16 @@ namespace Tienda.Controllers
                             product = new Producto
                             {
                                 Id = reader.GetInt32("id_main"),
-                                Nombre = reader.GetString("td_nombre"),
-                                Descripcion = reader.GetString("td_descri"),
-                                Precio = reader.GetDecimal("td_precio"),
-                                Imagen = reader.GetString("td_img"),
-                                Id_Grupo = reader.GetInt32("id_grupo"),
-                                GrupoNombre = reader.IsDBNull(reader.GetOrdinal("NombreGrupo")) ? null : reader.GetString("NombreGrupo"), // Se Utiliza IsDBNull para comprobar si el campo es NULL
-                                Detalle = reader.GetString("td_detall")
+                                Nombre = reader.IsDBNull(reader.GetOrdinal("td_nombre")) ? null : reader.GetString("td_nombre"),
+                                Descripcion = reader.IsDBNull(reader.GetOrdinal("td_descri")) ? null : reader.GetString("td_descri"),
+                                Precio = reader.IsDBNull(reader.GetOrdinal("td_precio")) ? 0 : reader.GetDecimal("td_precio"), // Suponiendo 0 como valor por defecto para decimal
+                                Imagen = reader.IsDBNull(reader.GetOrdinal("td_img")) ? null : reader.GetString("td_img"),
+                                Id_Grupo = reader.IsDBNull(reader.GetOrdinal("id_grupo")) ? 0 : reader.GetInt32("id_grupo"), // Suponiendo 0 como valor por defecto para int
+                                GrupoNombre = reader.IsDBNull(reader.GetOrdinal("NombreGrupo")) ? null : reader.GetString("NombreGrupo"),
+                                Detalle = reader.IsDBNull(reader.GetOrdinal("td_detall")) ? null : reader.GetString("td_detall")
                             };
                         }
+
                     }
 
                 }
@@ -727,12 +754,13 @@ namespace Tienda.Controllers
                             relatedProducts.Add(new Producto
                             {
                                 Id = reader.GetInt32("id_main"),
-                                Nombre = reader.GetString("td_nombre"),
-                                Descripcion = reader.GetString("td_descri"),
-                                Precio = reader.GetDecimal("td_precio"),
-                                Imagen = reader.GetString("td_img")
+                                Nombre = reader.IsDBNull(reader.GetOrdinal("td_nombre")) ? null : reader.GetString("td_nombre"),
+                                Descripcion = reader.IsDBNull(reader.GetOrdinal("td_descri")) ? null : reader.GetString("td_descri"),
+                                Precio = reader.IsDBNull(reader.GetOrdinal("td_precio")) ? 0 : reader.GetDecimal("td_precio"), // Suponiendo 0 como valor por defecto para decimal
+                                Imagen = reader.IsDBNull(reader.GetOrdinal("td_img")) ? null : reader.GetString("td_img")
                             });
                         }
+
                     }
                 }
             }

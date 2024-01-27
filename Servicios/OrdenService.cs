@@ -81,7 +81,7 @@ namespace Tienda.Servicios
                 {
                     connection.Open();
 
-                    string query = "SELECT nombre,nombre2, apellido, apellido2, email, total FROM td_orden WHERE refere = @reference_sale";
+                    string query = "SELECT nombre,nombre2, apellido, apellido2, email, td_razon, total FROM td_orden WHERE refere = @reference_sale";
                     using (var command = new MySqlCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@reference_sale", reference_sale);
@@ -96,6 +96,7 @@ namespace Tienda.Servicios
                                     Apellido = reader["apellido"].ToString(),
                                     Apellido2 = reader["apellido2"].ToString(),
                                     Email = reader["email"].ToString(),
+                                    Razon = reader["td_razon"].ToString(),
                                     Total = Convert.ToDecimal(reader["total"])
                                 };
                             }
@@ -116,9 +117,9 @@ namespace Tienda.Servicios
             // La consulta SQL y la lógica se mantienen, solo cambiamos cómo accedemos a las propiedades
             string query = @"
         INSERT INTO td_orden(email, telef, nombre, nombre2, apellido, apellido2, direc, tipo_doc, numer_doc, nomb_empr, pais, depart, city, 
-                             postalnum, td_nit, refere, total, descrip, td_estado, codigo_dcity)
+                             postalnum, td_nit, refere, total, descrip, td_estado, codigo_dcity, td_razon, td_legal)
         VALUES (@Email, @Phone, @FullName, @Nombre2, @Apellido, @Apellido2, @Address, @DocumentType, @DocumentNumber, @CompanyName, 
-                @Country, @State, @City, @PostalCode, @nit, @ReferenceCode, @Amount, @ProductDescription, @Estado, @CodigoD);
+                @Country, @State, @City, @PostalCode, @nit, @ReferenceCode, @Amount, @ProductDescription, @Estado, @CodigoD, @Razon, @Legal);
         SELECT LAST_INSERT_ID();";
 
             using (var command = new MySqlCommand(query, connection, transaction))
@@ -139,6 +140,8 @@ namespace Tienda.Servicios
                 command.Parameters.AddWithValue("@City", model.City);
                 command.Parameters.AddWithValue("@PostalCode", model.postalCode);
                 command.Parameters.AddWithValue("@CodigoD", model.CityCode);
+                command.Parameters.AddWithValue("@Razon", model.SocialReason);
+                command.Parameters.AddWithValue("@Legal", model.RepresentativeName);
 
                 if (model.VerificationDigit.HasValue)
                     command.Parameters.AddWithValue("@nit", model.VerificationDigit);
@@ -189,7 +192,7 @@ namespace Tienda.Servicios
 
             try
             {
-                string queryUserData = "SELECT email, telef, nombre, nombre2, apellido, apellido2, tipo_doc, numer_doc, td_nit, nomb_empr, depart, city, total, codigo_dcity, postalnum FROM td_orden WHERE Id = @Id";
+                string queryUserData = "SELECT email, telef, nombre, nombre2, apellido, apellido2, tipo_doc, numer_doc, td_nit, nomb_empr, depart, city, total, codigo_dcity, postalnum, td_razon, td_legal FROM td_orden WHERE Id = @Id";
                 using (var commandUserData = new MySqlCommand(queryUserData, connection))
                 {
                     commandUserData.Parameters.AddWithValue("@Id", userId);
@@ -212,6 +215,8 @@ namespace Tienda.Servicios
                             datosUsuario.Total = reader.GetDecimal("total");
                             datosUsuario.CodigoCity = reader["codigo_dcity"].ToString();
                             datosUsuario.PostalNum = reader.GetInt32("postalnum");
+                            datosUsuario.Razon = reader["td_razon"].ToString();
+                            datosUsuario.Legal = reader["td_legal"].ToString();
                         }
                         else
                         {

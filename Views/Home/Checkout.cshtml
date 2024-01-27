@@ -5,7 +5,7 @@
 }
 <!-- Formulario de Pago -->
 <div class="page-header border-bottom">
-    <h1>Página de Pago</h1>
+    <h1>Detalles de Facturación</h1>
 </div>
 
 <!--<div style="margin-top: 20px; margin-bottom: 20px;">
@@ -34,25 +34,45 @@
 <div class="billing-details">
     @using (Html.BeginForm("Checkout", "Home", FormMethod.Post))
     {
-        <h2>Detalles de Facturación</h2>
+        <h2>Datos para generar la factura</h2>
         @Html.HiddenFor(model => model.Cart)
         <!-- Renglón de Nombre y Apellidos -->
         <div class="row">
             <div class="form-group col-md-6">
+                <label for="personType">Tipo de Persona</label>
+                <select class="form-control" id="personType" name="personType">
+                    <option value="" disabled selected>Seleccione</option>
+                    <option value="natural">Natural</option>
+                    <option value="juridica">Jurídica</option>
+                </select>
+            </div>
+            <div class="form-group col-md-6" id="companySocialReason" style="display: none;">
+                <label for="socialReason">Razón Social <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="socialReason" name="socialReason" />
+            </div>
+            <div class="form-group col-md-6" id="legalRepresentativeName" style="display: none;">
+                <label for="representativeName">Nombre del Representante Legal <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="representativeName" name="representativeName" />
+            </div>
+            <div class="form-group col-md-6" id="nameFields">
                 <label for="firstName">Primer Nombre <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="firstName" name="firstName" required autocomplete="given-name" />
             </div>
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-6" id="nameFields1">
                 <label for="middleName">Segundo Nombre</label>
                 <input type="text" class="form-control" id="middleName" name="middleName" autocomplete="additional-name" />
             </div>
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-6" id="nameFields2">
                 <label for="lastName">Primer Apellido <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="lastName" name="lastName" required autocomplete="family-name" />
             </div>
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-6" id="nameFields3">
                 <label for="secondLastName">Segundo Apellido</label>
                 <input type="text" class="form-control" id="secondLastName" name="secondLastName" autocomplete="additional-name" />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="companyName">Nombre de la empresa (opcional)</label>
+                <input type="text" class="form-control" id="companyName" name="companyName" autocomplete="organization" />
             </div>
         </div>
 
@@ -76,11 +96,6 @@
                 <label for="verificationDigit">Dígito de Verificación</label>
                 <input type="number" class="form-control" id="verificationDigit" name="verificationDigit" min="0" max="9" inputmode="numeric" pattern="[0-9]" title="Por favor, introduce solo un número." />
             </div>
-        </div>
-
-        <div class="form-group">
-            <label for="companyName">Nombre de la empresa (opcional)</label>
-            <input type="text" class="form-control" id="companyName" name="companyName" autocomplete="organization" />
         </div>
         <div class="form-group">
             <label for="country-input">País / Región <span class="text-danger">*</span></label>
@@ -185,6 +200,7 @@
         color: white;
         border: none;
     }
+
         .btn-purple:hover {
             background-color: purple; /* Color de fondo al pasar el mouse */
             color: white; /* Color del texto al pasar el mouse (opcional) */
@@ -312,6 +328,58 @@
         });
     }
 });
+
+
+
+    $(document).ready(function () {
+        $('#personType').change(function () {
+            var selectedType = $(this).val();
+
+            if (selectedType === 'natural') {
+                // Para Persona Natural
+                $('#companySocialReason, #legalRepresentativeName').hide();
+                $('#nameFields, #nameFields1, #nameFields2, #nameFields3').show();
+            } else if (selectedType === 'juridica') {
+                // Para Persona Jurídica
+                $('#companySocialReason, #legalRepresentativeName').show();
+                $('#nameFields, #nameFields1, #nameFields2, #nameFields3').hide();
+                $('#documentType').val('NIT').change(); // Cambia el valor y desencadena el evento change
+            }
+        });
+
+        // Activar el evento change al cargar la página
+        $('#personType').change();
+    });
+
+    $(document).ready(function () {
+        $('#personType').change(function () {
+            var selectedType = $(this).val();
+
+            if (selectedType === 'natural') {
+                // Para Persona Natural
+                $('#companySocialReason, #legalRepresentativeName').hide();
+                $('#nameFields, #nameFields1, #nameFields2, #nameFields3').show();
+                // Hacer los campos de nombre y apellido requeridos
+                $('#firstName, #lastName').attr('required', true);
+                // Quitar el atributo required de los campos de Razón Social y Representante Legal
+                $('#socialReason, #representativeName').removeAttr('required');
+            } else if (selectedType === 'juridica') {
+                // Para Persona Jurídica
+                $('#companySocialReason, #legalRepresentativeName').show();
+                $('#nameFields, #nameFields1, #nameFields2, #nameFields3').hide();
+                $('#documentType').val('NIT').change();
+                // Quitar el atributo required de los campos de nombre y apellido
+                $('#firstName, #lastName').removeAttr('required');
+                // Hacer los campos de Razón Social y Representante Legal requeridos
+                $('#socialReason, #representativeName').attr('required', true);
+            }
+        });
+
+        $('#personType').change(); // Para inicializar el estado al cargar la página
+    });
+
+
+
 
 
 </script>

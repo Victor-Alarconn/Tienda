@@ -16,7 +16,7 @@
                     <div class="card product-card">
                         <a href="@Url.Action("Details", new { id = product.Id })" class="text-decoration-none">
                             @*<img src="@product.Imagen" class="card-img-top" alt="@product.Nombre">*@
-                            <img src="@Url.Content(product.Imagen)" class="card-img-top" alt="Imagen del producto" />
+                            <img src="@(!string.IsNullOrEmpty(product.Imagen) ? Url.Content(product.Imagen) : "ruta_a_imagen_por_defecto.jpg")" class="card-img-top" alt="Imagen del producto" />
 
                             <div class="card-body">
                                 <h5 class="card-title text-success">@product.Nombre</h5>

@@ -31,7 +31,7 @@
         <br />
         <img src="@Url.Content(Model.Imagen)" alt="Imagen del producto" style="max-width: 150px; max-height: 150px;" />
         <br />
-        @Html.TextBoxFor(m => m.Imagen, new { type = "file" })
+        @Html.TextBoxFor(m => m.Imagen, new { type = "file", name = "imagenSubida" })
         <br />
         <span>Cargar imagen o ingresar URL.</span>
     </div>
