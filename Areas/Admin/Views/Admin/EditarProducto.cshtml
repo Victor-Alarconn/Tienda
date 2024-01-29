@@ -29,12 +29,13 @@
         @Html.LabelFor(m => m.Imagen, "Imagen URL")
         @Html.TextBoxFor(m => m.Imagen, new { @class = "input-grande" })
         <br />
-        <img src="@Url.Content(Model.Imagen)" alt="Imagen del producto" style="max-width: 150px; max-height: 150px;" />
+        <img src="@(!string.IsNullOrEmpty(Model.Imagen) ? Url.Content(Model.Imagen) : Url.Content("ruta_a_imagen_por_defecto.jpg"))" alt="Imagen del producto" style="max-width: 150px; max-height: 150px;" />
         <br />
-        @Html.TextBoxFor(m => m.Imagen, new { type = "file", name = "imagenSubida" })
+        <input type="file" class="form-control" name="imagenSubida" />
         <br />
         <span>Cargar imagen o ingresar URL.</span>
     </div>
+
 
     <div>
         @Html.LabelFor(m => m.Categoria)

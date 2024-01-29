@@ -625,7 +625,7 @@ namespace Tienda.Controllers
 
             itemToUpdate.Quantity = quantity;  // Actualiza la cantidad
             Session["cart"] = cart;  // Guarda el carrito actualizado en la sesión
-
+            
             return Json(new { success = true });
         }
 
