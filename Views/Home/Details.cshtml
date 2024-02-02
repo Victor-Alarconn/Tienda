@@ -8,23 +8,44 @@
     <h2>Detalle</h2>
     <div class="row mb-5">
         <!-- Columna izquierda para la imagen -->
-        <div class="col-md-6">
-            <img src="@Model.Product.Imagen" alt="@Model.Product.Nombre" class="img-fluid">
+        <div class="col-md-6 img-zoom-container">
+            <img src="@Model.Product.Imagen" alt="@Model.Product.Nombre" class="img-fluid img-zoom">
         </div>
+
 
         <!-- Columna derecha para el texto -->
         <div class="col-md-6">
             <h2 class="font-weight-bold">@Model.Product.Nombre</h2>
-            <p class="text-price">@Model.Product.Precio.ToString("C")</p>
+            <p class="font-italic">Eligue el tamaño.</p>
+            @if (Model.Product.ManejaTamano == 1)
+            {
+                <div class="price-options">
+                    @foreach (var tamano in Model.Product.TamañosDisponibles)
+                    {
+                        <div class="price-circle" data-product-id="@Model.Product.Id" data-tamano-id="@tamano.IdTamano" onclick="selectTamano(@Model.Product.Id, @tamano.IdTamano, event)">
+                            <span class="size">@tamano.Descripcion</span>
+                            <span class="price">@tamano.Precio.ToString("C")</span>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="price-default">
+                    <div class="price-circle">
+                        <span class="price">@Model.Product.Precio.ToString("C")</span>
+                    </div>
+                </div>
+            }
             <p>@Model.Product.Detalle</p>
             <p>@Model.Product.Descripcion</p>
             <p class="font-italic">Nota: no se hacen devoluciones de dinero.</p>
-            <p>Abrimos todos los días del año desde las 9:00 a.m. hasta las 4:00 p.m. para el ingreso y hasta las 6:00 p.m. para estar en las instalaciones.</p>
+            <p>Estimado cliente, agradecemos tu compra. Por favor ten en cuenta que los pedidos realizados después de las 5:00 PM serán procesados el día hábil siguiente, en orden de llegada. Nos esforzamos por atender tu pedido lo más pronto posible y agradecemos tu comprensión.</p>
             <div class="input-group mb-3">
                 <input type="number" class="form-control" id="product-quantity" value="1" min="1" style="max-width: 70px; margin-right: 10px;">
                 <div class="input-group-append">
-                    <button class="btn btn-secondary add-to-cart" data-product-id="@Model.Product.Id">Añadir al carrito</button>
-                    <button class="btn btn-secondary buy-now" data-product-id="@Model.Product.Id">Comprar</button>
+                    <button class="btn bg-rosado add-to-cart" data-product-id="@Model.Product.Id">Añadir al carrito</button>
+                    <button class="btn bg-rosado buy-now" data-product-id="@Model.Product.Id">Comprar</button>
                 </div>
             </div>
             <span class="confirmation d-none" id="confirmation-@Model.Product.Id">
@@ -39,39 +60,19 @@
             </div>
         </div>
 
-        </div>
+    </div>
     <div class="col-12">
         <h1 class="border-bottom">Descripción</h1>
         <p>@Model.Product.Descripcion</p>
         <p class="font-italic">Nota: no se hacen devoluciones de dinero.</p>
-        <p>Abrimos todos los días del año desde las 9:00 a.m. hasta las 4:00 p.m. para el ingreso y hasta las 6:00 p.m. para estar en las instalaciones.</p>
+        <p>Estimado cliente, agradecemos tu compra. Por favor ten en cuenta que los pedidos realizados después de las 5:00 PM serán procesados el día hábil siguiente, en orden de llegada. Nos esforzamos por atender tu pedido lo más pronto posible y agradecemos tu comprensión.</p>
         <h3 class="text-center">Conoce nuestras restricciones</h3>
         <ul>
-            <li>No está permitido el ingreso a personas que estén bajo el efecto de bebidas alcohólicas o sustancias alucinógenas</li>
-            <li>Por el bienestar de su mascota y las especies del Bioparque, no se permite los ingresos de animales</li>
-            <li>Los menores de edad deben estar bajo vigilancia de un adulto</li>
-            <li>No esta permitido ingresar alimentos y/o bebidas</li>
-            <li>Está prohibido ingresar armas de fuego y elementos corto punzantes</li>
-            <li>No alimente los animales, ya que podría enfermarlos y ocasionarles la muerte, cada animal tiene una dieta especial elaborada por un profesional</li>
-            <li>No golpee los vidrios y mallas de los exhibidores, los ruidos altos asustan y estresan los animales</li>
-            <li>No lance objetos a los animales, puede causar daños irreversibles</li>
-            <li>Camine por los senderos indicados, respete los límites y barreras de seguridad de las exhibiciones, traspasarlos representa un peligro</li>
-            <li>No intente tocar los animales, introduciendo las manos por las rejas, esto representa un peligro</li>
-            <li>Cuide las plantas y jardines del Bioparque, son parte del hábitat y entorno de los animales, enriquecen el paisaje y brindan bienestar en el recorrido</li>
-            <li>En las zonas de aviarios asegúrese de mantener las puertas cerradas, para evitar escapes o accidentes con los animales</li>
-        </ul>
-
-        <h3 class="text-center">Recomendaciones para tu visita </h3>
-        <ul>
-            <li>Desde tu ingreso harás parte de un ecosistema que debes cuidar.</li>
-            <li>Aplicar abundante bloqueador solar en especial a los niños</li>
-            <li>Usar zapatos y ropa cómoda</li>
-            <li>Usa gorras o sombreros, también puedes comprarlos en la tienda de souvenir del Bioparque</li>
-            <li>Llevar coche para los bebés</li>
-            <li>El uso de lentes para sol</li>
-            <li>Lleva suficiente hidratación</li>
-            <li>Los residuos de alimentos, envases, deben ser depositados en los sitios destinados para tal fin.</li>
-            <li>Seguir las instrucciones y recomendaciones del personal del Bioparque Ukumarí</li>
+            <li>Política de Devolución: Después de realizado el pago no se realizan devoluciones, se puede reprogramar para una fecha no superior a 30 días. </li>
+            <li>Términos de Pago: Aceptamos pagos mediante tarjeta de crédito, PayPal, y otros métodos seguros. Todos los pagos deben realizarse antes del envío de los productos.</li>
+            <li>Límites de Compra: Se establece un límite de compra de 20 cajas de mini donas por transacción. Esto asegura la disponibilidad del producto para todos nuestros clientes.</li>
+            <li>Normativas Alimentarias: Cumplimos con las normativas locales de seguridad alimentaria y garantizamos la calidad e higiene de nuestros productos.</li>
+            <li>Envío: el costo del envío pueden variar según la ubicación del cliente. Nos esforzamos por entregar en el plazo establecido.</li>
         </ul>
     </div>
     <div class="col-12">
@@ -87,14 +88,33 @@
                         </a>
                         <div class="card-body">
                             <a href="@Url.Action("Details", new { id = relatedProduct.Id })" class="text-decoration-none text-success">
-                                <h5 class="card-title">@relatedProduct.Nombre</h5>
+                                <h5 class="card-title custom-color">@relatedProduct.Nombre</h5>
                             </a>
-                            <p class="card-text">@relatedProduct.Descripcion</p>
-                            <p class="card-text text-price">@relatedProduct.Precio.ToString("C")</p>
+                            @if (relatedProduct.ManejaTamano == 1)
+                            {
+                                <div class="price-options">
+                                    @foreach (var tamano in relatedProduct.TamañosDisponibles)
+                                    {
+                                        <div class="price-circle" data-product-id="@relatedProduct.Id" data-tamano-id="@tamano.IdTamano">
+                                            <span class="size">@tamano.Descripcion</span>
+                                            <span class="price">@tamano.Precio.ToString("C")</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+
+                                <div class="price-default">
+                                    <div class="price-circle">
+                                        <span class="price">@relatedProduct.Precio.ToString("C")</span>
+                                    </div>
+                                </div>
+                            }
                         </div>
                         <div class="card-footer">
-                            <button class="btn btn-secondary buy-now" data-product-id="@relatedProduct.Id">Comprar</button>
-                            <button class="btn btn-secondary add-to-cart" data-product-id="@relatedProduct.Id">Añadir al carrito</button>
+                            <button class="btn bg-rosado buy-now" data-product-id="@relatedProduct.Id">Comprar</button>
+                            <button class="btn bg-rosado add-to-cart" data-product-id="@relatedProduct.Id">Añadir al carrito</button>
                             <span class="confirmation d-none" id="confirmation-@relatedProduct.Id">
                                 ✓
                                 <br>
@@ -199,6 +219,89 @@
     .narrow-card {
         max-width: 330px;
     }
+
+    .btn.bg-rosado {
+        background-color: rgb(252, 186, 255); /* Color rosado */
+        color: #000000; /* Color negro para el texto de los botones */
+    }
+
+    .custom-color {
+        color: rgb(255, 25, 84); /* Color personalizado para el nombre */
+    }
+
+    .black-text {
+        color: #000000; /* Color negro para la descripción */
+    }
+
+    .card.product-card {
+        box-shadow: 0 4px 8px 0 rgb(0,0,0,0.2); /* Sombreado */
+        transition: 0.4s; /* Transición suave */
+        width: 85%; /* Hacer la tarjeta más delgada */
+        margin: auto; /* Centrar la tarjeta en el espacio de la columna */
+    }
+
+        .card.product-card:hover {
+            box-shadow: 0 8px 16px 0 rgba(128, 27, 131); /* Sombreado más pronunciado al pasar el ratón */
+        }
+
+    .price-options {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px; /* Espacio entre los círculos */
+    }
+
+    .price-circle {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 90px; /* Tamaño del círculo */
+        height: 90px;
+        border: 3px solid pink; /* Color del borde */
+        border-radius: 50%; /* Redondear bordes para crear un círculo */
+        padding: 3px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.5); /* Sombra opcional */
+    }
+
+        .price-circle .size {
+            font-weight: bold;
+            color: #555; /* Color del texto de tamaño */
+            font-size: 12px;
+        }
+
+        .price-circle .price {
+            color: #d33; /* Color del precio */
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .price-circle.selected {
+            background-color: #E4B9E3; /* O cualquier color que indique selección */
+            /* Otros estilos para el círculo seleccionado */
+        }
+
+    .price-default {
+        display: flex;
+        justify-content:left;
+        align-items: flex-start;
+        height: 100px; /* Ajusta esto según sea necesario */
+    }
+
+    .img-zoom-container {
+        overflow: hidden; /* Evita que la imagen salga del contenedor */
+    }
+
+    .img-zoom {
+        transition: transform 0.5s ease; /* Transición suave para el efecto de zoom */
+        width: 100%; /* Asegúrate de que la imagen se ajuste al contenedor */
+        height: auto; /* Mantiene la relación de aspecto de la imagen */
+    }
+
+        .img-zoom:hover {
+            transform: scale(1.2); /* Aumenta el tamaño de la imagen al pasar el mouse */
+        }
+
 </style>
 
 

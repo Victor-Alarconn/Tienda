@@ -686,8 +686,14 @@ namespace Tienda.Controllers
                                 Descripcion = reader.IsDBNull(reader.GetOrdinal("td_descri")) ? null : reader.GetString("td_descri"),
                                 Precio = reader.IsDBNull(reader.GetOrdinal("td_precio")) ? 0 : reader.GetDecimal("td_precio"), // Asumiendo que el precio por defecto es 0 si es NULL
                                 Imagen = reader.IsDBNull(reader.GetOrdinal("td_img")) ? null : reader.GetString("td_img"),
-                                Detalle = reader.IsDBNull(reader.GetOrdinal("td_detall")) ? null : reader.GetString("td_detall")
+                                Detalle = reader.IsDBNull(reader.GetOrdinal("td_detall")) ? null : reader.GetString("td_detall"),
+                                ManejaTamano = reader.GetInt32("td_tamano")
                             };
+                            if (producto.ManejaTamano == 1)
+                            {
+                                List<Tamano> tamañosDisponibles = _dataConexion.CargarTamaños();
+                                producto.TamañosDisponibles = tamañosDisponibles;
+                            }
 
                             products.Add(producto);
                         }
@@ -702,6 +708,7 @@ namespace Tienda.Controllers
         {
             Producto product = null;
             List<Producto> relatedProducts;
+            List<Tamano> tamañosDisponibles = new List<Tamano>();
             using (var connection = _dataConexion.CreateConnection())
             {
                 connection.Open();
@@ -731,8 +738,14 @@ namespace Tienda.Controllers
                                 Imagen = reader.IsDBNull(reader.GetOrdinal("td_img")) ? null : reader.GetString("td_img"),
                                 Id_Grupo = reader.IsDBNull(reader.GetOrdinal("id_grupo")) ? 0 : reader.GetInt32("id_grupo"), // Suponiendo 0 como valor por defecto para int
                                 GrupoNombre = reader.IsDBNull(reader.GetOrdinal("NombreGrupo")) ? null : reader.GetString("NombreGrupo"),
-                                Detalle = reader.IsDBNull(reader.GetOrdinal("td_detall")) ? null : reader.GetString("td_detall")
+                                Detalle = reader.IsDBNull(reader.GetOrdinal("td_detall")) ? null : reader.GetString("td_detall"),
+                                ManejaTamano = reader.GetInt32("td_tamano")
                             };
+                            if (product.ManejaTamano == 1)
+                            {
+                                tamañosDisponibles = _dataConexion.CargarTamaños();
+                                product.TamañosDisponibles = tamañosDisponibles;
+                            }
                         }
 
                     }
@@ -751,14 +764,23 @@ namespace Tienda.Controllers
                         relatedProducts = new List<Producto>();
                         while (reader.Read())
                         {
-                            relatedProducts.Add(new Producto
+                            var relatedProduct = new Producto
                             {
                                 Id = reader.GetInt32("id_main"),
                                 Nombre = reader.IsDBNull(reader.GetOrdinal("td_nombre")) ? null : reader.GetString("td_nombre"),
                                 Descripcion = reader.IsDBNull(reader.GetOrdinal("td_descri")) ? null : reader.GetString("td_descri"),
                                 Precio = reader.IsDBNull(reader.GetOrdinal("td_precio")) ? 0 : reader.GetDecimal("td_precio"), // Suponiendo 0 como valor por defecto para decimal
-                                Imagen = reader.IsDBNull(reader.GetOrdinal("td_img")) ? null : reader.GetString("td_img")
-                            });
+                                Imagen = reader.IsDBNull(reader.GetOrdinal("td_img")) ? null : reader.GetString("td_img"),
+                                ManejaTamano = reader.GetInt32("td_tamano")
+                            };
+
+                            if (relatedProduct.ManejaTamano == 1)
+                            {
+                                var tamañosParaProductoRelacionado = _dataConexion.CargarTamaños();
+                                relatedProduct.TamañosDisponibles = tamañosParaProductoRelacionado;
+                            }
+
+                            relatedProducts.Add(relatedProduct);
                         }
 
                     }

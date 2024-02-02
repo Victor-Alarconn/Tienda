@@ -5,70 +5,72 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Favicon SVG -->
-    <link rel="icon" href="~/Imagenes/Ukumari_logo.svg" type="image/svg+xml">
+    <link rel="icon" href="~/Imagenes/Dona_logo.svg" type="image/svg+xml">
 
-    <title>@ViewBag.Title - Bioparque Ukumari</title>
+    <title>@ViewBag.Title - MiniDonas</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
 </head>
 <body>
-    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <div class="zoom-background">
-                    <img src="~/Imagenes/hipopotamo.svg" class="d-block w-100" alt="Imagen de Fondo 1">
-                </div>
-            </div>
-            <div class="carousel-item">
-                <div class="zoom-background">
-                    <img src="~/Imagenes/suricata.svg" class="d-block w-100" alt="Imagen de Fondo 2">
-                </div>
-            </div>
-            <div class="carousel-item">
-                <div class="zoom-background">
-                    <img src="~/Imagenes/oso.svg" class="d-block w-100" alt="Imagen de Fondo 3">
-                </div>
-            </div>
-            <div class="carousel-item">
-                <div class="zoom-background">
-                    <img src="~/Imagenes/puma.svg" class="d-block w-100" alt="Imagen de Fondo 4">
-                </div>
-            </div>
-            <div class="carousel-item">
-                <div class="zoom-background">
-                    <img src="~/Imagenes/rinoceronte.svg" class="d-block w-100" alt="Imagen de Fondo 5">
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="static-images">
-        <img src="~/Imagenes/pereira.png" alt="Imagen Estática 1">
-        <img src="~/Imagenes/ukumarii.png" alt="Imagen Estática 2">
-    </div>
+
+    <!--<div class="static-images">-->
+        @*<img src="~/Imagenes/pereira.png" alt="Imagen Estática 1">*@
+        <!--<img src="~/Imagenes/dulce.png" alt="Imagen Estática 2">
+    </div>-->
 
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark nav-top">
         <div class="container">
-            @Html.ActionLink("Tienda virtual", "Index", "Home", new { area = "" }, new { @class = "navbar-brand custom-nav-link" })
+            @Html.ActionLink("Tienda", "Index", "Home", new { area = "" }, new { @class = "navbar-brand custom-nav-link" })
             <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Alternar navegación" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-3">
-                    <li><a href="https://ukumari.org/" class="nav-link">Bioparque Ukumarí</a></li>
-                    <li><a href="https://ukumari.org/contacto/" class="nav-link">Contacto</a></li>
+                    <li><a href="https://ukumari.org/" class="nav-link custom-nav-link">Productos</a></li>
+                    <li><a href="https://ukumari.org/contacto/" class="nav-link custom-nav-link">Contacto</a></li>
                 </ul>
             </div>
         </div>
     </nav>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-verde nav-botto">
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-morado nav-botto">
         <div class="container">
             <div class="collapse navbar-collapse justify-content-center ">
                 <span style="font-weight: bold;">@Html.Action("CategoryNav", "Home")</span>
             </div>
         </div>
     </nav>
+
+    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <div class="zoom-background">
+                    <img src="~/Imagenes/Portada1.svg" class="d-block w-100" alt="Imagen de Fondo 1">
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="zoom-background">
+                    <img src="~/Imagenes/Portada2.svg" class="d-block w-100" alt="Imagen de Fondo 2">
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="zoom-background">
+                    <img src="~/Imagenes/Portada3.svg" class="d-block w-100" alt="Imagen de Fondo 3">
+                </div>
+            </div>
+            @*<div class="carousel-item">
+                    <div class="zoom-background">
+                        <img src="~/Imagenes/puma.svg" class="d-block w-100" alt="Imagen de Fondo 4">
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="zoom-background">
+                        <img src="~/Imagenes/rinoceronte.svg" class="d-block w-100" alt="Imagen de Fondo 5">
+                    </div>
+                </div>*@
+        </div>
+    </div>
 
     <div class="container body-content">
         @RenderBody()
@@ -77,15 +79,22 @@
             <div class="container">
                 <div class="row justify-content-center">
                     <!-- Añadida clase para centrar las columnas -->
-                    <div class="col-md-6 text-center">
+                    <!--<div class="col-md-6 text-center">-->
                         <!-- Cambiado a 6 para que tome la mitad del ancho -->
-                        <p><strong>Pagos 100% Seguros</strong></p>
+                        <!--<p><strong>Pagos 100% Seguros</strong></p>
                         <p>Recibimos todas las tarjetas</p>
                     </div>
-                    <div class="col-md-6 text-center">
+                    <div class="col-md-6 text-center">-->
                         <!-- Cambiado a 6 para que tome la mitad del ancho -->
-                        <p><strong>Entregas Nacionales</strong></p>
+                        <!--<p><strong>Entregas Nacionales</strong></p>
                         <p>Enviamos a toda Colombia</p>
+                    </div>-->
+                    <div class="col-md-12 text-center">
+                        <!-- Cambiado a 6 para que tome la mitad del ancho -->
+                        <p><strong>COBERTURA PARA LAS ENTREGAS EN PEREIRA:</strong></p>
+                        <p>
+                            Área urbana del Municipio de Pereira; hacia la vía Armenia hasta la Glorieta de la Condina; vía hacia Dosquebradas hasta la Romelia; vía Cerritos hasta el Hotel Sonesta.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -109,40 +118,43 @@
                     </div>
                 </div>
             </div>
-            <div class="container my-5 bg-verde">
+            <div class="container my-5 bg-rosado">
                 <!-- my-5 añade margen arriba y abajo -->
-                <div class="row text-white">
-                    <div class="col-md-4">
+                <div class="row text-black">
+                    @*<div class="col-md-4">
                         <h2>Dirección</h2>
                         <p>
-                            Kilómetro 14 vía cerritos<br>
-                            Entrada por la bomba Santa Barbara.
+                            Casa de Yessica<br>
+                            Llamar a porteria.
                         </p>
                         <p>
-                            60 6 3515488<br>
-                            servicioalcliente@ukumari.co
+                            3227147454<br>
+                            
                         </p>
-                    </div>
-                    <div class="col-md-4">
+                    </div>*@
+                    <div class="col-md-5">
                         <h2>Horario de atención:</h2>
-                        <p>9:00 am – 4:00 pm</p>
+                        <p>8:00 am – 5:00 pm</p>
                         <p>Abrimos los 365 días del año.</p>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-5">
                         <h2>Redes sociales</h2>
-                        <a href="https://www.facebook.com/BioparqueUkumariPereira/" target="_blank" class="social-icon">
+                        <a href="https://www.facebook.com/mini.dulce.bocado/" target="_blank" class="social-icon">
                             <img src="~/Imagenes/Facebook.svg" alt="Facebook" style="width: 80px; height: 60px;">
                         </a>
-                        <a href="https://twitter.com/ukumaripereira" target="_blank" class="social-icon">
+                        @*<a href="https://twitter.com/ukumaripereira" target="_blank" class="social-icon">
                             <img src="~/Imagenes/Twitter.svg" alt="Twitter" style="width: 80px; height: 60px;">
-                        </a>
-                        <a href="https://www.instagram.com/bioparqueukumari/" target="_blank" class="social-icon">
+                        </a>*@
+                        <a href="https://www.instagram.com/minidulcebocado/" target="_blank" class="social-icon">
                             <img src="~/Imagenes/Instagram.svg" alt="Instagram" style="width: 80px; height: 60px;">
                         </a>
-                        <a href="https://www.youtube.com/channel/UCSiERFPD0kXZD604Ewgt3XA" target="_blank" class="social-icon">
+                        @*<a href="https://www.youtube.com/channel/UCSiERFPD0kXZD604Ewgt3XA" target="_blank" class="social-icon">
                             <img src="/Imagenes/YouTube.svg" alt="Youtube" style="width: 80px; height: 60px;">
-                        </a>
+                        </a>*@
                     </div>
+                     <div class="col-md-2">
+                         <img src="~/Imagenes/dulce.png" alt="Logo" style="width: 150px; height: 150px; " />
+                     </div>
                 </div>
             </div>
             <div class="container text-center">
@@ -181,8 +193,8 @@
 
             /* Estilo para el efecto hover */
             .custom-nav-link:hover {
-                background-color: #61CE70 !important; /* Color de fondo verde al pasar el mouse */
-                color: white !important; /* Color del texto blanco al pasar el mouse */
+                background-color: #FCBAFF !important; /* Color de fondo verde al pasar el mouse */
+                color: black !important; /* Color del texto blanco al pasar el mouse */
                 border-radius: 5px; /* Radio de la esquina del recuadro */
             }
 
@@ -201,15 +213,31 @@
 
             /* Efecto hover para los elementos del menú */
             .navbar .navbar-nav .nav-link:hover {
-                background-color: #61CE70; /* Color de fondo al pasar el mouse */
-                color: white; /* Color del texto al pasar el mouse */
+                background-color: #FCBAFF; /* Color de fondo al pasar el mouse */
+                color: black !important; /* Color del texto al pasar el mouse */
                 border-radius: 5px; /* Radio de la esquina del recuadro */
             }
+
+        .navbar-nav .nav-link:hover {
+            color: #FFB9B9; /* Cambia este color según tus necesidades */
+        }
 
 
 
         .bg-verde {
             background-color: rgb(35, 164, 84); /* Color verde en formato RGB */
+        }
+
+        .bg-morado {
+            background-color: rgb(148, 11, 146); /* Color verde en formato RGB */
+        }
+
+        .bg-rosado {
+            background-color: rgb(252, 186, 255); /* Color verde en formato RGB */
+        }
+
+        .bg-azul {
+            background-color: rgb(179, 229, 218); /* Color verde en formato RGB */
         }
 
         #myCarousel .carousel-inner .carousel-item .d-flex img {
@@ -231,110 +259,110 @@
                 border: none;
                 text-decoration: none;
             }
-/* Estilos para el carrusel */
-     .carousel-inner {
-  max-height: 145px;
-  overflow: hidden;
-}
+        /* Estilos para el carrusel */
+        .carousel-inner {
+            max-height: 400px;
+            overflow: hidden;
+        }
 
-.zoom-background img {
-  width: 100%;
-  height: 50%;
-  object-fit: cover;
-  object-position: center;
-  animation: zoom 7s ease-in-out infinite alternate;
-}
+        .zoom-background img {
+            width: 80%;
+            height: 25%;
+            object-fit: cover;
+            object-position: center;
+            animation: zoom 7s ease-in-out infinite alternate;
+        }
 
-@@keyframes zoom {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.1);
-  }
-}
+        @@keyframes zoom {
+            from {
+                transform: scale(1);
+            }
 
-.static-images {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 145px;
-  z-index: 10;
-}
+            to {
+                transform: scale(1.1);
+            }
+        }
 
-.static-images img {
-  width: 145px;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-}
+        .static-images {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 145px;
+            z-index: 10;
+        }
 
-/* Ajustar la posición de las imágenes estáticas */
-.static-images img:first-child {
-  left: 18%; /* Ajusta este valor según sea necesario */
-}
+            .static-images img {
+                width: 145px;
+                position: absolute;
+                top: 250%;
+                transform: translateY(-50%);
+            }
 
-.static-images img:last-child {
-  left: 35%; /* Ajusta este valor según sea necesario */
-}
+                /* Ajustar la posición de las imágenes estáticas */
+                .static-images img:first-child {
+                    left: 18%; /* Ajusta este valor según sea necesario */
+                }
+
+                .static-images img:last-child {
+                    left: 5%; /* Ajusta este valor según sea necesario */
+                }
 
         /* Estilo para el botón del menú cuando está en su estado colapsado */
         .navbar-toggler {
-            background-color: #23A455 !important; /* Cambia el color del borde del botón si es necesario */
+            background-color: #940B92 !important; /* Cambia el color del borde del botón si es necesario */
         }
 
-/* Media query para tablets */
-@@media (max-width: 768px) {
-  .static-images img {
-    width: 100px; /* Ajusta el tamaño para tablets */
-  }
+        /* Media query para tablets */
+        @@media (max-width: 768px) {
+            .static-images img {
+                width: 100px; /* Ajusta el tamaño para tablets */
+            }
 
-  .static-images img:first-child {
-    left: 10%; /* Ajusta la posición para tablets */
-  }
+                .static-images img:first-child {
+                    left: 10%; /* Ajusta la posición para tablets */
+                }
 
-  .static-images img:last-child {
-    left: 30%; /* Ajusta la posición para tablets */
-  }
-}
+                .static-images img:last-child {
+                    left: 30%; /* Ajusta la posición para tablets */
+                }
+        }
 
-/* Media query para móviles */
-@@media (max-width: 576px) {
-  .static-images img {
-    width: 80px; /* Ajusta el tamaño para móviles */
-  }
+        /* Media query para móviles */
+        @@media (max-width: 576px) {
+            .static-images img {
+                width: 80px; /* Ajusta el tamaño para móviles */
+            }
 
-  .static-images img:first-child {
-    left: 5%; /* Ajusta la posición para móviles */
-  }
+                .static-images img:first-child {
+                    left: 5%; /* Ajusta la posición para móviles */
+                }
 
-  .static-images img:last-child {
-    left: 28%; /* Ajusta la posición para móviles */
-  }
-}
+                .static-images img:last-child {
+                    left: 28%; /* Ajusta la posición para móviles */
+                }
+        }
 
-@@media (max-width: 375px) {
-  .static-images img {
-    width: 60px; /* Ajusta el tamaño para móviles */
-  }
+        @@media (max-width: 375px) {
+            .static-images img {
+                width: 60px; /* Ajusta el tamaño para móviles */
+            }
 
-  .static-images img:first-child {
-    left: 3%; /* Ajusta la posición para móviles */
-    top: 50%;
-  }
+                .static-images img:first-child {
+                    left: 3%; /* Ajusta la posición para móviles */
+                    top: 50%;
+                }
 
-  .static-images img:last-child {
-    left: 28%; /* Ajusta la posición para móviles */
-     top: 45%;
-  }
-}
-
+                .static-images img:last-child {
+                    left: 28%; /* Ajusta la posición para móviles */
+                    top: 45%;
+                }
+        }
     </style>
     <script>
         var myCarousel = document.querySelector('#carouselExampleIndicators')
         var carousel = new bootstrap.Carousel(myCarousel, {
-            interval: 7000,
+            interval: 8000,
             wrap: true
         });
     </script>

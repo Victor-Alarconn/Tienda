@@ -18,5 +18,14 @@ namespace Tienda.Models
         public string GrupoNombre { get; set; }
         public int Cantidad { get; set; }
         public string ValorTotal { get; set; }
+        public int ManejaTamano { get; set; }
+
+        public List<Tamano> TamañosDisponibles { get; set; }
+
+        // Constructor
+        public Producto()
+        {
+            TamañosDisponibles = new List<Tamano>();
+        }
     }
 }

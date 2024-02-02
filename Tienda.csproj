@@ -161,6 +161,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminController.cs" />
+    <Compile Include="Areas\Admin\Models\Articulo.cs" />
     <Compile Include="Areas\Admin\Models\Categorias.cs" />
     <Compile Include="Areas\Admin\Models\Productos.cs" />
     <Compile Include="Areas\Admin\Models\Usuario.cs" />
@@ -175,6 +176,7 @@
     <Compile Include="Interfaces\IProductoService.cs" />
     <Compile Include="Interfaces\IReferenciaService.cs" />
     <Compile Include="Interfaces\IOrdenService.cs" />
+    <Compile Include="Models\Artuculos.cs" />
     <Compile Include="Models\Cart.cs" />
     <Compile Include="Models\Categoria.cs" />
     <Compile Include="Models\Ciudad.cs" />
@@ -185,7 +187,9 @@
     <Compile Include="Models\PayUResponse.cs" />
     <Compile Include="Models\ProductDetailsViewModel.cs" />
     <Compile Include="Models\Producto.cs" />
+    <Compile Include="Models\Tamano.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Servicios\Articulos.cs" />
     <Compile Include="Servicios\FacturaService.cs" />
     <Compile Include="Servicios\MainService.cs" />
     <Compile Include="Servicios\OrdenService.cs" />
@@ -213,6 +217,8 @@
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="Imagenes\Daviplata.jpg" />
+    <Content Include="Imagenes\Dona_logo.svg" />
+    <Content Include="Imagenes\dulce.png" />
     <Content Include="Imagenes\Facebook.svg" />
     <Content Include="Imagenes\hipopotamo.svg" />
     <Content Include="Imagenes\Instagram.svg" />
@@ -221,6 +227,9 @@
     <Content Include="Imagenes\oso.svg" />
     <Content Include="Imagenes\payu.jpg" />
     <Content Include="Imagenes\pereira.png" />
+    <Content Include="Imagenes\Portada1.svg" />
+    <Content Include="Imagenes\Portada2.svg" />
+    <Content Include="Imagenes\Portada3.svg" />
     <Content Include="Imagenes\pse.jpg" />
     <Content Include="Imagenes\puma.svg" />
     <Content Include="Imagenes\rinoceronte.svg" />

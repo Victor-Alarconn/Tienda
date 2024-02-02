@@ -7,7 +7,7 @@
 <main>
     <section class="row" aria-labelledby="aspnetTitle">
         <h1 id="title">Productos</h1>
-        <p class="lead">Explora nuestros productos.</p>
+        <p class="lead">A continuación encontrarás nuestros productos disponibles para entregas en Pereira. Selecciona el que desees, indica el tamaño, la cantidad de unidades y haz clic en el botón agregar al carrito.</p>
         <p>Mostrando @ViewBag.ProductCount resultados</p>
         <div class="row">
             @foreach (var product in Model)
@@ -15,18 +15,37 @@
                 <div class="col-md-4 mb-4">
                     <div class="card product-card">
                         <a href="@Url.Action("Details", new { id = product.Id })" class="text-decoration-none">
-                            @*<img src="@product.Imagen" class="card-img-top" alt="@product.Nombre">*@
-                            <img src="@(!string.IsNullOrEmpty(product.Imagen) ? Url.Content(product.Imagen) : "ruta_a_imagen_por_defecto.jpg")" class="card-img-top" alt="Imagen del producto" />
-
+                            <img src="@(!string.IsNullOrEmpty(product.Imagen) ? Url.Content(product.Imagen) : "ruta_a_imagen_por_defecto.jpg")" class="card-img-top" alt="@product.Nombre" />
                             <div class="card-body">
-                                <h5 class="card-title text-success">@product.Nombre</h5>
-                                <p class="card-text">@product.Descripcion</p>
-                                <p class="card-text text-price">@product.Precio.ToString("C")</p>
+                                <h5 class="card-title custom-color">@product.Nombre</h5>
+                                <p class="card-text black-text">@product.Descripcion</p>
+
                             </div>
                         </a>
-                        <div class="card-footer">
-                            <button class="btn btn-secondary buy-now" data-product-id="@product.Id">Comprar</button>
-                            <button class="btn btn-secondary add-to-cart" data-product-id="@product.Id">Añadir al carrito</button>
+                        @if (product.ManejaTamano == 1)
+                        {
+                            <div class="price-options">
+                                @foreach (var tamano in product.TamañosDisponibles)
+                                {
+                                    <div class="price-circle" data-product-id="@product.Id" data-tamano-id="@tamano.IdTamano" onclick="selectTamano(@product.Id, @tamano.IdTamano, event)">
+                                        <span class="size">@tamano.Descripcion</span>
+                                        <span class="price">@tamano.Precio.ToString("C")</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="price-default">
+                                <div class="price-circle">
+                                    <span class="price">@product.Precio.ToString("C")</span>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="card-footer" data-product-id="@product.Id" data-maneja-tamano="@product.ManejaTamano">
+                            <button class="btn bg-rosado buy-now" data-product-id="@product.Id" data-tamano-id="">Comprar</button>
+                            <button class="btn bg-rosado add-to-cart" data-product-id="@product.Id" data-tamano-id="">Añadir al carrito</button>
                             <span class="confirmation d-none" id="confirmation-@product.Id">
                                 ✓
                                 <br>
@@ -38,59 +57,98 @@
                     </div>
                 </div>
             }
+
         </div>
     </section>
 </main>
 <script>
 
-    function buyNow(productId) {
-        fetch('/Home/AddToCart', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ productId: productId })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Redirigir al carrito de compras si la operación fue exitosa
-                window.location.href = '@Url.Action("Carrito", "Home")';
+            document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    var productId = this.getAttribute('data-product-id');
+                    var tamanoId = this.getAttribute('data-tamano-id');
+                    var manejaTamano = productManejaTamano(productId);
+
+                    if (manejaTamano && !tamanoId) {
+                        alert("Por favor, selecciona un tamaño antes de añadir al carrito.");
+                    } else {
+                        addToCart(productId, tamanoId); // Llamamos directamente a addToCart
+                    }
+                });
+            });
+
+            document.querySelectorAll('.buy-now').forEach(button => {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    var productId = this.getAttribute('data-product-id');
+                    var tamanoId = this.getAttribute('data-tamano-id');
+                    var manejaTamano = productManejaTamano(productId);
+
+                    if (manejaTamano && !tamanoId) {
+                        alert("Por favor, selecciona un tamaño antes de comprar.");
+                    } else {
+                        buyNow(productId, tamanoId); // Llamamos directamente a buyNow
+                    }
+                });
+            });
+        });
+
+        function addToCart(productId, tamanoId) {
+            var bodyData = { productId: productId };
+            if (tamanoId) {
+                bodyData.tamanoId = tamanoId;
             }
-        });
-    }
 
-    // Evento de clic para botón de Comprar
-    document.querySelectorAll('.buy-now').forEach(button => {
-        button.addEventListener('click', function () {
-            var productId = this.getAttribute('data-product-id');
-            buyNow(productId);
-        });
-    });
-
-
-    document.querySelectorAll('.add-to-cart').forEach(button => {
-        button.addEventListener('click', function () {
-            var productId = this.getAttribute('data-product-id');
             fetch('/Home/AddToCart', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ productId: productId })
+                body: JSON.stringify(bodyData)
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Actualizar el mensaje de confirmación
-                        document.getElementById('confirmation-' + productId).classList.remove('d-none');
-
-                        // Actualizar el contador del carrito
-                        updateCartItemCount();
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Actualizar contador del carrito y mostrar mensaje de confirmación
+                    updateCartItemCount();
+                    var confirmationElement = document.getElementById('confirmation-' + productId);
+                    if (confirmationElement) {
+                        confirmationElement.classList.remove('d-none');
                     }
-                });
-        });
-    });
+                }
+            });
+        }
+
+        function buyNow(productId, tamanoId) {
+            addToCart(productId, tamanoId); // Añadir al carrito primero
+            // Redirigimos al carrito solo después de recibir la confirmación de que se añadió al carrito
+            setTimeout(function() {
+                window.location.href = '@Url.Action("Carrito", "Home")';
+            }, 500); // Esperamos medio segundo para asegurar que se añadió al carrito antes de redirigir
+        }
+
+        function productManejaTamano(productId) {
+            // Obtenemos el producto específico y verificamos si maneja tamaños
+            var productCard = document.querySelector('.card-footer[data-product-id="' + productId + '"]');
+            return productCard && productCard.dataset.manejaTamano === 'true';
+        }
+
+        function selectTamano(productId, tamanoId, event) {
+            event.stopPropagation();
+            // Quitar la clase 'selected' de todos los círculos y agregarla al clickeado
+            var circles = document.querySelectorAll('.price-circle[data-product-id="' + productId + '"]');
+            circles.forEach(circle => circle.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+            // Actualizar el 'data-tamano-id' de los botones de comprar y añadir al carrito
+            var addToCartButton = document.querySelector('.add-to-cart[data-product-id="' + productId + '"]');
+            var buyNowButton = document.querySelector('.buy-now[data-product-id="' + productId + '"]');
+            if (addToCartButton && buyNowButton) {
+                addToCartButton.setAttribute('data-tamano-id', tamanoId);
+                buyNowButton.setAttribute('data-tamano-id', tamanoId);
+            }
+    }
 
 
     function updateCartItemCount() {
@@ -119,5 +177,85 @@
     .hidden {
         display: none;
     }
+
+    .custom-color {
+        color: rgb(255, 25, 84); /* Color personalizado para el nombre */
+    }
+
+    .black-text {
+        color: #000000; /* Color negro para la descripción */
+    }
+
+    .btn.bg-rosado {
+        background-color: rgb(252, 186, 255); /* Color rosado */
+        color: #000000; /* Color negro para el texto de los botones */
+    }
+
+    .card.product-card {
+        box-shadow: 0 4px 8px 0 rgb(0,0,0,0.2); /* Sombreado */
+        transition: 0.4s; /* Transición suave */
+        width: 85%; /* Hacer la tarjeta más delgada */
+        margin: auto; /* Centrar la tarjeta en el espacio de la columna */
+    }
+
+        .card.product-card:hover {
+            box-shadow: 0 8px 16px 0 rgba(128, 27, 131); /* Sombreado más pronunciado al pasar el ratón */
+        }
+
+    .price-options {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px; /* Espacio entre los círculos */
+    }
+
+    .price-circle {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 75px; /* Tamaño del círculo */
+        height: 75px;
+        border: 3px solid pink; /* Color del borde */
+        border-radius: 50%; /* Redondear bordes para crear un círculo */
+        padding: 3px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.5); /* Sombra opcional */
+    }
+
+        .price-circle .size {
+            font-weight: bold;
+            color: #555; /* Color del texto de tamaño */
+            font-size: 10px;
+        }
+
+        .price-circle .price {
+            color: #d33; /* Color del precio */
+            font-weight: bold;
+            font-size: 9px;
+        }
+
+        .price-circle.selected {
+            background-color: #E4B9E3; /* O cualquier color que indique selección */
+            /* Otros estilos para el círculo seleccionado */
+        }
+
+    .price-default {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100px; /* Ajusta esto según sea necesario */
+    }
+
+
+    .card-footer {
+        display: flex;
+        justify-content: center; /* Alinea los elementos horizontalmente en el centro */
+        align-items: center; /* Alinea los elementos verticalmente en el centro */
+        flex-wrap: nowrap; /* Evita que los elementos se coloquen uno debajo del otro */
+    }
+
+
+
+
 </style>
 
