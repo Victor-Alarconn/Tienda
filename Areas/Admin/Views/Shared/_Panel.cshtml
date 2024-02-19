@@ -7,13 +7,15 @@
 
     <!-- Favicon SVG -->
     <link rel="icon" href="~/Imagenes/Ukumari_logo.svg" type="image/svg+xml">
-        
+
     <title>@ViewBag.Title - Bioparque Ukumari</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
 </head>
 <body>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark mi-navbar">
@@ -28,7 +30,11 @@
                     <li>@Html.ActionLink("Gestíon de Productos", "Productos", "Admin", new { area = "Admin" }, new { @class = "mi-nav-link fs-5" })</li>
                     @if (Session["NivelAcceso"] != null && Convert.ToInt32(Session["NivelAcceso"]) == 4)
                     {
-                        <li>@Html.ActionLink("Gestion de Categorías", "Categorias", "Admin", new { area = "Admin" }, new { @class = "mi-nav-link fs-5" })</li>
+                        <li>
+                            @Html.ActionLink("Gestión de Categorías", "Categorias", "Admin", new { area = "Admin" }, new { @class = "mi-nav-link fs-5" })
+                            <i class="fa fa-tachometer-alt"></i>
+                        </li>
+
                     }
                     <li>@Html.ActionLink("Gestión de Pedidos", "", "", new { area = "Admin" }, new { @class = "mi-nav-link fs-5" })</li>
                     <li>@Html.ActionLink("Salir", "CerrarSesion", "Admin", new { area = "Admin" }, new { @class = "mi-nav-link fs-5" })</li>

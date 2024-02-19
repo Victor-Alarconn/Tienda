@@ -21,6 +21,7 @@ using Tienda.Interfaces;
 using Tienda.Servicios;
 using static System.Net.Mime.MediaTypeNames;
 using System.Configuration;
+using Tienda.Areas.Admin.Models;
 
 namespace Tienda.Controllers
 {
@@ -33,10 +34,12 @@ namespace Tienda.Controllers
         private readonly IMainService _mainService;
 
         private readonly DataConexion _dataConexion; // Se crea una instancia de la clase DataConexion
+        private readonly DataConexion _otraDataConexion;
         private readonly Cart _cart; // Se crea una instancia de la clase Cart
         public HomeController() // Constructor de la clase
         {
             _dataConexion = new DataConexion();
+            _otraDataConexion = new DataConexion("ArticulosConnectionString");
             _cart = new Cart();
             _referenciaService = new ReferenciaService(_dataConexion);
             _ordenService = new OrdenService(_dataConexion); // Inicializar _ordenService
@@ -78,8 +81,8 @@ namespace Tienda.Controllers
             var phone = model.Phone; // Guardad en base de datos
             var fullName = $"{model.FirstName} {model.MiddleName} {model.LastName} {model.SecondLastName}";  // Combina FirstName y LastName
             var paymentMethods = "MASTERCARD,PSE,VISA";
-            var responseUrl = "https://901d-181-59-112-193.ngrok-free.app/Home/PayUResponse";
-            var confirmationUrl = "https://901d-181-59-112-193.ngrok-free.app/Home/Confirmation";
+            var responseUrl = "https://1ecb-181-55-25-239.ngrok-free.app/Home/PayUResponse";
+            var confirmationUrl = "https://1ecb-181-55-25-239.ngrok-free.app/Home/Confirmation";
             // Genera la firma
             var formattedAmount = amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             var signature = GenerarFirma(apiKey, merchantId, referenceCode, formattedAmount, currency, paymentMethods); // Llama al método para generar la firma
@@ -418,6 +421,11 @@ namespace Tienda.Controllers
                     _productoService.ConsultarYTransferirProductos(userId, idFac, connection);
                     _ordenService.EliminarDeTdOrden(userId, connection);
                     //  EliminarProductosDeTdProduc(userId, connection);
+                    //if (model.State_pol == "4") // Si el estado es 'aprobado'
+                    //{
+                    //    GuardarTransaccionesAprobadas(model, userId, idFac, datosUsuario);
+                    //    GuardarArticulosAprobados(model, userId, idFac, datosUsuario);
+                    //}
 
                     connection.Close();
                 }
@@ -427,6 +435,87 @@ namespace Tienda.Controllers
                 }
             }
         }
+
+        public void GuardarTransaccionesAprobadas(PayUConfirmation model, int userId, int idFac, DatosCliente datosUsuario)
+        {
+            if (model.State_pol != "4") // Asegurarse de que el estado sea 'aprobado'
+                return;
+
+            using (var connection = _otraDataConexion.CreateConnection())
+            {
+                try
+                {
+                    connection.Open();
+
+                    string queryInsert = @"
+                    INSERT INTO xxxxvpex (nit, fecha, factura, valor, titular, titudire, titutelf, tituciudad)
+                    VALUES (@Nit, @Fecha, @Factura, @Valor, @Titular, @Direccion, @Telefono, @Ciudad);
+                    ";
+
+                    using (var commandInsert = new MySqlCommand(queryInsert, connection))
+                    {
+                        // Reemplaza estos parámetros con los detalles reales de tu tabla y modelo
+                        commandInsert.Parameters.AddWithValue("@Nit", datosUsuario.Td_nit);
+                        commandInsert.Parameters.AddWithValue("@Fecha", model.Operation_date);
+                        commandInsert.Parameters.AddWithValue("@Factura", idFac);
+                        commandInsert.Parameters.AddWithValue("@Valor", datosUsuario.Total);
+                        commandInsert.Parameters.AddWithValue("@Titular", datosUsuario.Nombre);
+                        commandInsert.Parameters.AddWithValue("@Direccion", datosUsuario.Depart);
+                        commandInsert.Parameters.AddWithValue("@Telefono", datosUsuario.Telef);
+                        commandInsert.Parameters.AddWithValue("@Ciudad", datosUsuario.City);
+
+
+
+                        commandInsert.ExecuteNonQuery();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Considera implementar una mejor gestión de errores
+                    Console.WriteLine($"Error al guardar la transacción aprobada: {ex.Message}");
+                }
+            }
+        }
+
+        public void GuardarArticulosAprobados(PayUConfirmation model, int userId, int idFac, DatosCliente datosUsuario)
+        {
+            if (model.State_pol != "4") // Asegurarse de que el estado sea 'aprobado'
+                return;
+
+            using (var connection = _otraDataConexion.CreateConnection())
+            {
+                try
+                {
+                    connection.Open();
+
+                    string queryInsert = @"
+                    INSERT INTO xxxxvpax (numero, fecha, codigo, nit, detalle, cantidad, valor)
+                    VALUES (@Numero, @Fecha, @Codigo, @Nit, @Detalle, @Cantidad, @Valor);
+                    ";
+
+                    using (var commandInsert = new MySqlCommand(queryInsert, connection))
+                    {
+                        // Reemplaza estos parámetros con los detalles reales de tu tabla y modelo
+                        commandInsert.Parameters.AddWithValue("@Numero", idFac);
+                        commandInsert.Parameters.AddWithValue("@Fecha", model.Operation_date);
+                        commandInsert.Parameters.AddWithValue("@Codigo", idFac);
+                        commandInsert.Parameters.AddWithValue("@Nit", datosUsuario.Td_nit);
+                        commandInsert.Parameters.AddWithValue("@Detalle", model.Description);
+                        commandInsert.Parameters.AddWithValue("@Cantidad", 1);
+                        commandInsert.Parameters.AddWithValue("@Valor", datosUsuario.Total);
+
+
+                        commandInsert.ExecuteNonQuery();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Considera implementar una mejor gestión de errores
+                    Console.WriteLine($"Error al guardar la transacción aprobada: {ex.Message}");
+                }
+            }
+        }
+
 
         //private void EliminarProductosDeTdProduc(int userId, MySqlConnection connection)
         //{
