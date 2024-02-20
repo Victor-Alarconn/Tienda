@@ -221,6 +221,10 @@
     <Content Include="Imagenes\oso.svg" />
     <Content Include="Imagenes\payu.jpg" />
     <Content Include="Imagenes\pereira.png" />
+    <Content Include="Imagenes\Portada1.svg" />
+    <Content Include="Imagenes\Portada2.svg" />
+    <Content Include="Imagenes\Portada3.svg" />
+    <Content Include="Imagenes\Portada4.svg" />
     <Content Include="Imagenes\pse.jpg" />
     <Content Include="Imagenes\puma.svg" />
     <Content Include="Imagenes\rinoceronte.svg" />
