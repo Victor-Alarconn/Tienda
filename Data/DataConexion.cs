@@ -12,9 +12,9 @@ namespace Tienda.Data
     {
         private readonly string _connectionString;
 
-        public DataConexion()
+        public DataConexion(string nombreBaseDatos = "MySqlConnectionString")
         {
-            _connectionString = ConfigurationManager.ConnectionStrings["MySqlConnectionString"].ToString();
+            _connectionString = ConfigurationManager.ConnectionStrings[nombreBaseDatos].ToString();
         }
 
         public MySqlConnection CreateConnection()

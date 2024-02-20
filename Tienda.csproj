@@ -161,6 +161,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminController.cs" />
+    <Compile Include="Areas\Admin\Models\Articulo.cs" />
     <Compile Include="Areas\Admin\Models\Categorias.cs" />
     <Compile Include="Areas\Admin\Models\Productos.cs" />
     <Compile Include="Areas\Admin\Models\Usuario.cs" />
@@ -228,6 +229,7 @@
     <Content Include="Imagenes\pse.jpg" />
     <Content Include="Imagenes\puma.svg" />
     <Content Include="Imagenes\rinoceronte.svg" />
+    <Content Include="Imagenes\sesion.png" />
     <Content Include="Imagenes\suricata.svg" />
     <Content Include="Imagenes\Twitter.svg" />
     <Content Include="Imagenes\Ukumari.jpg" />

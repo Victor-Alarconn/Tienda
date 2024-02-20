@@ -16,10 +16,12 @@ namespace Tienda.Areas.Admin.Controllers
     public class AdminController : Controller
     {
         private readonly DataConexion _dataConexion; // Se crea una instancia de la clase DataConexion
+        private readonly DataConexion _otraDataConexion;
 
         public AdminController()
         {
             _dataConexion = new DataConexion();
+            _otraDataConexion = new DataConexion("ArticulosConnectionString");
         }
 
         // GET: Admin/Admin
@@ -87,6 +89,46 @@ namespace Tienda.Areas.Admin.Controllers
                 TempData["MensajeError"] = "Error al agregar el producto: " + ex.Message;
                 return View(producto);
             }
+        }
+
+        [HttpGet]
+        public JsonResult AccionParaBuscarArticulo(string codigoArticulo)
+        {
+            var articulos = ObtenerArticulosPorCodigo(codigoArticulo);
+            return Json(articulos, JsonRequestBehavior.AllowGet);
+        }
+
+
+
+        public List<Articulo> ObtenerArticulosPorCodigo(string codigoArticulo)
+        {
+            List<Articulo> listaArticulos = new List<Articulo>();
+            using (var connection = _otraDataConexion.CreateConnection())
+            {
+                connection.Open();
+                string query = "SELECT articodigo, artigrupo, articodi2, artinomb, artiunidad, artiaplica, artirefer, articontie, artipeso, articolor, artimarca, artiinvima, artinomb2, artiforma, artiptoi, artiptor, artiptop1, artiptop2, artivlr1_c, artivlr2_c, artivlr3_c, artivlr4_c, artiiva, articant " +
+                               "FROM xxxxarti, xxxxartv " +
+                               "WHERE xxxxarti.articodigo = @CodigoArticulo AND xxxxarti.articodigo = xxxxartv.artvcodigo";
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@CodigoArticulo", codigoArticulo);
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var articulo = new Articulo
+                            {
+                                Articodigo = reader.GetString("articodigo"),
+                                Artinomb = reader.GetString("artinomb"),
+                                Artivlr1_c = reader.GetInt32("artivlr1_c"),
+                                // Completa con el resto de propiedades
+                            };
+                            listaArticulos.Add(articulo);
+                        }
+                    }
+                }
+            }
+            return listaArticulos;
         }
 
         public List<Categorias> ObtenerCategorias()

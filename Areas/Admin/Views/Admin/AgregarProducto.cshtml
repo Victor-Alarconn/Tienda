@@ -1,4 +1,4 @@
-﻿@model Tienda.Areas.Admin.Models.Productos
+﻿﻿@model Tienda.Areas.Admin.Models.Productos
 
 @{
     ViewBag.Title = "Agregar Producto";
@@ -20,6 +20,12 @@
 
 @using (Html.BeginForm("AgregarProducto", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
+    <div class="mb-3">
+        <label for="codigoArticulo">Código del Artículo</label>
+        <input type="text" class="form-control" id="codigoArticulo" name="CodigoArticulo" placeholder="Ingresa el código del artículo">
+        <button type="button" class="btn btn-info" onclick="buscarArticuloPorCodigo()">Buscar</button>
+    </div>
+
     <div class="mb-3">
         @Html.LabelFor(model => model.Nombre)
         @Html.TextAreaFor(model => model.Nombre, new { @class = "form-control" })
@@ -74,6 +80,26 @@
             }
         });
     });
+
+    function buscarArticuloPorCodigo() {
+    var codigoArticulo = $('#codigoArticulo').val();
+    $.ajax({
+        url: '@Url.Action("AccionParaBuscarArticulo", "Admin")', // Asegúrate de reemplazar AccionParaBuscarArticulo con el nombre real de tu acción
+        type: 'GET',
+        data: { codigoArticulo: codigoArticulo },
+        success: function (data) {
+            // Asumiendo que la respuesta es un objeto JSON con los datos del artículo
+            if (data && data.length > 0) {
+                var articulo = data[0]; // Tomar el primer artículo de la respuesta
+                $('#Nombre').val(articulo.Artinomb); // Actualizar el campo Nombre
+                $('#Precio').val(articulo.Artivlr1_c); // Actualizar el campo Precio
+            }
+        },
+        error: function (error) {
+            console.error("Error al buscar artículo: ", error);
+        }
+    });
+}
 </script>
 
 

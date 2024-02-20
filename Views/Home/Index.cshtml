@@ -25,8 +25,8 @@
                             </div>
                         </a>
                         <div class="card-footer">
-                            <button class="btn btn-secondary buy-now" data-product-id="@product.Id">Comprar</button>
-                            <button class="btn btn-secondary add-to-cart" data-product-id="@product.Id">Añadir al carrito</button>
+                            <button class="btn bg-azul buy-now" data-product-id="@product.Id">Comprar</button>
+                            <button class="btn bg-azul add-to-cart" data-product-id="@product.Id">Añadir al carrito</button>
                             <span class="confirmation d-none" id="confirmation-@product.Id">
                                 ✓
                                 <br>
@@ -128,8 +128,8 @@
         color: #000000; /* Color negro para la descripción */
     }
 
-    .btn.bg-rosado {
-        background-color: rgb(252, 186, 255); /* Color rosado */
+    .btn.bg-azul {
+        background-color: rgb(58, 176, 255); /* Color rosado */
         color: #000000; /* Color negro para el texto de los botones */
     }
 
@@ -141,7 +141,7 @@
     }
 
         .card.product-card:hover {
-            box-shadow: 0 8px 16px 0 rgb(85, 130, 255); /* Sombreado más pronunciado al pasar el ratón */
+            box-shadow: 0 8px 16px 3px rgb(85, 130, 255); /* Sombreado más pronunciado al pasar el ratón */
         }
 </style>
 
