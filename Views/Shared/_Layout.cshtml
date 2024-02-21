@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Favicon SVG -->
     <link rel="icon" href="~/Imagenes/Dona_logo.svg" type="image/svg+xml">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <title>@ViewBag.Title - Petetes</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
@@ -19,7 +19,6 @@
     @*<img src="~/Imagenes/pereira.png" alt="Imagen Estática 1">*@
     <!--<img src="~/Imagenes/dulce.png" alt="Imagen Estática 2">
     </div>-->
-
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark nav-top">
         <div class="container">
             @Html.ActionLink("Tienda", "Index", "Home", new { area = "" }, new { @class = "navbar-brand custom-nav-link" })
@@ -32,9 +31,20 @@
                     <li><a href="https://ukumari.org/" class="nav-link custom-nav-link">Productos</a></li>
                     <li><a href="https://ukumari.org/contacto/" class="nav-link custom-nav-link">Contacto</a></li>
                 </ul>
+                <!-- Barra de búsqueda -->
+                <form class="d-flex w-50 mx-auto">
+                    <div class="input-group flex-grow-1">
+                        <input type="text" class="form-control" placeholder="Buscar..." style="flex-grow: 1;">
+                        <button class="btn bg-azul" type="button" id="button-addon2">
+                            <i class="bi bi-search" style="color: white;"></i>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </nav>
+
+
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-azul nav-botto">
         <div class="container">
             <div class="collapse navbar-collapse justify-content-center ">
@@ -268,6 +278,10 @@
             object-position: center;
             animation: zoom 7s ease-in-out infinite alternate;
         }
+
+        /* barra de busqueda */
+
+
 
         @@keyframes zoom {
             from {
