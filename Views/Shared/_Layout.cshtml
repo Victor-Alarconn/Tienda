@@ -22,6 +22,17 @@
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark nav-top">
         <div class="container">
             @Html.ActionLink("Tienda", "Index", "Home", new { area = "" }, new { @class = "navbar-brand custom-nav-link" })
+            <!-- Barra de búsqueda para dispositivos móviles -->
+            <div class="d-md-none">
+                <form class="d-flex">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Buscar productos...">
+                        <button class="btn bg-azul" type="button" id="button-addon2">
+                            <i class="bi bi-search" style="color: white;"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
             <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Alternar navegación" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -31,18 +42,21 @@
                     <li><a href="https://ukumari.org/" class="nav-link custom-nav-link">Productos</a></li>
                     <li><a href="https://ukumari.org/contacto/" class="nav-link custom-nav-link">Contacto</a></li>
                 </ul>
-                <!-- Barra de búsqueda -->
-                <form class="d-flex w-50 mx-auto">
-                    <div class="input-group flex-grow-1">
-                        <input type="text" class="form-control" placeholder="Buscar..." style="flex-grow: 1;">
-                        <button class="btn bg-azul" type="button" id="button-addon2">
-                            <i class="bi bi-search" style="color: white;"></i>
-                        </button>
-                    </div>
-                </form>
+                <!-- Barra de búsqueda para dispositivos no móviles -->
+                <div class="d-none d-md-block">
+                    <form class="d-flex mx-auto" style="width: 820px;">
+                        <div class="input-group flex-grow-1">
+                            <input type="text" class="form-control" placeholder="Buscar productos...">
+                            <button class="btn bg-azul" type="button" id="button-addon2">
+                                <i class="bi bi-search" style="color: white;"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </nav>
+
 
 
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-azul nav-botto">
@@ -267,12 +281,12 @@
             }
         /* Estilos para el carrusel */
         .carousel-inner {
-            max-height: 400px;
+            max-height: 300px;
             overflow: hidden;
         }
 
         .zoom-background img {
-            width: 80%;
+            width: 60%;
             height: 25%;
             object-fit: cover;
             object-position: center;
