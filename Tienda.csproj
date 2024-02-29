@@ -254,6 +254,7 @@
     <Content Include="Areas\Admin\Views\Admin\EditarCategoria.cshtml" />
     <Content Include="Areas\Admin\Views\Admin\AgregarProducto.cshtml" />
     <Content Include="Areas\Admin\Views\Admin\AgregarCategoria.cshtml" />
+    <Content Include="Areas\Admin\Views\Admin\Pedidos.cshtml" />
     <None Include="Scripts\jquery-3.7.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.1.js" />
     <Content Include="Scripts\jquery-3.7.1.min.js" />

@@ -1,6 +1,6 @@
 ﻿@model Tienda.Areas.Admin.Models.Categorias
 @{
-    ViewBag.Title = "AgregarCategoria";
+    ViewBag.Title = "Agregar Categoria";
     Layout = "~/Areas/Admin/Views/Shared/_Panel.cshtml";
 }
 
@@ -14,14 +14,38 @@
     <div class="alert alert-danger">@TempData["MensajeError"].ToString()</div>
 }
 
-<h2>AgregarCategoria</h2>
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-second-primary">
+            <h2>Agregar Categoría</h2>
+        </div>
+        <div class="card-body">
+            @using (Html.BeginForm("AgregarCategoria", "Admin", FormMethod.Post, new { enctype = "multipart/form-data", @class = "row g-3" }))
+            {
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        @Html.LabelFor(model => model.Nombre, new { @class = "form-label" })
+                        @Html.TextBoxFor(model => model.Nombre, new { @class = "form-control" })
+                    </div>
+                </div>
 
-@using (Html.BeginForm("AgregarCategoria", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
-{
-    <div class="mb-3">
-        @Html.LabelFor(model => model.Nombre)
-        @Html.TextAreaFor(model => model.Nombre, new { @class = "form-control" })
+                <div class="col-md-6">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            }
+
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <form action="@Url.Action("BuscarCategorias", "Admin")" method="get" class="form-inline">
+                        <div class="form-group">
+                            <label for="searchCategoria" class="mr-2">Buscar Categoría:</label>
+                            <input type="text" class="form-control" id="searchCategoria" name="search" placeholder="Nombre de categoría">
+                        </div>
+                        <button type="submit" class="btn btn-primary ml-2">Buscar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
-    <button type="submit" class="btn btn-primary">Guardar</button>
-}

@@ -27,51 +27,66 @@
     </script>
 }
 
-<div class="header-con-boton">
-    <h2>Productos</h2>
-    <button class="btn btn-success" onclick="location.href='@Url.Action("AgregarProducto", "Admin")'">Agregar Producto +</button>
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-second-primary">
+            <h6 class="m-0 font-weight-bold text-dark">Lista de Productos</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm-3">
+                    <button class="btn btn-success" onclick="location.href='@Url.Action("AgregarProducto", "Admin")'">Agregar Producto +</button>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="tbdata" cellspacing="0" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Descripción</th>
+                                    <th>Precio</th>
+                                    <th>Categoría</th>
+                                    <th class="d-none d-sm-table-cell">En Stock</th>
+                                    <th class="d-none d-sm-table-cell">Cantidad</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr data-id="@item.Id">
+                                        <td>@item.Id</td>
+                                        <td>@item.Nombre</td>
+                                        <td>@item.Descripcion</td>
+                                        <td>@item.Precio</td>
+                                        <td>@item.Categoria</td>
+                                        <td class="d-none d-sm-table-cell">@(item.Stock ? "Sí" : "No")</td>
+                                        <td class="d-none d-sm-table-cell">@item.Cantidad</td>
+                                        <td class="celda-botones">
+                                            <button class="btn btn-primary btn-editar btn-accion" data-id="@item.Id"
+                                                    data-url="@Url.Action("EditarProducto", "Admin", new { area = "Admin", id = item.Id })">
+                                                Editar
+                                            </button>
+                                            <button class="btn btn-danger btn-borrar btn-accion" data-id="@item.Id">
+                                                Borrar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Precio</th>
-            @*<th>Imagen</th>*@
-            <th>Categoría</th>
-            @*<th>Detalle</th>*@
-            <th>En Stock</th>
-            <th>Cantidad</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr data-id="@item.Id">
 
-                <td>@item.Id</td>
-                <td>@item.Nombre</td>
-                <td>@item.Descripcion</td>
-                <td>@item.Precio</td>
-                @*<td><img src="@item.Imagen" alt="Imagen del producto" class="producto-imagen" /></td>*@
-                <td>@item.Categoria</td>
-                @*<td>@item.Detalle</td>*@
-                <td>@(item.Stock ? "Sí" : "No")</td>
-                <td>@item.Cantidad</td>
-                <td class="celda-botones">
-                    <button class="btn btn-primary btn-editar btn-accion"
-                            data-id="@item.Id"
-                            data-url="@Url.Action("EditarProducto", "Admin", new { area = "Admin", id = item.Id })">
-                        Editar
-                    </button>
-                    <button class="btn btn-danger btn-borrar btn-accion" data-id="@item.Id">Borrar</button>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
 
 <!-- Modal para confirmación de borrado -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">

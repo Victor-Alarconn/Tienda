@@ -15,63 +15,90 @@
     <div class="alert alert-danger">@TempData["MensajeError"].ToString()</div>
 }
 
-
 <h2>Agregar Producto</h2>
 
-@using (Html.BeginForm("AgregarProducto", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+@using (Html.BeginForm("AgregarProducto", "Admin", FormMethod.Post, new { enctype = "multipart/form-data", @class = "row g-3" }))
 {
-    <div class="mb-3">
-        <label for="codigoArticulo">Código del Artículo</label>
-        <input type="text" class="form-control" id="codigoArticulo" name="CodigoArticulo" placeholder="Ingresa el código del artículo">
-        <button type="button" class="btn btn-info" onclick="buscarArticuloPorCodigo()">Buscar</button>
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label for="codigoArticulo" class="form-label">Código del Artículo</label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="codigoArticulo" name="CodigoArticulo" placeholder="Ingresa el código del artículo">
+                <button type="button" class="btn btn-info" onclick="buscarArticuloPorCodigo()">Buscar</button>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            @Html.LabelFor(model => model.Nombre, new { @class = "form-label" })
+            @Html.TextAreaFor(model => model.Nombre, new { @class = "form-control" })
+        </div>
+
+        <div class="mb-3">
+            @Html.LabelFor(model => model.Descripcion, new { @class = "form-label" })
+            @Html.TextAreaFor(model => model.Descripcion, new { @class = "form-control" })
+        </div>
+
+        <div class="mb-3">
+            @Html.LabelFor(model => model.Precio, new { @class = "form-label" })
+            @Html.TextBoxFor(model => model.Precio, new { @class = "form-control", type = "number" })
+        </div>
     </div>
 
-    <div class="mb-3">
-        @Html.LabelFor(model => model.Nombre)
-        @Html.TextAreaFor(model => model.Nombre, new { @class = "form-control" })
-    </div>
+    <div class="col-md-6">
+        <div class="mb-3">
+            @Html.LabelFor(model => model.Imagen, new { @class = "form-label" })
+            <input type="file" class="form-control" name="ImagenArchivo" />
+            @Html.TextBoxFor(model => model.Imagen, new { @class = "form-control", placeholder = "O ingresa URL de la imagen" })
+        </div>
 
-    <div class="mb-3">
-        @Html.LabelFor(model => model.Descripcion)
-        @Html.TextAreaFor(model => model.Descripcion, new { @class = "form-control" })
-    </div>
+        <div class="mb-3">
+            @Html.LabelFor(model => model.Detalle, new { @class = "form-label" })
+            @Html.TextAreaFor(model => model.Detalle, new { @class = "form-control" })
+        </div>
 
-    <div class="mb-3">
-        @Html.LabelFor(model => model.Precio)
-        @Html.TextBoxFor(model => model.Precio, new { @class = "form-control", type = "number" })
-    </div>
+        <div class="mb-3">
+            @Html.LabelFor(model => model.Categoria, new { @class = "form-label" })
+            @Html.DropDownListFor(model => model.Categoria, ViewBag.Categorias as IEnumerable<SelectListItem>, "Seleccionar", new { @class = "form-control" })
+        </div>
 
-    <div class="mb-3">
-        @Html.LabelFor(model => model.Imagen)
-        <input type="file" class="form-control" name="ImagenArchivo" />
-        @Html.TextBoxFor(model => model.Imagen, new { @class = "form-control", placeholder = "O ingresa URL de la imagen" })
-    </div>
+        <div class="mb-3 form-check">
+            @Html.CheckBoxFor(model => model.Stock, new { @class = "form-check-input" })
+            @Html.LabelFor(model => model.Stock, new { @class = "form-check-label" })
+        </div>
 
-    <div class="mb-3">
-        @Html.LabelFor(model => model.Detalle)
-        @Html.TextAreaFor(model => model.Detalle, new { @class = "form-control" })
+        <div class="mb-3" id="cantidadStock" style="display:none;">
+            @Html.LabelFor(model => model.Cantidad, new { @class = "form-label" })
+            @Html.TextBoxFor(model => model.Cantidad, new { @class = "form-control", type = "number" })
+        </div>
     </div>
-
-    <div class="mb-3">
-        @Html.LabelFor(model => model.Categoria)
-        @Html.DropDownListFor(model => model.Categoria, ViewBag.Categorias as IEnumerable<SelectListItem>, "Seleccionar", new { @class = "form-control" })
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Guardar</button>
     </div>
-
-    <div class="mb-3 form-check">
-        @Html.CheckBoxFor(model => model.Stock, new { @class = "form-check-input" })
-        @Html.LabelFor(model => model.Stock, new { @class = "form-check-label" })
-    </div>
-
-    <div class="mb-3" id="cantidadStock" style="display:none;">
-        @Html.LabelFor(model => model.Cantidad)
-        @Html.TextBoxFor(model => model.Cantidad, new { @class = "form-control", type = "number" })
-    </div>
-
-    <button type="submit" class="btn btn-primary">Guardar</button>
 }
 
+<div id="imagenPreview" class="mb-3" style="display: none;">
+    <label class="form-label">Vista previa de la imagen:</label>
+    <img id="imagenSeleccionada" class="img-fluid" src="#" alt="Vista previa de la imagen" style="max-width: 100%;">
+</div>
 <script>
-    $(document).ready(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('ImagenArchivo').addEventListener('change', function (event) {
+            var imagenSeleccionada = document.getElementById('imagenSeleccionada');
+            var imagenPreview = document.getElementById('imagenPreview');
+            var archivo = event.target.files[0];
+
+            if (archivo) {
+                var lector = new FileReader();
+
+                lector.onload = function (e) {
+                    imagenSeleccionada.src = e.target.result;
+                    imagenPreview.style.display = 'block';
+                }
+
+                lector.readAsDataURL(archivo);
+            }
+        });
+
         $('#Stock').change(function () {
             if ($(this).is(':checked')) {
                 $('#cantidadStock').show();

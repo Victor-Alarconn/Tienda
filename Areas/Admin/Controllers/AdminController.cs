@@ -29,6 +29,10 @@ namespace Tienda.Areas.Admin.Controllers
         {
             return View();
         }
+        public ActionResult Pedidos()
+        {
+            return View();
+        }
 
         public ActionResult AgregarProducto()
         {
