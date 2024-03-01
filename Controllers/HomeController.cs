@@ -625,7 +625,7 @@ namespace Tienda.Controllers
 
             itemToUpdate.Quantity = quantity;  // Actualiza la cantidad
             Session["cart"] = cart;  // Guarda el carrito actualizado en la sesión
-            
+
             return Json(new { success = true });
         }
 
@@ -826,6 +826,55 @@ namespace Tienda.Controllers
             return Json(new { itemCount = 0 }, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult BuscarProductos(string searchTerm)
+        {
+            using (var connection = _dataConexion.CreateConnection())
+            {
+                connection.Open();
 
+                // Definir la consulta utilizando JOIN para combinar las tablas.
+                string query = @"SELECT m.*, g.*
+                     FROM td_main AS m
+                     INNER JOIN td_grupo AS g ON m.id_grupo = g.id_grupo
+                     WHERE m.nombre LIKE @searchTerm OR g.nombre_grupo LIKE @searchTerm";
+
+                // Crear un comando SQL con la consulta y la conexión.
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    // Agregar el parámetro para el término de búsqueda.
+                    command.Parameters.AddWithValue("@searchTerm", "%" + searchTerm + "%");
+
+                    // Ejecutar el comando y leer los resultados.
+                    using (var reader = command.ExecuteReader())
+                    {
+                        // Crear una lista para almacenar los resultados.
+                        var resultados = new List<object>();
+
+                        // Leer cada fila de resultados.
+                        while (reader.Read())
+                        {
+                            // Aquí puedes crear objetos con los datos de cada fila y agregarlos a la lista de resultados.
+                            // Por ejemplo, podrías crear un objeto anónimo con los datos de ambas tablas.
+                            var resultado = new
+                            {
+                                IdMain = reader["id_main"],
+                                NombreMain = reader["nombre_main"],
+                                IdGrupo = reader["id_grupo"],
+                                NombreGrupo = reader["nombre_grupo"]
+                                // Agrega más propiedades según sea necesario
+                            };
+
+                            // Agregar el resultado a la lista.
+                            resultados.Add(resultado);
+                        }
+
+                        // Devolver los resultados como JSON.
+                        return Json(resultados, JsonRequestBehavior.AllowGet);
+                    }
+                }
+            }
+
+        }
+
+        }
     }
-}

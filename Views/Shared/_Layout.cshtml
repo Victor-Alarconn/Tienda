@@ -53,6 +53,11 @@
                         </div>
                     </form>
                 </div>
+                <ul id="searchResultsList" style="list-style: none; padding: 0;">
+                    <!-- Los resultados de la búsqueda se agregarán aquí dinámicamente -->
+                </ul>
+
+
             </div>
         </div>
     </nav>
@@ -389,6 +394,33 @@
             interval: 8000,
             wrap: true
         });
+
+        $(document).ready(function () {
+            $('#button-addon2').click(function () {
+                var searchTerm = $('.form-control').val();
+                $.ajax({
+                    url: '/Home/BuscarProductos', // Ruta del método de búsqueda en el controlador HomeController
+                    type: 'GET',
+                    data: { searchTerm: searchTerm },
+                    success: function (response) {
+                        // Limpiar resultados anteriores
+                        $('#searchResults').empty();
+
+                        // Iterar sobre los resultados y agregarlos a la lista
+                        $.each(response, function (index, result) {
+                            var resultItem = '<li>' + result.nombre_main + ' - ' + result.nombre_grupo + '</li>';
+                            $('#searchResults').append(resultItem);
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        // Manejar errores
+                        console.error(error);
+                    }
+                });
+            });
+        });
+
+
     </script>
 
     @Scripts.Render("~/bundles/jquery")
