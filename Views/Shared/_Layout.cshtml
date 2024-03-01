@@ -396,29 +396,39 @@
         });
 
         $(document).ready(function () {
-            $('#button-addon2').click(function () {
-                var searchTerm = $('.form-control').val();
-                $.ajax({
-                    url: '/Home/BuscarProductos', // Ruta del método de búsqueda en el controlador HomeController
-                    type: 'GET',
-                    data: { searchTerm: searchTerm },
-                    success: function (response) {
-                        // Limpiar resultados anteriores
-                        $('#searchResults').empty();
+            $('.form-control').on('input', function () {
+                var searchTerm = $(this).val();
+                if (searchTerm.length >= 2) {
+                    $.ajax({
+                        url: '/Home/BuscarProductos', // Ruta del método de búsqueda en el controlador HomeController
+                        type: 'GET',
+                        data: { searchTerm: searchTerm },
+                        success: function (response) {
+                            // Limpiar resultados anteriores
+                            $('#searchResultsList').empty(); // Corregido para apuntar al ID correcto
 
-                        // Iterar sobre los resultados y agregarlos a la lista
-                        $.each(response, function (index, result) {
-                            var resultItem = '<li>' + result.nombre_main + ' - ' + result.nombre_grupo + '</li>';
-                            $('#searchResults').append(resultItem);
-                        });
-                    },
-                    error: function (xhr, status, error) {
-                        // Manejar errores
-                        console.error(error);
-                    }
-                });
+                            // Iterar sobre los resultados y agregarlos a la lista
+                            $.each(response, function (index, result) {
+                                var resultItem = '<li>' + result.NombreMain + ' - ' + result.NombreGrupo + '</li>';
+                                $('#searchResultsList').append(resultItem); // Corregido para apuntar al ID correcto
+                            });
+
+                            // Opcional: Si necesitas mostrar el ul explícitamente, asegúrate de que el ul esté oculto inicialmente con CSS
+                        },
+                        error: function (xhr, status, error) {
+                            // Manejar errores
+                            console.error(error);
+                        }
+                    });
+                } else {
+                    // Si la longitud de la búsqueda es menor que 2, ocultar los resultados
+                    $('#searchResultsList').empty(); // Corregido para apuntar al ID correcto
+                    // Opcional: Si estás utilizando un método para ocultar el ul, asegúrate de activarlo aquí también
+                }
             });
         });
+
+
 
 
     </script>

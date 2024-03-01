@@ -826,6 +826,7 @@ namespace Tienda.Controllers
             return Json(new { itemCount = 0 }, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpGet]
         public JsonResult BuscarProductos(string searchTerm)
         {
             using (var connection = _dataConexion.CreateConnection())
@@ -835,12 +836,12 @@ namespace Tienda.Controllers
                 // Definir la consulta utilizando JOIN para combinar las tablas.
                 string query = @"SELECT m.*, g.*
                      FROM td_main AS m
-                     INNER JOIN td_grupo AS g ON m.id_grupo = g.id_grupo
+                     INNER JOIN td_grupos AS g ON m.id_grupo = g.id_grupo
                      WHERE m.nombre LIKE @searchTerm OR g.nombre_grupo LIKE @searchTerm";
 
                 // Crear un comando SQL con la consulta y la conexión.
                 using (var command = new MySqlCommand(query, connection))
-                {
+                { 
                     // Agregar el parámetro para el término de búsqueda.
                     command.Parameters.AddWithValue("@searchTerm", "%" + searchTerm + "%");
 
