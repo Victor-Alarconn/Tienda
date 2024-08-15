@@ -1,0 +1,49 @@
+﻿@{
+    ViewBag.Title = "Gestión de Imágenes";
+    Layout = "~/Areas/Admin/Views/Shared/_Panel.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-second-primary">
+            <h6 class="m-0 font-weight-bold text-dark">Gestión de Imágenes Tienda Virtual</h6>
+        </div>
+        <div class="card-body">
+            @if (ViewBag.Message != null)
+            {
+                <div class="alert alert-success">@ViewBag.Message</div>
+            }
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">@ViewBag.Error</div>
+            }
+            <form action="@Url.Action("UploadImages", "GestionPagina", new { area = "Admin" })" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="file">Seleccionar Imagen</label>
+                    <input type="file" name="file" id="file" class="form-control" required />
+                </div>
+                <button type="submit" class="btn btn-primary">Subir Imagen</button>
+            </form>
+
+            <hr />
+
+            <h6 class="m-0 font-weight-bold text-dark">Imágenes Subidas</h6>
+            <div class="row">
+                @foreach (var image in (List<string>)ViewBag.Images)
+                {
+                    <div class="col-md-3">
+                        <div class="card mb-4">
+                            <img src="@Url.Content("~/Imagenes/Carousel/" + image)" class="card-img-top" alt="Imagen" />
+                            <div class="card-body">
+                                <form action="@Url.Action("DeleteImage", "GestionPagina", new { area = "Admin" })" method="post">
+                                    <input type="hidden" name="fileName" value="@image" />
+                                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

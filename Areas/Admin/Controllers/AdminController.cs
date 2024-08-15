@@ -34,6 +34,15 @@ namespace Tienda.Areas.Admin.Controllers
             return View();
         }
 
+        public ActionResult GestionPagina()
+        {
+            return View();
+        }
+
+        public ActionResult View1()
+        {
+            return View();
+        }
         public ActionResult AgregarProducto()
         {
             var categorias = ObtenerCategorias();

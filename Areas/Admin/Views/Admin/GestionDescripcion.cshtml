@@ -1,0 +1,40 @@
+﻿@{
+    ViewBag.Title = "Gestión de Descripción y Horarios";
+    Layout = "~/Areas/Admin/Views/Shared/_Panel.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-second-primary">
+            <h6 class="m-0 font-weight-bold text-dark">Gestión de Horarios y Descripción</h6>
+        </div>
+        <div class="card-body">
+            @if (ViewBag.Message != null)
+            {
+                <div class="alert alert-success">@ViewBag.Message</div>
+            }
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">@ViewBag.Error</div>
+            }
+
+            <form action="@Url.Action("GuardarDescripcion", "GestionPagina", new { area = "Admin" })" method="post">
+                <div class="form-group">
+                    <label for="descripcion"><strong>Descripción</strong></label>
+                    <textarea name="nuevaDescripcion" id="descripcion" class="form-control" rows="5" required>@ViewBag.Descripcion</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar Descripción</button>
+            </form>
+
+            <hr />
+
+            <form action="@Url.Action("GuardarHorario", "GestionPagina", new { area = "Admin" })" method="post">
+                <div class="form-group">
+                    <label for="horario"><strong>Horario de Atención</strong></label>
+                    <textarea name="nuevoHorario" id="horario" class="form-control" rows="3" required>@ViewBag.Horario</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar Horario</button>
+            </form>
+        </div>
+    </div>
+</div>

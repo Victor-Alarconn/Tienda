@@ -4,94 +4,58 @@
     ViewBag.Title = "Tienda Virtual";
 }
 
-<main>
-    <section class="row" aria-labelledby="aspnetTitle">
-        <h1 id="title">Productos</h1>
-        <p class="lead">Explora nuestros productos.</p>
-        <p>Mostrando @ViewBag.ProductCount resultados</p>
-        <div class="row">
-            @foreach (var product in Model)
-            {
-                <div class="col-md-4 mb-4">
-                    <div class="card product-card">
-                        <a href="@Url.Action("Details", new { id = product.Id })" class="text-decoration-none">
-                            @*<img src="@product.Imagen" class="card-img-top" alt="@product.Nombre">*@
-                            <img src="@(!string.IsNullOrEmpty(product.Imagen) ? Url.Content(product.Imagen) : "ruta_a_imagen_por_defecto.jpg")" class="card-img-top" alt="Imagen del producto" />
-
+<body class="initial-bg-color">
+    <main>
+        <section class="row" aria-labelledby="aspnetTitle">
+            <h1 id="title">Productos</h1>
+            <p class="lead">Explora nuestros productos.</p>
+            <p>Mostrando @ViewBag.ProductCount resultados</p>
+            <div class="row">
+                @foreach (var producto in Model)
+                {
+                    <div class="col-md-4 mb-4">
+                        <div class="card product-card narrow-card">
+                            <!-- Envuelve solo la imagen y el título en enlaces -->
+                            <a href="@Url.Action("Details", new { id = producto.Id })" class="text-decoration-none">
+                                <img src="@producto.Imagen" class="card-img-top" alt="@producto.Nombre">
+                            </a>
                             <div class="card-body">
-                                <h5 class="card-title text-success">@product.Nombre</h5>
-                                <p class="card-text">@product.Descripcion</p>
-                                <p class="card-text text-price">@product.Precio.ToString("C")</p>
+                                <a href="@Url.Action("Details", new { id = producto.Id })" class="text-decoration-none text-success">
+                                    <h5 class="card-title">@producto.Nombre</h5>
+                                </a>
+                                <p class="card-text">@producto.Descripcion</p>
+                                <p class="card-text text-price">@producto.Precio.ToString("C")</p>
                             </div>
-                        </a>
-                        <div class="card-footer">
-                            <button class="btn bg-azul buy-now" data-product-id="@product.Id">Comprar</button>
-                            <button class="btn bg-azul add-to-cart" data-product-id="@product.Id">Añadir al carrito</button>
-                            <span class="confirmation d-none" id="confirmation-@product.Id">
-                                ✓
-                                <br>
-                                <span class="text-danger">El producto se agregó al carrito</span>
-                                <br>
-                                <a href="@Url.Action("Carrito", "Home")">Ver carrito</a>
-                            </span>
+                            <div class="card-footer">
+                                <button class="btn buy-now" data-product-id="@producto.Id">Comprar</button>
+                                <button class="btn add-to-cart" data-product-id="@producto.Id">Añadir al carrito</button>
+                                <span class="confirmation d-none" id="confirmation-@producto.Id">
+                                    ✓
+                                    <br>
+                                    <span class="text-danger">El producto se agregó al carrito</span>
+                                    <br>
+                                    <a href="@Url.Action("Carrito", "Home")">Ver carrito</a>
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            }
-        </div>
-    </section>
-</main>
+                }
+            </div>
+            </div>
+</body>
+
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Obtener el color guardado desde localStorage
+        var savedNavbarColor = localStorage.getItem('navbarColor');
 
-    function buyNow(productId) {
-        fetch('/Home/AddToCart', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ productId: productId })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Redirigir al carrito de compras si la operación fue exitosa
-                window.location.href = '@Url.Action("Carrito", "Home")';
-            }
-        });
-    }
-
-    // Evento de clic para botón de Comprar
-    document.querySelectorAll('.buy-now').forEach(button => {
-        button.addEventListener('click', function () {
-            var productId = this.getAttribute('data-product-id');
-            buyNow(productId);
-        });
+        // Aplicar el color guardado a los botones "Añadir al carrito" y "Comprar"
+        if (savedNavbarColor) {
+            document.querySelectorAll('.add-to-cart, .buy-now').forEach(function(button) {
+                button.style.backgroundColor = savedNavbarColor;
+            });
+        }
     });
-
-
-    document.querySelectorAll('.add-to-cart').forEach(button => {
-        button.addEventListener('click', function () {
-            var productId = this.getAttribute('data-product-id');
-            fetch('/Home/AddToCart', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ productId: productId })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Actualizar el mensaje de confirmación
-                        document.getElementById('confirmation-' + productId).classList.remove('d-none');
-
-                        // Actualizar el contador del carrito
-                        updateCartItemCount();
-                    }
-                });
-        });
-    });
-
 
     function updateCartItemCount() {
         fetch('/Home/GetCartItemCount')
@@ -103,10 +67,10 @@
                     cartCounterElement.textContent = cartItemCount;
                 } else {
                     // Crear el contador si no existe
-                    var cartLink = document.querySelector('a[href$="/Carrito/Home"]');
+                    var cartLink = document.querySelector('a[href="/Home/Carrito"]');
                     if (cartLink) {
                         var span = document.createElement('span');
-                        span.className = 'badge bg-danger cart-item-count';
+                        span.classList.add('cart-item-count', 'badge', 'badge-danger');
                         span.textContent = cartItemCount;
                         cartLink.appendChild(span);
                     }
@@ -114,10 +78,60 @@
             });
     }
 
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function () {
+            var productId = this.getAttribute('data-product-id');
+            fetch('/Home/AddToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId: productId, quantity: 1 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Actualizar el mensaje de confirmación
+                    document.getElementById('confirmation-' + productId).classList.remove('d-none');
+
+                    // Actualizar el contador del carrito
+                    updateCartItemCount();
+                }
+            });
+        });
+    });
+
+    function buyNow(productId) {
+        fetch('/Home/AddToCart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ productId: productId, quantity: 1 })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirigir al carrito de compras si la operación fue exitosa
+                window.location.href = '@Url.Action("Carrito", "Home")';
+            }
+        });
+    }
+
+    document.querySelectorAll('.buy-now').forEach(button => {
+        button.addEventListener('click', function () {
+            var productId = this.getAttribute('data-product-id');
+            buyNow(productId);
+        });
+    });
+
+    // Llamar a updateCartItemCount cuando la página se cargue
+    document.addEventListener('DOMContentLoaded', updateCartItemCount);
 </script>
+
 <style>
-    .hidden {
-        display: none;
+    .narrow-card {
+        max-width: 330px;
     }
 
     .custom-color {
@@ -128,11 +142,6 @@
         color: #000000; /* Color negro para la descripción */
     }
 
-    .btn.bg-azul {
-        background-color: rgb(58, 176, 255); /* Color rosado */
-        color: #000000; /* Color negro para el texto de los botones */
-    }
-
     .card.product-card {
         box-shadow: 0 4px 8px 0 rgb(0,0,0,0.2); /* Sombreado */
         transition: 0.4s; /* Transición suave */
@@ -141,7 +150,6 @@
     }
 
         .card.product-card:hover {
-            box-shadow: 0 8px 16px 3px rgb(85, 130, 255); /* Sombreado más pronunciado al pasar el ratón */
+            box-shadow: 0 8px 16px 3px rgba(85, 130, 255); /* Sombreado más pronunciado al pasar el ratón */
         }
 </style>
-

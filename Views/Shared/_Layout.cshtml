@@ -1,4 +1,7 @@
-﻿﻿
+﻿@using System.IO
+@using System.Linq
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,27 +15,26 @@
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
 </head>
-<body>
+<body class="sb-nav-fixed">
 
-
-    <!--<div class="static-images">-->
-    @*<img src="~/Imagenes/pereira.png" alt="Imagen Estática 1">*@
-    <!--<img src="~/Imagenes/dulce.png" alt="Imagen Estática 2">
-    </div>-->
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark nav-top">
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark nav-top" id="navbar">
         <div class="container">
             @Html.ActionLink("Tienda", "Index", "Home", new { area = "" }, new { @class = "navbar-brand custom-nav-link" })
             <!-- Barra de búsqueda para dispositivos móviles -->
             <div class="d-md-none">
-                <form class="d-flex">
+                <form class="d-flex position-relative">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Buscar productos...">
-                        <button class="btn bg-azul" type="button" id="button-addon2">
+                        <input type="text" id="searchInputMobile" class="form-control" placeholder="Buscar productos...">
+                        <button class="btn bg-black" type="button" id="button-addon2">
                             <i class="bi bi-search" style="color: white;"></i>
                         </button>
                     </div>
+                    <ul id="searchResultsMobile" class="list-group position-absolute w-100 mt-2 bg-white border" style="display: none;">
+                        <!-- Los resultados de la búsqueda se agregarán aquí dinámicamente -->
+                    </ul>
                 </form>
             </div>
+
             <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Alternar navegación" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -44,27 +46,24 @@
                 </ul>
                 <!-- Barra de búsqueda para dispositivos no móviles -->
                 <div class="d-none d-md-block">
-                    <form class="d-flex mx-auto" style="width: 820px;">
+                    <form class="d-flex mx-auto position-relative" style="width: 820px;">
                         <div class="input-group flex-grow-1">
-                            <input type="text" class="form-control" placeholder="Buscar productos...">
-                            <button class="btn bg-azul" type="button" id="button-addon2">
+                            <input type="text" id="searchInput" class="form-control" placeholder="Buscar productos...">
+                            <button class="btn bg-black" type="button" id="button-addon2">
                                 <i class="bi bi-search" style="color: white;"></i>
                             </button>
                         </div>
+                        <ul id="searchResults" class="list-group position-absolute w-100 mt-2 bg-white border" style="display: none; z-index: 1000;">
+                            <!-- Los resultados de la búsqueda se agregarán aquí dinámicamente -->
+                        </ul>
                     </form>
                 </div>
-                <ul id="searchResultsList" style="list-style: none; padding: 0;">
-                    <!-- Los resultados de la búsqueda se agregarán aquí dinámicamente -->
-                </ul>
-
-
             </div>
         </div>
     </nav>
 
-
-
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-azul nav-botto">
+    <!-- Barra de categoría -->
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light nav-botto" id="categoryNav">
         <div class="container">
             <div class="collapse navbar-collapse justify-content-center ">
                 <span style="font-weight: bold;">@Html.Action("CategoryNav", "Home")</span>
@@ -72,28 +71,24 @@
         </div>
     </nav>
 
+    @*esto es para el carrusel de las imagenes con zoom y que van pasando*@
+
     <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
-            <div class="carousel-item active">
-                <div class="zoom-background">
-                    <img src="~/Imagenes/Portada1.svg" class="d-block w-100" alt="Imagen de Fondo 1">
+            @{
+                var imagesPath = Server.MapPath("~/Imagenes/Carousel");
+                var images = Directory.GetFiles(imagesPath).Select(Path.GetFileName).ToList();
+            }
+            @for (int i = 0; i < images.Count; i++)
+            {
+                var image = images[i];
+                var activeClass = i == 0 ? "active" : "";
+                <div class="carousel-item @activeClass">
+                    <div class="zoom-background">
+                        <img src="~/Imagenes/Carousel/@image" class="d-block w-100" alt="Imagen de Fondo @i">
+                    </div>
                 </div>
-            </div>
-            <div class="carousel-item">
-                <div class="zoom-background">
-                    <img src="~/Imagenes/Portada2.svg" class="d-block w-100" alt="Imagen de Fondo 2">
-                </div>
-            </div>
-            <div class="carousel-item">
-                <div class="zoom-background">
-                    <img src="~/Imagenes/Portada3.svg" class="d-block w-100" alt="Imagen de Fondo 3">
-                </div>
-            </div>
-            <div class="carousel-item">
-                <div class="zoom-background">
-                    <img src="~/Imagenes/Portada4.svg" class="d-block w-100" alt="Imagen de Fondo 4">
-                </div>
-            </div>
+            }
         </div>
     </div>
 
@@ -103,27 +98,26 @@
         <footer>
             <div class="container">
                 <div class="row justify-content-center">
-                    <!-- Añadida clase para centrar las columnas -->
-                    <!--<div class="col-md-6 text-center">-->
-                    <!-- Cambiado a 6 para que tome la mitad del ancho -->
-                    <!--<p><strong>Pagos 100% Seguros</strong></p>
-                        <p>Recibimos todas las tarjetas</p>
-                    </div>
-                    <div class="col-md-6 text-center">-->
-                    <!-- Cambiado a 6 para que tome la mitad del ancho -->
-                    <!--<p><strong>Entregas Nacionales</strong></p>
-                        <p>Enviamos a toda Colombia</p>
-                    </div>-->
                     <div class="col-md-12 text-center">
                         <!-- Cambiado a 6 para que tome la mitad del ancho -->
-                        <p><strong>COBERTURA PARA LAS ENTREGAS EN PEREIRA:</strong></p>
+                        <p><strong>COBERTURA PARA LAS ENTREGAS:</strong></p>
                         <p>
-                            Área urbana del Municipio de Pereira; hacia la vía Armenia hasta la Glorieta de la Condina; vía hacia Dosquebradas hasta la Romelia; vía Cerritos hasta el Hotel Sonesta.
+                            <strong>
+                                @{
+                                    // Ruta al archivo de texto
+                                    var filePath = Server.MapPath("~/Areas/Descripcion/descripcion.txt");
+
+                                    // Leer todo el contenido del archivo de texto
+                                    var fileContent = System.IO.File.ReadAllText(filePath);
+                                }
+                                <div class="txt-content">
+                                    <pre>@fileContent</pre>
+                                </div>
+                            </strong>
                         </p>
                     </div>
                 </div>
             </div>
-
             <div id="myCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
                 <div class="carousel-inner">
                     <!-- Primer conjunto de imágenes -->
@@ -146,38 +140,39 @@
             <div class="container my-5 bg-azul">
                 <!-- my-5 añade margen arriba y abajo -->
                 <div class="row text-black">
-                    @*<div class="col-md-4">
-                            <h2>Dirección</h2>
-                            <p>
-                                Casa de Yessica<br>
-                                Llamar a porteria.
-                            </p>
-                            <p>
-                                3227147454<br>
 
-                            </p>
-                        </div>*@
-                    <div class="col-md-5">
+                    <div class="col-md-5 text-white bg-overlay fondo-imagen">
                         <h2>Horario de atención:</h2>
-                        <p>8:00 am – 5:00 pm</p>
-                        <p>Abrimos los 365 días del año.</p>
+                        @{
+                            // Ruta al archivo de texto donde se almacenará el horario
+                            var horarioFilePath = Server.MapPath("~/Areas/Descripcion/horarios.txt");
+
+                            // Leer el contenido del archivo de texto
+                            var horarioAtencion = System.IO.File.Exists(horarioFilePath)
+                                ? System.IO.File.ReadAllText(horarioFilePath)
+                                : "8:00 am – 5:00 pm\nAbrimos los 365 días del año."; // Valor predeterminado
+
+                            // Mostrar el contenido en el layout
+                        }
+                        <p>@horarioAtencion</p>
                     </div>
-                    <div class="col-md-5">
+
+                    <div class="col-md-5 text-white bg-overlay fondo-imagen">
                         <h2>Redes sociales</h2>
                         <a href="https://www.facebook.com/mini.dulce.bocado/" target="_blank" class="social-icon">
                             <img src="~/Imagenes/Facebook.svg" alt="Facebook" style="width: 80px; height: 60px;">
                         </a>
                         @*<a href="https://twitter.com/ukumaripereira" target="_blank" class="social-icon">
-                                <img src="~/Imagenes/Twitter.svg" alt="Twitter" style="width: 80px; height: 60px;">
-                            </a>*@
+                <img src="~/Imagenes/Twitter.svg" alt="Twitter" style="width: 80px; height: 60px;">
+            </a>*@
                         <a href="https://www.instagram.com/minidulcebocado/" target="_blank" class="social-icon">
                             <img src="~/Imagenes/Instagram.svg" alt="Instagram" style="width: 80px; height: 60px;">
                         </a>
                         @*<a href="https://www.youtube.com/channel/UCSiERFPD0kXZD604Ewgt3XA" target="_blank" class="social-icon">
-                                <img src="/Imagenes/YouTube.svg" alt="Youtube" style="width: 80px; height: 60px;">
-                            </a>*@
+                <img src="/Imagenes/YouTube.svg" alt="Youtube" style="width: 80px; height: 60px;">
+            </a>*@
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-2 text-white bg-overlay fondo-imagen">
                         <img src="~/Imagenes/dulce.png" alt="Logo" style="width: 150px; height: 150px; " />
                     </div>
                 </div>
@@ -187,8 +182,14 @@
                 <div class="row">
                     <div class="col-md-12">
                         <!-- Cambiado a 12 para que tome todo el ancho -->
-                        <p>- RM SOFT Casa de Software y Servicios SAS – Victor A</p>
+                        <p>- RM SOFT Casa de Software y Servicios SAS </p>
                         <p>Todos los derechos reservados &copy; @DateTime.Now.Year</p>
+                        <h3 class="dtq-animated-text-head">
+                            <div id="typed-output" class="dtq-text-animation dtq-animated-text-main dtq-typed-text"></div>
+                            <i class="fa-solid fa-heart"></i>
+                            <span class="typed-cursor typed-cursor--blink" aria-hidden="true">|</span>
+                        </h3>
+
                     </div>
                 </div>
             </div>
@@ -246,6 +247,54 @@
         .navbar-nav .nav-link:hover {
             color: #F87474; /* Cambia este color según tus necesidades */
         }
+
+        .fondo-imagen {
+            background: url('/Imagenes/pisci.jpg') no-repeat center center;
+            background-size: cover;
+            position: relative;
+            color: white;
+            min-height: 300px;
+            padding: 20px;
+        }
+
+            .fondo-imagen h2, .fondo-imagen p, .fondo-imagen a {
+                position: relative;
+                z-index: 1;
+            }
+
+            .fondo-imagen::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0);
+                z-index: 0;
+            }
+
+        .social-icon {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .custom-nav-link {
+            font-size: 17px;
+            Tamaño de letra margin: 10px;
+            Margen alrededor del enlace padding: 5px 10px;
+            Relleno interno del enlace color: #000;
+            Color del texto background-color: #f8f9fa;
+            Color de fondo text-decoration: none;
+            Quitar subrayado del enlace border-radius: 5px;
+            Bordes redondeados
+        }
+
+            .custom-nav-link:hover {
+                color: #fff;
+                Color del texto al pasar el cursor background-color: #007bff;
+                Color de fondo al pasar el cursor
+            }
+
 
 
 
@@ -389,13 +438,20 @@
         }
     </style>
     <script>
-        var myCarousel = document.querySelector('#carouselExampleIndicators')
+        var myCarousel = document.querySelector('#carouselExampleIndicators');
         var carousel = new bootstrap.Carousel(myCarousel, {
             interval: 8000,
             wrap: true
         });
 
         $(document).ready(function () {
+            // Aplicar colores guardados en localStorage
+            var savedNavbarColor = localStorage.getItem('navbarColor');
+            if (savedNavbarColor) {
+                document.getElementById('navbar').style.backgroundColor = savedNavbarColor;
+                document.getElementById('categoryNav').style.backgroundColor = savedNavbarColor;
+            }
+
             $('.form-control').on('input', function () {
                 var searchTerm = $(this).val();
                 if (searchTerm.length >= 2) {
@@ -427,14 +483,25 @@
                 }
             });
         });
+    </script>
 
 
-
-
+    <script>
+        $(document).ready(function () {
+            // Aplica el color guardado desde localStorage
+            var savedNavbarColor = localStorage.getItem('navbarColor');
+            if (savedNavbarColor) {
+                document.getElementById('categoryNav').style.backgroundColor = savedNavbarColor;
+            }
+        });
     </script>
 
     @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/complementos")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
+
+
+
 </body>
 </html>

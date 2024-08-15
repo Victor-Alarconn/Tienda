@@ -1,0 +1,35 @@
+﻿@{
+    ViewBag.Title = "Gestión de Redes Sociales";
+    Layout = "~/Areas/Admin/Views/Shared/_Panel.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-second-primary">
+            <h6 class="m-0 font-weight-bold text-dark">Gestión de Redes Sociales</h6>
+        </div>
+        <div class="card-body">
+            @if (TempData["Message"] != null)
+            {
+                <div class="alert alert-success">@TempData["Message"]</div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">@TempData["Error"]</div>
+            }
+
+            <form action="@Url.Action("GuardarRedesSociales", "GestionPagina", new { area = "Admin" })" method="post">
+                <div class="form-group">
+                    <label for="facebookUrl"><strong>Facebook URL</strong></label>
+                    <input type="text" name="facebookUrl" id="facebookUrl" class="form-control" value="@ViewBag.FacebookUrl" required />
+                </div>
+                <div class="form-group">
+                    <label for="instagramUrl"><strong>Instagram URL</strong></label>
+                    <input type="text" name="instagramUrl" id="instagramUrl" class="form-control" value="@ViewBag.InstagramUrl" required />
+                </div>
+                <!-- Agrega campos para otras redes sociales si es necesario -->
+                <button type="submit" class="btn btn-primary">Guardar URLs</button>
+            </form>
+        </div>
+    </div>
+</div>

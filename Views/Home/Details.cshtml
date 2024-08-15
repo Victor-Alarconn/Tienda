@@ -4,112 +4,116 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container">
-    <h2>Detalle</h2>
-    <div class="row mb-5">
-        <!-- Columna izquierda para la imagen -->
-        <div class="col-md-6">
-            <img src="@Model.Product.Imagen" alt="@Model.Product.Nombre" class="img-fluid">
+<!-- Agregar la clase `initial-bg-color` al body para el color inicial -->
+<body class="initial-bg-color">
+    <div class="container">
+        <h2>Detalle</h2>
+        <div class="row mb-5">
+            <!-- Columna izquierda para la imagen -->
+            <div class="col-md-6">
+                <img src="@Model.Product.Imagen" alt="@Model.Product.Nombre" class="img-fluid">
+            </div>
+
+            <!-- Columna derecha para el texto -->
+            <div class="col-md-6">
+                <h2 class="font-weight-bold">@Model.Product.Nombre</h2>
+                <p class="text-price">@Model.Product.Precio.ToString("C")</p>
+                <p>@Model.Product.Detalle</p>
+                <p>@Model.Product.Descripcion</p>
+                <p class="font-italic">Nota: no se hacen devoluciones de dinero.</p>
+                <p>Abrimos todos los días del año desde las 9:00 a.m. hasta las 4:00 p.m. para el ingreso y hasta las 6:00 p.m. para estar en las instalaciones.</p>
+                <div class="input-group mb-3">
+                    <input type="number" class="form-control" id="product-quantity" value="1" min="1" style="max-width: 70px; margin-right: 10px;">
+                    <div class="input-group-append">
+                        <button class="btn add-to-cart" data-product-id="@Model.Product.Id">Añadir al carrito</button>
+                        <button class="btn buy-now" data-product-id="@Model.Product.Id">Comprar</button>
+                    </div>
+                </div>
+                <span class="confirmation d-none" id="confirmation-@Model.Product.Id">
+                    ✓
+                    <br>
+                    <span class="text-danger">El producto se agregó al carrito</span>
+                    <br>
+                    <a href="@Url.Action("Carrito", "Home")">Ver carrito</a>
+                </span>
+                <div class="input-group mb-3">
+                    <p>Categoria: <span class="text-danger">@Model.Product.GrupoNombre</span></p>
+                </div>
+            </div>
         </div>
 
-        <!-- Columna derecha para el texto -->
-        <div class="col-md-6">
-            <h2 class="font-weight-bold">@Model.Product.Nombre</h2>
-            <p class="text-price">@Model.Product.Precio.ToString("C")</p>
-            <p>@Model.Product.Detalle</p>
+        <div class="col-12">
+            <h1 class="border-bottom">Descripción</h1>
             <p>@Model.Product.Descripcion</p>
             <p class="font-italic">Nota: no se hacen devoluciones de dinero.</p>
             <p>Abrimos todos los días del año desde las 9:00 a.m. hasta las 4:00 p.m. para el ingreso y hasta las 6:00 p.m. para estar en las instalaciones.</p>
-            <div class="input-group mb-3">
-                <input type="number" class="form-control" id="product-quantity" value="1" min="1" style="max-width: 70px; margin-right: 10px;">
-                <div class="input-group-append">
-                    <button class="btn bg-azul add-to-cart" data-product-id="@Model.Product.Id">Añadir al carrito</button>
-                    <button class="btn bg-azul buy-now" data-product-id="@Model.Product.Id">Comprar</button>
-                </div>
-            </div>
-            <span class="confirmation d-none" id="confirmation-@Model.Product.Id">
-                ✓
-                <br>
-                <span class="text-danger">El producto se agregó al carrito</span>
-                <br>
-                <a href="@Url.Action("Carrito", "Home")">Ver carrito</a>
-            </span>
-            <div class="input-group mb-3">
-                <p>Categoria: <span class="text-danger">@Model.Product.GrupoNombre</span></p>
-            </div>
+            <h3 class="text-center">Conoce nuestras restricciones</h3>
+            <ul>
+                <li>No está permitido el ingreso a personas que estén bajo el efecto de bebidas alcohólicas o sustancias alucinógenas</li>
+                <li>Por el bienestar de su mascota y las especies del Bioparque, no se permite los ingresos de animales</li>
+                <li>Los menores de edad deben estar bajo vigilancia de un adulto</li>
+                <li>No esta permitido ingresar alimentos y/o bebidas</li>
+                <li>Está prohibido ingresar armas de fuego y elementos corto punzantes</li>
+                <li>No alimente los animales, ya que podría enfermarlos y ocasionarles la muerte, cada animal tiene una dieta especial elaborada por un profesional</li>
+                <li>No golpee los vidrios y mallas de los exhibidores, los ruidos altos asustan y estresan los animales</li>
+                <li>No lance objetos a los animales, puede causar daños irreversibles</li>
+                <li>Camine por los senderos indicados, respete los límites y barreras de seguridad de las exhibiciones, traspasarlos representa un peligro</li>
+                <li>No intente tocar los animales, introduciendo las manos por las rejas, esto representa un peligro</li>
+                <li>Cuide las plantas y jardines del Bioparque, son parte del hábitat y entorno de los animales, enriquecen el paisaje y brindan bienestar en el recorrido</li>
+                <li>En las zonas de aviarios asegúrese de mantener las puertas cerradas, para evitar escapes o accidentes con los animales</li>
+            </ul>
+
+            <h3 class="text-center">Recomendaciones para tu visita </h3>
+            <ul>
+                <li>Desde tu ingreso harás parte de un ecosistema que debes cuidar.</li>
+                <li>Aplicar abundante bloqueador solar en especial a los niños</li>
+                <li>Usar zapatos y ropa cómoda</li>
+                <li>Usa gorras o sombreros, también puedes comprarlos en la tienda de souvenir del Bioparque</li>
+                <li>Llevar coche para los bebés</li>
+                <li>El uso de lentes para sol</li>
+                <li>Lleva suficiente hidratación</li>
+                <li>Los residuos de alimentos, envases, deben ser depositados en los sitios destinados para tal fin.</li>
+                <li>Seguir las instrucciones y recomendaciones del personal del Bioparque Ukumarí</li>
+            </ul>
         </div>
 
-        </div>
-    <div class="col-12">
-        <h1 class="border-bottom">Descripción</h1>
-        <p>@Model.Product.Descripcion</p>
-        <p class="font-italic">Nota: no se hacen devoluciones de dinero.</p>
-        <p>Abrimos todos los días del año desde las 9:00 a.m. hasta las 4:00 p.m. para el ingreso y hasta las 6:00 p.m. para estar en las instalaciones.</p>
-        <h3 class="text-center">Conoce nuestras restricciones</h3>
-        <ul>
-            <li>No está permitido el ingreso a personas que estén bajo el efecto de bebidas alcohólicas o sustancias alucinógenas</li>
-            <li>Por el bienestar de su mascota y las especies del Bioparque, no se permite los ingresos de animales</li>
-            <li>Los menores de edad deben estar bajo vigilancia de un adulto</li>
-            <li>No esta permitido ingresar alimentos y/o bebidas</li>
-            <li>Está prohibido ingresar armas de fuego y elementos corto punzantes</li>
-            <li>No alimente los animales, ya que podría enfermarlos y ocasionarles la muerte, cada animal tiene una dieta especial elaborada por un profesional</li>
-            <li>No golpee los vidrios y mallas de los exhibidores, los ruidos altos asustan y estresan los animales</li>
-            <li>No lance objetos a los animales, puede causar daños irreversibles</li>
-            <li>Camine por los senderos indicados, respete los límites y barreras de seguridad de las exhibiciones, traspasarlos representa un peligro</li>
-            <li>No intente tocar los animales, introduciendo las manos por las rejas, esto representa un peligro</li>
-            <li>Cuide las plantas y jardines del Bioparque, son parte del hábitat y entorno de los animales, enriquecen el paisaje y brindan bienestar en el recorrido</li>
-            <li>En las zonas de aviarios asegúrese de mantener las puertas cerradas, para evitar escapes o accidentes con los animales</li>
-        </ul>
-
-        <h3 class="text-center">Recomendaciones para tu visita </h3>
-        <ul>
-            <li>Desde tu ingreso harás parte de un ecosistema que debes cuidar.</li>
-            <li>Aplicar abundante bloqueador solar en especial a los niños</li>
-            <li>Usar zapatos y ropa cómoda</li>
-            <li>Usa gorras o sombreros, también puedes comprarlos en la tienda de souvenir del Bioparque</li>
-            <li>Llevar coche para los bebés</li>
-            <li>El uso de lentes para sol</li>
-            <li>Lleva suficiente hidratación</li>
-            <li>Los residuos de alimentos, envases, deben ser depositados en los sitios destinados para tal fin.</li>
-            <li>Seguir las instrucciones y recomendaciones del personal del Bioparque Ukumarí</li>
-        </ul>
-    </div>
-    <div class="col-12">
-        <h2 class="border-bottom mb-4">Productos relacionados</h2>
-        <div class="row mb-4">
-            @foreach (var relatedProduct in Model.RelatedProducts)
-            {
-                <div class="col-md-4 mb-2">
-                    <div class="card product-card narrow-card">
-                        <!-- Envuelve solo la imagen y el título en enlaces -->
-                        <a href="@Url.Action("Details", new { id = relatedProduct.Id })" class="text-decoration-none">
-                            <img src="@relatedProduct.Imagen" class="card-img-top" alt="@relatedProduct.Nombre">
-                        </a>
-                        <div class="card-body">
-                            <a href="@Url.Action("Details", new { id = relatedProduct.Id })" class="text-decoration-none text-success">
-                                <h5 class="card-title">@relatedProduct.Nombre</h5>
+        <div class="col-12">
+            <h2 class="border-bottom mb-4">Productos relacionados</h2>
+            <div class="row mb-4">
+                @foreach (var relatedProduct in Model.RelatedProducts)
+                {
+                    <div class="col-md-4 mb-2">
+                        <div class="card product-card narrow-card">
+                            <!-- Envuelve solo la imagen y el título en enlaces -->
+                            <a href="@Url.Action("Details", new { id = relatedProduct.Id })" class="text-decoration-none">
+                                <img src="@relatedProduct.Imagen" class="card-img-top" alt="@relatedProduct.Nombre">
                             </a>
-                            <p class="card-text">@relatedProduct.Descripcion</p>
-                            <p class="card-text text-price">@relatedProduct.Precio.ToString("C")</p>
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn bg-azul buy-now" data-product-id="@relatedProduct.Id">Comprar</button>
-                            <button class="btn bg-azul add-to-cart" data-product-id="@relatedProduct.Id">Añadir al carrito</button>
-                            <span class="confirmation d-none" id="confirmation-@relatedProduct.Id">
-                                ✓
-                                <br>
-                                <span class="text-danger">El producto se agregó al carrito</span>
-                                <br>
-                                <a href="@Url.Action("Carrito", "Home")">Ver carrito</a>
-                            </span>
+                            <div class="card-body">
+                                <a href="@Url.Action("Details", new { id = relatedProduct.Id })" class="text-decoration-none text-success">
+                                    <h5 class="card-title">@relatedProduct.Nombre</h5>
+                                </a>
+                                <p class="card-text">@relatedProduct.Descripcion</p>
+                                <p class="card-text text-price">@relatedProduct.Precio.ToString("C")</p>
+                            </div>
+                            <div class="card-footer">
+                                <button class="btn buy-now" data-product-id="@relatedProduct.Id">Comprar</button>
+                                <button class="btn add-to-cart" data-product-id="@relatedProduct.Id">Añadir al carrito</button>
+                                <span class="confirmation d-none" id="confirmation-@relatedProduct.Id">
+                                    ✓
+                                    <br>
+                                    <span class="text-danger">El producto se agregó al carrito</span>
+                                    <br>
+                                    <a href="@Url.Action("Carrito", "Home")">Ver carrito</a>
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-            }
+                }
+            </div>
         </div>
     </div>
-</div>
+</body>
+
 <script>
     function updateQuantity(amount) {
         var quantityInput = document.getElementById('product-quantity');
@@ -132,19 +136,18 @@
                 },
                 body: JSON.stringify({ productId: productId, quantity: quantity })
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Actualizar el mensaje de confirmación
-                        document.getElementById('confirmation-' + productId).classList.remove('d-none');
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Actualizar el mensaje de confirmación
+                    document.getElementById('confirmation-' + productId).classList.remove('d-none');
 
-                        // Actualizar el contador del carrito
-                        updateCartItemCount();
-                    }
-                });
+                    // Actualizar el contador del carrito
+                    updateCartItemCount();
+                }
+            });
         });
     });
-
 
     function updateCartItemCount() {
         fetch('/Home/GetCartItemCount')
@@ -156,10 +159,10 @@
                     cartCounterElement.textContent = cartItemCount;
                 } else {
                     // Crear el contador si no existe
-                    var cartLink = document.querySelector('a[href$="/Carrito/Home"]');
+                    var cartLink = document.querySelector('a[href="/Home/Carrito"]');
                     if (cartLink) {
                         var span = document.createElement('span');
-                        span.className = 'badge bg-danger cart-item-count';
+                        span.classList.add('cart-item-count', 'badge', 'badge-danger');
                         span.textContent = cartItemCount;
                         cartLink.appendChild(span);
                     }
@@ -167,6 +170,8 @@
             });
     }
 
+    // Llamar a updateCartItemCount cuando la página se cargue
+    updateCartItemCount();
 
     function buyNow(productId) {
         var quantity = document.getElementById('product-quantity').value;
@@ -193,16 +198,24 @@
             buyNow(productId);
         });
     });
+
+    // Función para aplicar el color almacenado en localStorage a los botones
+    function applyCustomColor() {
+        const customColor = localStorage.getItem('navBarColor');
+        if (customColor) {
+            document.querySelectorAll('.add-to-cart, .buy-now').forEach(button => {
+                button.style.backgroundColor = customColor;
+            });
+        }
+    }
+
+    // Llamar a applyCustomColor cuando la página se cargue
+    document.addEventListener('DOMContentLoaded', applyCustomColor);
 </script>
 
 <style>
     .narrow-card {
         max-width: 330px;
-    }
-
-    .btn.bg-azul {
-        background-color: rgb(58, 176, 255); /* Color rosado */
-        color: #000000; /* Color negro para el texto de los botones */
     }
 
     .custom-color {
@@ -224,5 +237,3 @@
             box-shadow: 0 8px 16px 3px rgba(85, 130, 255); /* Sombreado más pronunciado al pasar el ratón */
         }
 </style>
-
-
