@@ -785,6 +785,12 @@ namespace Tienda.Controllers
             return View();
         }
 
+        public ActionResult Intranet() // Acción para mostrar la Intranet de privacidad
+        {
+
+            return View();
+        }
+
         [HttpGet]
         public ActionResult CalcularDigitoVerificacion(string nit)
         {
@@ -837,7 +843,7 @@ namespace Tienda.Controllers
                 string query = @"SELECT m.*, g.*
                      FROM td_main AS m
                      INNER JOIN td_grupos AS g ON m.id_grupo = g.id_grupo
-                     WHERE m.nombre LIKE @searchTerm OR g.nombre_grupo LIKE @searchTerm";
+                     WHERE m.td_nombre LIKE @searchTerm OR g.td_nombre LIKE @searchTerm";
 
                 // Crear un comando SQL con la consulta y la conexión.
                 using (var command = new MySqlCommand(query, connection))
@@ -854,15 +860,13 @@ namespace Tienda.Controllers
                         // Leer cada fila de resultados.
                         while (reader.Read())
                         {
-                            // Aquí puedes crear objetos con los datos de cada fila y agregarlos a la lista de resultados.
-                            // Por ejemplo, podrías crear un objeto anónimo con los datos de ambas tablas.
                             var resultado = new
                             {
                                 IdMain = reader["id_main"],
-                                NombreMain = reader["nombre_main"],
+                                NombreMain = reader["td_nombre"],
                                 IdGrupo = reader["id_grupo"],
-                                NombreGrupo = reader["nombre_grupo"]
-                                // Agrega más propiedades según sea necesario
+                                NombreGrupo = reader["td_nombre"]
+                                
                             };
 
                             // Agregar el resultado a la lista.

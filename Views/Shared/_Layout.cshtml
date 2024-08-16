@@ -41,23 +41,25 @@
                 <ul class="navbar-nav flex-grow-3">
                     <li><a href="https://ukumari.org/" class="nav-link custom-nav-link">Productos</a></li>
                     <li><a href="https://ukumari.org/contacto/" class="nav-link custom-nav-link">Contacto</a></li>
-                    <li>@Html.ActionLink("Intranet", "Papelera", "Nave", new { area = "" }, new { @class = "nav-link custom-nav-link" })</li>
+                    <li>@Html.ActionLink("Intranet", "Intranet", "Home", new { area = "" }, new { @class = "nav-link custom-nav-link" })</li>
 
                 </ul>
-                <!-- Barra de búsqueda para dispositivos no móviles -->
-                <div class="d-none d-md-block">
+                <!-- Contenedor para la barra de búsqueda y los resultados -->
+                <div class="search-container d-none d-md-block">
                     <form class="d-flex mx-auto" style="width: 820px;">
                         <div class="input-group flex-grow-1">
-                            <input type="text" class="form-control" placeholder="Buscar productos...">
+                            <input type="text" id="buscador" class="form-control" placeholder="Buscar productos...">
                             <button class="btn bg-azul" type="button" id="button-addon2">
                                 <i class="bi bi-search" style="color: white;"></i>
                             </button>
                         </div>
                     </form>
+                    <ul id="searchResultsList" style="list-style: none; padding: 0; margin: 0;">
+                        <!-- Los resultados de la búsqueda se agregarán aquí dinámicamente -->
+                    </ul>
                 </div>
-                <ul id="searchResultsList" style="list-style: none; padding: 0;">
-                    <!-- Los resultados de la búsqueda se agregarán aquí dinámicamente -->
-                </ul>
+
+
 
 
             </div>
@@ -302,6 +304,32 @@
 
         /* barra de busqueda */
 
+        ..search-container {
+            position: relative;
+            z-index: 1100; /* Asegúrate de que este valor sea mayor que el de la barra de navegación */
+        }
+
+        #searchResultsList {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #ccc;
+            z-index: 1100; /* Asegúrate de que este valor sea mayor que el de la barra de navegación */
+        }
+
+            #searchResultsList li {
+                padding: 10px;
+                cursor: pointer;
+            }
+
+                #searchResultsList li:hover {
+                    background-color: #f0f0f0;
+                }
+
+
+
 
 
         @@keyframes zoom {
@@ -390,53 +418,50 @@
                 }
         }
     </style>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+
     <script>
-        var myCarousel = document.querySelector('#carouselExampleIndicators')
+        var myCarousel = document.querySelector('#carouselExampleIndicators');
         var carousel = new bootstrap.Carousel(myCarousel, {
             interval: 8000,
             wrap: true
         });
 
+
         $(document).ready(function () {
-            $('.form-control').on('input', function () {
+            $('#buscador').on('input', function () {
                 var searchTerm = $(this).val();
+
+                // Limpiar resultados anteriores
+                $('#searchResultsList').empty();
+
+                // Realizar la búsqueda AJAX si la longitud del término es >= 2
                 if (searchTerm.length >= 2) {
                     $.ajax({
                         url: '/Home/BuscarProductos', // Ruta del método de búsqueda en el controlador HomeController
                         type: 'GET',
                         data: { searchTerm: searchTerm },
                         success: function (response) {
-                            // Limpiar resultados anteriores
-                            $('#searchResultsList').empty(); // Corregido para apuntar al ID correcto
-
                             // Iterar sobre los resultados y agregarlos a la lista
                             $.each(response, function (index, result) {
-                                var resultItem = '<li>' + result.NombreMain + ' - ' + result.NombreGrupo + '</li>';
-                                $('#searchResultsList').append(resultItem); // Corregido para apuntar al ID correcto
+                                var resultItem = $('<li>').text(result.NombreMain + ' - ' + result.NombreGrupo);
+                                $('#searchResultsList').append(resultItem);
                             });
-
-                            // Opcional: Si necesitas mostrar el ul explícitamente, asegúrate de que el ul esté oculto inicialmente con CSS
                         },
                         error: function (xhr, status, error) {
-                            // Manejar errores
-                            console.error(error);
+                            console.error(error); // Manejar errores
                         }
                     });
-                } else {
-                    // Si la longitud de la búsqueda es menor que 2, ocultar los resultados
-                    $('#searchResultsList').empty(); // Corregido para apuntar al ID correcto
-                    // Opcional: Si estás utilizando un método para ocultar el ul, asegúrate de activarlo aquí también
                 }
             });
         });
 
 
-
-
     </script>
 
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")
-    @RenderSection("scripts", required: false)
+
 </body>
 </html>

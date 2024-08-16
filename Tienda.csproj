@@ -285,6 +285,7 @@
     <Content Include="Views\Home\PayUForm.cshtml" />
     <Content Include="Views\Home\PayUResponse.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Home\Intranet.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
