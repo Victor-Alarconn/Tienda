@@ -9,15 +9,17 @@
             <h6 class="m-0 font-weight-bold text-dark">Gestión de Horarios y Descripción</h6>
         </div>
         <div class="card-body">
-            @if (ViewBag.Message != null)
+            <!-- Mensajes de éxito o error -->
+            @if (TempData["Message"] != null)
             {
-                <div class="alert alert-success">@ViewBag.Message</div>
+                <div class="alert alert-success">@TempData["Message"]</div>
             }
-            @if (ViewBag.Error != null)
+            @if (TempData["Error"] != null)
             {
-                <div class="alert alert-danger">@ViewBag.Error</div>
+                <div class="alert alert-danger">@TempData["Error"]</div>
             }
 
+            <!-- Formulario para la descripción -->
             <form action="@Url.Action("GuardarDescripcion", "GestionPagina", new { area = "Admin" })" method="post">
                 <div class="form-group">
                     <label for="descripcion"><strong>Descripción</strong></label>
@@ -28,6 +30,7 @@
 
             <hr />
 
+            <!-- Formulario para el horario de atención -->
             <form action="@Url.Action("GuardarHorario", "GestionPagina", new { area = "Admin" })" method="post">
                 <div class="form-group">
                     <label for="horario"><strong>Horario de Atención</strong></label>

@@ -91,7 +91,7 @@
             }
         </div>
     </div>
-
+    
     <div class="container body-content">
         @RenderBody()
         <hr />
@@ -157,21 +157,38 @@
                         <p>@horarioAtencion</p>
                     </div>
 
+                    <!-- Para las redes sociales -->
                     <div class="col-md-5 text-white bg-overlay fondo-imagen">
                         <h2>Redes sociales</h2>
-                        <a href="https://www.facebook.com/mini.dulce.bocado/" target="_blank" class="social-icon">
+                        @{
+                            // Ruta al archivo de texto donde se almacenan las URLs de redes sociales
+                            var redesSocialesFilePath = Server.MapPath("~/Areas/Descripcion/redes-sociales.txt");
+
+                            // Inicializar las URLs de las redes sociales con valores predeterminados
+                            var facebookUrl = "https://www.facebook.com/mini.dulce.bocado/";
+                            var instagramUrl = "https://www.instagram.com/minidulcebocado/";
+
+                            // Verificar si el archivo existe y leer las URLs
+                            if (System.IO.File.Exists(redesSocialesFilePath))
+                            {
+                                var lines = System.IO.File.ReadAllLines(redesSocialesFilePath);
+                                if (lines.Length >= 2)
+                                {
+                                    facebookUrl = lines[0];  // Primera línea para Facebook
+                                    instagramUrl = lines[1]; // Segunda línea para Instagram
+                                }
+                            }
+                        }
+
+                        <a href="@facebookUrl" target="_blank" class="social-icon">
                             <img src="~/Imagenes/Facebook.svg" alt="Facebook" style="width: 80px; height: 60px;">
                         </a>
-                        @*<a href="https://twitter.com/ukumaripereira" target="_blank" class="social-icon">
-                <img src="~/Imagenes/Twitter.svg" alt="Twitter" style="width: 80px; height: 60px;">
-            </a>*@
-                        <a href="https://www.instagram.com/minidulcebocado/" target="_blank" class="social-icon">
+                        <a href="@instagramUrl" target="_blank" class="social-icon">
                             <img src="~/Imagenes/Instagram.svg" alt="Instagram" style="width: 80px; height: 60px;">
                         </a>
-                        @*<a href="https://www.youtube.com/channel/UCSiERFPD0kXZD604Ewgt3XA" target="_blank" class="social-icon">
-                <img src="/Imagenes/YouTube.svg" alt="Youtube" style="width: 80px; height: 60px;">
-            </a>*@
                     </div>
+
+
                     <div class="col-md-2 text-white bg-overlay fondo-imagen">
                         <img src="~/Imagenes/dulce.png" alt="Logo" style="width: 150px; height: 150px; " />
                     </div>

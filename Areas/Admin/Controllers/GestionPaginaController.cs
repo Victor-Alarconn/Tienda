@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -13,9 +14,12 @@ namespace Tienda.Areas.Admin.Controllers
 
         // Ruta relativa al archivo donde se almacenará la descripción
          private static readonly string DescripcionPath = System.Web.HttpContext.Current.Server.MapPath("~/Areas/Descripcion/descripcion.txt");
-        
+
         // Ruta horario
         private string HorarioPath => Server.MapPath("~/Areas/Descripcion/horarios.txt");
+
+        // Ruta para las redes sociales
+        private string RedesSocialesPath => Server.MapPath("~/Areas/Descripcion/redes-sociales.txt");
 
         // GET: Admin/GestionPagina
         public ActionResult Index()
@@ -133,6 +137,49 @@ namespace Tienda.Areas.Admin.Controllers
 
             // Volver a cargar la vista de gestión
             return RedirectToAction("GestionDescripcion");
+        }
+
+        // GET: GestionPagina/GestionRedesSociales
+        public ActionResult GestionRedesSociales()
+        {
+            var urls = new Dictionary<string, string>();
+            if (System.IO.File.Exists(RedesSocialesPath))
+            {
+                var lines = System.IO.File.ReadAllLines(RedesSocialesPath);
+                if (lines.Length >= 2)
+                {
+                    urls["FacebookUrl"] = lines[0];
+                    urls["InstagramUrl"] = lines[1];
+                }
+            }
+            else
+            {
+                urls["FacebookUrl"] = "https://www.facebook.com/mini.dulce.bocado/";
+                urls["InstagramUrl"] = "https://www.instagram.com/minidulcebocado/";
+            }
+
+            ViewBag.FacebookUrl = urls["FacebookUrl"];
+            ViewBag.InstagramUrl = urls["InstagramUrl"];
+
+            return View("~/Areas/Admin/Views/Admin/GestionRedesSociales.cshtml");
+        }
+
+        // POST: GestionPagina/GuardarRedesSociales
+        [HttpPost]
+        public ActionResult GuardarRedesSociales(string facebookUrl, string instagramUrl)
+        {
+            try
+            {
+                var urls = new[] { facebookUrl, instagramUrl };
+                System.IO.File.WriteAllLines(RedesSocialesPath, urls);
+                TempData["Message"] = "URLs de redes sociales guardadas exitosamente.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error al guardar las URLs: " + ex.Message;
+            }
+
+            return RedirectToAction("GestionRedesSociales");
         }
 
 
