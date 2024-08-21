@@ -1,5 +1,10 @@
 ﻿@model IEnumerable<Tienda.Models.Categoria>
 
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css">
+</head>
+
 <ul class="navbar-nav flex-grow-2">
     @foreach (var categoria in Model)
     {
@@ -7,15 +12,14 @@
             <a href="@Url.Action("Index", "Home", new { categoryId = categoria.Id })" class="nav-link text-white">@categoria.Nombre</a>
         </li>
     }
-<li>
-    <a href="@Url.Action("Carrito", "Home")" class="nav-link text-white">
-        Carrito de Compras <span class="badge bg-danger cart-item-count">@Session["cartItemCount"]</span>
-    </a>
-
-</li>
+    <li>
+        <a href="@Url.Action("Carrito", "Home")" class="nav-link text-white">
+            Carrito de Compras
+            <i class="bi bi-cart4" style="color: #ffffff;"></i>
+            <span class="badge bg-danger cart-item-count">@Session["cartItemCount"]</span>
+        </a>
+    </li>
 </ul>
-
-
 <style>
     .badge-danger {
         vertical-align: super;

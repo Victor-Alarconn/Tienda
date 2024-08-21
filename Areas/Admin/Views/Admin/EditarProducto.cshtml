@@ -1,66 +1,82 @@
 ﻿@model Tienda.Areas.Admin.Models.Productos
 @{
-    ViewBag.Title = "Editar";
+    ViewBag.Title = "Editar Producto";
     Layout = "~/Areas/Admin/Views/Shared/_Panel.cshtml";
 }
 
-<h2>Editar Producto</h2>
+<h2 class="text-center mb-4">Editar Producto</h2>
 
 @using (Html.BeginForm("ActualizarProducto", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.HiddenFor(m => m.Id)
 
-    <div>
-        @Html.LabelFor(m => m.Nombre)
-        @Html.TextAreaFor(m => m.Nombre, new { @class = "input-grande", rows = 4 })
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                @Html.LabelFor(m => m.Nombre, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control", rows = 4 })
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                @Html.LabelFor(m => m.Categoria, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.Categoria, new { @class = "form-control" })
+            </div>
+        </div>
     </div>
 
-    <div>
-        @Html.LabelFor(m => m.Descripcion)
-        @Html.TextAreaFor(m => m.Descripcion, new { @class = "input-grande", rows = 4 })
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                @Html.LabelFor(m => m.Precio, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.Precio, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                @Html.LabelFor(m => m.Cantidad, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.Cantidad, new { @class = "form-control" })
+            </div>
+        </div>
     </div>
 
-    <div>
-        @Html.LabelFor(m => m.Precio)
-        @Html.TextBoxFor(m => m.Precio)
+    <div class="mb-3">
+        <div class="form-group">
+            @Html.LabelFor(m => m.Descripcion, new { @class = "form-label" })
+            @Html.TextAreaFor(m => m.Descripcion, new { @class = "form-control", rows = 4 })
+        </div>
     </div>
 
-    <div>
-        @Html.LabelFor(m => m.Imagen, "Imagen URL")
-        @Html.TextBoxFor(m => m.Imagen, new { @class = "input-grande" })
-        <br />
-        <img src="@(!string.IsNullOrEmpty(Model.Imagen) ? Url.Content(Model.Imagen) : Url.Content("ruta_a_imagen_por_defecto.jpg"))" alt="Imagen del producto" style="max-width: 150px; max-height: 150px;" />
-        <br />
-        <input type="file" class="form-control" name="imagenSubida" />
-        <br />
-        <span>Cargar imagen o ingresar URL.</span>
+    <div class="mb-3">
+        <div class="form-group">
+            @Html.LabelFor(m => m.Detalle, new { @class = "form-label" })
+            @Html.TextAreaFor(m => m.Detalle, new { @class = "form-control", rows = 4 })
+        </div>
     </div>
 
-
-    <div>
-        @Html.LabelFor(m => m.Categoria)
-        @Html.TextBoxFor(m => m.Categoria)
+    <div class="mb-3">
+        <div class="form-group">
+            @Html.LabelFor(m => m.Imagen, "Imagen URL", new { @class = "form-label" })
+            @Html.TextBoxFor(m => m.Imagen, new { @class = "form-control" })
+            <div class="mt-2">
+                <img src="@(!string.IsNullOrEmpty(Model.Imagen) ? Url.Content(Model.Imagen) : Url.Content("~/images/default-image.jpg"))" alt="Imagen del producto" class="img-thumbnail" style="max-width: 150px; max-height: 150px;" />
+            </div>
+            <div class="mt-2">
+                <input type="file" class="form-control" name="imagenSubida" />
+                <small class="form-text text-muted">Cargar imagen o ingresar URL.</small>
+            </div>
+        </div>
     </div>
 
-    <div>
-        @Html.LabelFor(m => m.Detalle)
-        @Html.TextAreaFor(m => m.Detalle, new { @class = "input-grande", rows = 4 })
+    <div class="mb-3">
+        <div class="form-check">
+            @Html.CheckBoxFor(m => m.Stock, new { @class = "form-check-input" })
+            @Html.LabelFor(m => m.Stock, new { @class = "form-check-label" })
+        </div>
     </div>
 
-    <div>
-        @Html.LabelFor(m => m.Stock)
-        @Html.CheckBoxFor(m => m.Stock)
-    </div>
-
-    <div>
-        @Html.LabelFor(m => m.Cantidad)
-        @Html.TextBoxFor(m => m.Cantidad)
-    </div>
-
-    <div style="margin-top: 20px;">
+    <div class="d-flex justify-content-between mt-4">
         <input type="submit" value="Guardar cambios" class="btn btn-primary" />
         <input type="button" value="Cancelar" class="btn btn-secondary" onclick="location.href='@Url.Action("Productos", "Admin")'" />
     </div>
-
-
 }

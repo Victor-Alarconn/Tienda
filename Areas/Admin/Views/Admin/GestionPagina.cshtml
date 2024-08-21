@@ -1,0 +1,118 @@
+﻿﻿@{
+    ViewBag.Title = "GestionPagina";
+    Layout = "~/Areas/Admin/Views/Shared/_Panel.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-second-primary">
+            <h6 class="m-0 font-weight-bold text-dark">Gestion de Colores Tienda Virtual</h6>
+        </div>
+        <div class="card-body">
+            <div>
+                <label for="navbarColorPicker">Elige un color para la barra de navegación:</label>
+                <input type="text" id="navbarColorPicker" />
+            </div>
+            <div>
+                <label for="sliderColorPicker">Elige un color para el Slider:</label>
+                <input type="text" id="sliderColorPicker" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-second-primary">
+            <h6 class="m-0 font-weight-bold text-dark">Gestion de Imágenes Tienda Virtual</h6>
+        </div>
+        <div class="card-body">
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">@ViewBag.Error</div>
+            }
+            else if (ViewBag.Message != null)
+            {
+                <div class="alert alert-success">@ViewBag.Message</div>
+            }
+            <form action="@Url.Action("UploadImages", "GestionPagina", new { area = "Admin" })" method="post" enctype="multipart/form-data">
+                <button type="submit" class="btn btn-primary">Subir Imágenes </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-second-primary">
+            <h6 class="m-0 font-weight-bold text-dark">Gestión de Descripción Tienda Virtual</h6>
+        </div>
+        <div class="card-body">
+            <!-- Elimina el formulario y solo usa un enlace que redirija -->
+            <a href="@Url.Action("GestionDescripcion", "GestionPagina", new { area = "Admin" })" class="btn btn-primary">Agregar Descripción</a>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-second-primary">
+            <h6 class="m-0 font-weight-bold text-dark">Gestión de Redes Sociales</h6>
+        </div>
+        <div class="card-body">
+            <!-- Enlace para gestionar las redes sociales -->
+            <a href="@Url.Action("GestionRedesSociales", "GestionPagina", new { area = "Admin" })" class="btn btn-primary">Gestionar Redes Sociales</a>
+        </div>
+    </div>
+</div>
+
+
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $("#navbarColorPicker").spectrum({
+                color: "#86B038",
+                showInput: true,
+                preferredFormat: "hex",
+                showPalette: true,
+                palette: [
+                    ["#007BFF", "#FF0000", "#86B038"]
+                ],
+                change: function (color) {
+                    var selectedColor = color.toHexString();
+                    document.getElementById('navbar').style.backgroundColor = selectedColor;
+                    localStorage.setItem('navbarColor', selectedColor);
+                }
+            });
+
+            $("#sliderColorPicker").spectrum({
+                color: "#d6f792",
+                showInput: true,
+                preferredFormat: "hex",
+                showPalette: true,
+                palette: [
+                    ["#007BFF", "#FF0000", "#d6f792"]
+                ],
+                change: function (color) {
+                    var selectedColor = color.toHexString();
+                    document.querySelector('.sb-sidenav-menu').style.backgroundColor = selectedColor;
+                    localStorage.setItem('sliderColor', selectedColor);
+                }
+            });
+
+            // Al cargar la página, aplica los colores guardados
+            var savedNavbarColor = localStorage.getItem('navbarColor');
+            if (savedNavbarColor) {
+                document.getElementById('navbar').style.backgroundColor = savedNavbarColor;
+                $("#navbarColorPicker").spectrum("set", savedNavbarColor);
+            }
+
+            var savedSliderColor = localStorage.getItem('sliderColor');
+            if (savedSliderColor) {
+                document.querySelector('.sb-sidenav-menu').style.backgroundColor = savedSliderColor;
+                $("#sliderColorPicker").spectrum("set", savedSliderColor);
+            }
+        });
+    </script>
+}

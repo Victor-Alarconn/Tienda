@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Tienda.Areas.Admin.Models.Categorias>
+﻿﻿@model IEnumerable<Tienda.Areas.Admin.Models.Categorias>
 @{
     ViewBag.Title = "Categorias";
     Layout = "~/Areas/Admin/Views/Shared/_Panel.cshtml";
@@ -27,38 +27,50 @@
     </script>
 }
 
-
-<div class="header-con-boton">
-    <h2>Categorias</h2>
-    <button class="btn btn-success" onclick="location.href='@Url.Action("AgregarCategoria", "Admin")'">Agregar Categoria +</button>
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-second-primary">
+            <div class="header-con-boton">
+                <h2>Categorías</h2>
+                <button class="btn btn-success" onclick="location.href='@Url.Action("AgregarCategoria", "Admin")'">Agregar Categoría +</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm-12">
+                    <table class="table table-bordered" id="tbCategorias" cellspacing="0" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Acciones</th> <!-- Encabezado para las acciones -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr data-id="@item.Id">
+                                    <td>@item.Id</td>
+                                    <td>@item.Nombre</td>
+                                    <td class="celda-botones">
+                                        <button class="btn btn-primary btn-editar btn-accion" data-id="@item.Id"
+                                                data-url="@Url.Action("EditarCategoria", "Admin", new { area = "Admin", id = item.Id })">
+                                            Editar
+                                        </button>
+                                        <button class="btn btn-danger btn-borrar btn-accion" data-id="@item.Id">
+                                            Borrar
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Acciones</th> <!-- Encabezado para las acciones -->
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Id</td>
-                <td>@item.Nombre</td>
-                <td class="celda-botones">
-                    <button class="btn btn-primary btn-editar btn-accion"
-                            data-id="@item.Id"
-                            data-url="@Url.Action("EditarCategoria", "Admin", new { area = "Admin", id = item.Id })">
-                        Editar
-                    </button>
-                    <button class="btn btn-danger btn-borrar btn-accion" data-id="@item.Id">Borrar</button>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
 <!-- Modal para confirmación de borrado -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
