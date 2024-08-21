@@ -76,8 +76,12 @@
 @section scripts {
     <script>
         $(document).ready(function () {
+            // Color gris predeterminado
+            var defaultColor = "#808080";
+
+            // Configuración del color picker para la barra de navegación
             $("#navbarColorPicker").spectrum({
-                color: "#86B038",
+                color: defaultColor,
                 showInput: true,
                 preferredFormat: "hex",
                 showPalette: true,
@@ -91,8 +95,9 @@
                 }
             });
 
+            // Configuración del color picker para el slider
             $("#sliderColorPicker").spectrum({
-                color: "#d6f792",
+                color: defaultColor,
                 showInput: true,
                 preferredFormat: "hex",
                 showPalette: true,
@@ -106,18 +111,14 @@
                 }
             });
 
-            // Al cargar la página, aplica los colores guardados
-            var savedNavbarColor = localStorage.getItem('navbarColor');
-            if (savedNavbarColor) {
-                document.getElementById('navbar').style.backgroundColor = savedNavbarColor;
-                $("#navbarColorPicker").spectrum("set", savedNavbarColor);
-            }
+            // Al cargar la página, aplica los colores guardados o el gris predeterminado
+            var savedNavbarColor = localStorage.getItem('navbarColor') || defaultColor;
+            document.getElementById('navbar').style.backgroundColor = savedNavbarColor;
+            $("#navbarColorPicker").spectrum("set", savedNavbarColor);
 
-            var savedSliderColor = localStorage.getItem('sliderColor');
-            if (savedSliderColor) {
-                document.querySelector('.sb-sidenav-menu').style.backgroundColor = savedSliderColor;
-                $("#sliderColorPicker").spectrum("set", savedSliderColor);
-            }
+            var savedSliderColor = localStorage.getItem('sliderColor') || defaultColor;
+            document.querySelector('.sb-sidenav-menu').style.backgroundColor = savedSliderColor;
+            $("#sliderColorPicker").spectrum("set", savedSliderColor);
         });
     </script>
 }

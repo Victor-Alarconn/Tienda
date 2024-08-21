@@ -45,16 +45,18 @@
 </body>
 
 <script>
+    // color fonde de los botones
     document.addEventListener('DOMContentLoaded', function () {
         // Obtener el color guardado desde localStorage
         var savedNavbarColor = localStorage.getItem('navbarColor');
 
-        // Aplicar el color guardado a los botones "Añadir al carrito" y "Comprar"
-        if (savedNavbarColor) {
-            document.querySelectorAll('.add-to-cart, .buy-now').forEach(function(button) {
-                button.style.backgroundColor = savedNavbarColor;
-            });
-        }
+        // Definir el color por defecto (gris)
+        var colorToApply = savedNavbarColor || '#808080'; // Gris por defecto
+
+        // Aplicar el color guardado o el color por defecto a los botones
+        document.querySelectorAll('.add-to-cart, .buy-now').forEach(function (button) {
+            button.style.backgroundColor = colorToApply;
+        });
     });
 
     function updateCartItemCount() {

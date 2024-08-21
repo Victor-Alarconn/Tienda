@@ -95,21 +95,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.1/spectrum.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
-  <script>
-        $(document).ready(function () {
-            var savedNavbarColor = localStorage.getItem('navbarColor');
-            if (savedNavbarColor) {
-                document.getElementById('navbar').style.backgroundColor = savedNavbarColor;
-            }
-
-            var savedSliderColor = localStorage.getItem('sliderColor');
-            if (savedSliderColor) {
-                document.querySelector('.sb-sidenav-menu').style.backgroundColor = savedSliderColor;
-            }
-        });
-    </script>
-
-
+    <script src="~/Scripts/colorManagement.js"></script>
 </body>
 </html>
 
@@ -118,8 +104,6 @@
         background-color: #86B038; /* Color de fondo */
     }
 
-
-    /* Colores, tamaños etc de las letras que dicen GESTION */
     .mi-nav-link {
         color: white; /* Color de la letra */
         text-decoration: none; /* Elimina el subrayado */

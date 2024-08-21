@@ -39,9 +39,8 @@
         // Obtener el color guardado desde localStorage
         var savedNavbarColor = localStorage.getItem('navbarColor');
 
-        // Aplicar el color guardado a la barra de categoría
-        if (savedNavbarColor) {
-            document.getElementById('categoryNav').style.backgroundColor = savedNavbarColor;
-        }
+        // Si hay un color guardado, aplicarlo; de lo contrario, usar gris
+        var colorToApply = savedNavbarColor || '#808080'; // Gris por defecto
+        document.getElementById('categoryNav').style.backgroundColor = colorToApply;
     });
 </script>
