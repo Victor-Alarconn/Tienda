@@ -1,34 +1,26 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <!-- Configuración de caracteres y vista -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Título de la página -->
     <title>@ViewBag.Title - Tienda PETETES</title>
-
-    <!-- Enlaces a hojas de estilo -->
+    <!-- Carga de hojas de estilo externas -->
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.1/spectrum.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css">
     @Styles.Render("~/Content/css")
 </head>
 <body class="sb-nav-fixed">
-
     <!-- Barra de navegación superior -->
     <nav class="sb-topnav navbar navbar-expand navbar-dark" id="navbar">
         <!-- Botón para alternar la barra lateral -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidenavAccordion">
-            <span class="navbar-toggler-icon"></span>
+        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!">
+            <i class="fas fa-bars"></i>
         </button>
-
-
-        <!-- Título de administración -->
+        <!-- Título de la sección de administración -->
         <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
             <a>@Html.ActionLink("ADMINISTRACION", "Inicio", "Admin", new { area = "Admin" }, new { @class = "navbar-brand mi-navbar-brand" })</a>
         </form>
-
-        <!-- Menú desplegable de usuario -->
+        <!-- Menú de usuario para login/logout -->
         <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -38,27 +30,22 @@
                     <li><a class="dropdown-item" href="#!">Settings</a></li>
                     <li><a class="dropdown-item" href="#!">Activity Log</a></li>
                     <li><hr class="dropdown-divider" /></li>
-                    <li>
-                        @Html.ActionLink("Salir", "CerrarSesion", "Admin", new { area = "Admin" }, new { @class = "dropdown-item" })
-                    </li>
+                    <li>@Html.ActionLink("Salir", "CerrarSesion", "Admin", new { area = "Admin" }, new { @class = "dropdown-item" })</li>
                 </ul>
             </li>
         </ul>
     </nav>
 
-    <!-- Contenedor de la barra lateral y contenido principal -->
     <div id="layoutSidenav">
-        <!-- Barra lateral -->
+        <!-- Barra lateral de navegación -->
         <div id="layoutSidenav_nav">
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu">
                     <div class="container">
-                        <!-- Botón para alternar la barra de navegación en dispositivos móviles -->
-                        <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Alternar navegación" aria-controls="navbarSupportedContent"
-                                aria-expanded="false" aria-label="Toggle navigation">
+                        <!-- Botón para colapsar la barra lateral en pantallas pequeñas -->
+                        <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Alternar navegación" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
                         </button>
-                        <!-- Menú de navegación -->
                         <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
                             <ul class="navbar-nav flex-grow-1">
                                 <li>@Html.ActionLink("Gestión de Productos", "Productos", "Admin", new { area = "Admin" }, new { @class = "mi-nav-link fs-5" })</li>
@@ -82,35 +69,39 @@
                     @RenderBody()
                 </div>
             </main>
+
             <!-- Pie de página -->
             <footer class="py-4 bg-light mt-auto">
                 <div class="container-fluid px-4">
                     <div class="d-flex align-items-center justify-content-between small">
-                        <div class="text-muted">© 2024 - Parque Temático De Flora Y Fauna De Pereira SAS</div>
+                        <div class="text-muted">Copyright &copy; Rm Soft 2024</div>
                     </div>
                 </div>
             </footer>
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Carga de scripts necesarios -->
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/complementos")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
 
-    <!-- Scripts adicionales -->
+    <!-- Carga de scripts externos -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.1/spectrum.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
+
+    <!-- Script personalizado para cargar colores guardados en localStorage -->
     <script>
         $(document).ready(function () {
-            // Aplicar colores guardados desde el almacenamiento local
+            // Cargar color del navbar desde localStorage
             var savedNavbarColor = localStorage.getItem('navbarColor');
             if (savedNavbarColor) {
                 document.getElementById('navbar').style.backgroundColor = savedNavbarColor;
             }
 
+            // Cargar color del sidebar desde localStorage
             var savedSliderColor = localStorage.getItem('sliderColor');
             if (savedSliderColor) {
                 document.querySelector('.sb-sidenav-menu').style.backgroundColor = savedSliderColor;
@@ -119,52 +110,45 @@
     </script>
 </body>
 </html>
+
+<!-- Estilos personalizados -->
 <style>
     .mi-navbar {
-        background-color: #86B038; /* Color de fondo de la barra de navegación */
+        background-color: #86B038; /* Color de fondo del navbar */
     }
 
-    /* Estilos para los enlaces de navegación */
     .mi-nav-link {
-        color: black; /* Color de la letra */
+        color: white; /* Color de la letra */
         text-decoration: none; /* Elimina el subrayado */
         text-align: center; /* Centra el texto */
         display: block; /* Hace que el enlace llene todo el <li> */
         margin: 0 10px; /* Agrega un margen a izquierda y derecha */
         font-weight: bold; /* Letra en negrita */
-        padding: 8px 12px; /* Espaciado interno */
+    }
+
+        .mi-nav-link:hover {
+            color: black; /* Color de la letra al pasar el ratón por encima */
+            text-decoration: none; /* Mantiene sin subrayado al pasar el ratón por encima */
+        }
+
+    .navbar-nav > li {
+        margin-right: 20px; /* Espacio a la derecha para centrar el texto de los títulos */
+    }
+
+    .mi-navbar-brand {
+        color: white !important; /* Color de la letra */
+        font-weight: bold; /* Letra en negrita */
+    }
+
+    .mi-nav-link {
+        color: #000000; /* Color negro por defecto */
+        padding: 8px 12px; /* Espaciado interno para parecerse a una casilla */
         border-radius: 4px; /* Esquinas redondeadas */
         transition: background-color 0.3s, color 0.3s; /* Transición suave */
     }
 
         .mi-nav-link:hover {
-            background-color: #86B038; /* Color de fondo cuando se pasa el ratón por encima */
-            color: #ffffff; /* Color del texto cuando se pasa el ratón por encima */
-        }
-
-    .navbar-nav > li {
-        margin-right: 20px; /* Margen derecho para centrar texto */
-    }
-
-    .mi-navbar-brand {
-        color: white !important; /* Color de letra en la marca de la barra de navegación */
-        font-weight: bold; /* Letra en negrita */
-    }
-
-    /* Estilo para el acordeón lateral */
-    .sb-sidenav {
-        height: 100vh; /* Asegura que el menú ocupe toda la altura de la pantalla */
-        width: 250px;
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 100;
-        transition: all 0.3s;
-    }
-
-
-        .sb-sidenav.toggled {
-            transform: translateX(-250px);
+            background-color: #86B038; /* Color verde cuando se pasa el mouse */
+            color: #ffffff; /* Color del texto cuando se pasa el mouse */
         }
 </style>
-
