@@ -167,6 +167,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminController.cs" />
+    <Compile Include="Areas\Admin\Controllers\GestionPaginaController.cs" />
     <Compile Include="Areas\Admin\Models\Categorias.cs" />
     <Compile Include="Areas\Admin\Models\Productos.cs" />
     <Compile Include="Areas\Admin\Models\Usuario.cs" />
@@ -355,6 +356,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Areas\Admin\Views\GestionPagina\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

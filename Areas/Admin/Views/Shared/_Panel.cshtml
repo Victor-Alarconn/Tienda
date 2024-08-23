@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - Tienda PETETES</title>
-    <!-- Carga de hojas de estilo externas -->
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.1/spectrum.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css">
     @Styles.Render("~/Content/css")
@@ -12,16 +11,13 @@
 </head>
 <body class="sb-nav-fixed">
     <!-- Barra de navegación superior -->
-    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark" id="navbar">
-        <!-- Botón para alternar la barra lateral -->
+    <nav class="sb-topnav navbar navbar-expand navbar-dark" id="navbar">
         <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!">
             <i class="fas fa-bars" style="color: #ffffff;"></i>
         </button>
-        <!-- Título de la sección de administración -->
         <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
             <a>@Html.ActionLink("ADMINISTRACION", "Inicio", "Admin", new { area = "Admin" }, new { @class = "navbar-brand mi-navbar-brand" })</a>
         </form>
-        <!-- Menú de usuario para login/logout -->
         <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -38,12 +34,10 @@
     </nav>
 
     <div id="layoutSidenav">
-        <!-- Barra lateral de navegación -->
         <div id="layoutSidenav_nav">
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu">
                     <div class="container">
-                        <!-- Botón para colapsar la barra lateral en pantallas pequeñas -->
                         <button type="button" class="navbar-toggler d-md-none" data-bs-toggle="collapse" data-bs-target="#sidenavCollapse" aria-controls="sidenavCollapse" aria-expanded="false" aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
                         </button>
@@ -63,7 +57,6 @@
             </nav>
         </div>
 
-        <!-- Contenido principal -->
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
@@ -71,7 +64,6 @@
                 </div>
             </main>
 
-            <!-- Pie de página -->
             <footer class="py-4 bg-light mt-auto">
                 <div class="container-fluid px-4">
                     <div class="d-flex align-items-center justify-content-between small">
@@ -82,35 +74,33 @@
         </div>
     </div>
 
-    <!-- Carga de scripts necesarios -->
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/complementos")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
 
-    <!-- Carga de scripts externos -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.1/spectrum.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
 
-    <!-- Script personalizado para cargar colores guardados en localStorage -->
     <script>
         $(document).ready(function () {
-            // Cargar color del navbar desde localStorage
-            var savedNavbarColor = localStorage.getItem('navbarColor');
-            if (savedNavbarColor) {
-                document.getElementById('navbar').style.backgroundColor = savedNavbarColor;
-            }
+            // Colores por defecto
+            var defaultNavbarColor = '#000000';
+            var defaultSliderColor = '#59BABA';
 
-            // Cargar color del sidebar desde localStorage
-            var savedSliderColor = localStorage.getItem('sliderColor');
-            if (savedSliderColor) {
-                document.querySelector('.sb-sidenav-menu').style.backgroundColor = savedSliderColor;
-            }
+            // Cargar color del navbar desde localStorage o usar color por defecto
+            var savedNavbarColor = localStorage.getItem('navbarColor') || defaultNavbarColor;
+            document.getElementById('navbar').style.backgroundColor = savedNavbarColor;
+
+            // Cargar color del sidebar desde localStorage o usar color por defecto
+            var savedSliderColor = localStorage.getItem('sliderColor') || defaultSliderColor;
+            document.querySelector('.sb-sidenav-menu').style.backgroundColor = savedSliderColor;
         });
     </script>
 </body>
 </html>
+
 
 <!-- Estilos personalizados -->
 <style>
@@ -127,10 +117,10 @@
         font-weight: bold; /* Letra en negrita */
     }
 
-    .mi-nav-link:hover {
-        color: black; /* Color de la letra al pasar el ratón por encima */
-        text-decoration: none; /* Mantiene sin subrayado al pasar el ratón por encima */
-    }
+        .mi-nav-link:hover {
+            color: black; /* Color de la letra al pasar el ratón por encima */
+            text-decoration: none; /* Mantiene sin subrayado al pasar el ratón por encima */
+        }
 
     .navbar-nav > li {
         margin-right: 20px; /* Espacio a la derecha para centrar el texto de los títulos */
@@ -148,13 +138,13 @@
         transition: background-color 0.3s, color 0.3s; /* Transición suave */
     }
 
-    .mi-nav-link:hover {
-        background-color: #86B038; /* Color verde cuando se pasa el mouse */
-        color: #ffffff; /* Color del texto cuando se pasa el mouse */
-    }
+        .mi-nav-link:hover {
+            background-color: #86B038; /* Color verde cuando se pasa el mouse */
+            color: #ffffff; /* Color del texto cuando se pasa el mouse */
+        }
 
     /* Estilos para la barra lateral en dispositivos móviles */
-   @@media (max-width: 768px) {
+    @@media (max-width: 768px) {
         #layoutSidenav_nav {
             position: absolute;
             top: 0;
@@ -166,9 +156,9 @@
             transition: transform 0.3s ease;
         }
 
-        #layoutSidenav_nav .collapse {
-            display: block;
-        }
+            #layoutSidenav_nav .collapse {
+                display: block;
+            }
 
         .navbar-toggler {
             display: inline-block;
