@@ -373,6 +373,7 @@
     <Folder Include="App_Data\" />
     <Folder Include="Areas\Descripcion\" />
     <Folder Include="Imagenes\Carousel\" />
+    <Folder Include="Imagenes\Logo\" />
     <Folder Include="Views\GestionPagina\" />
   </ItemGroup>
   <ItemGroup>

@@ -4,9 +4,10 @@
 }
 
 <div class="container-fluid">
+    <!-- Gestión de Imágenes del Carrusel -->
     <div class="card shadow mb-4">
         <div class="card-header py-3 bg-second-primary">
-            <h6 class="m-0 font-weight-bold text-dark">Gestión de Imágenes Tienda Virtual</h6>
+            <h6 class="m-0 font-weight-bold text-dark">Gestión de Imágenes Tienda Virtual - Carrusel</h6>
         </div>
         <div class="card-body">
             @if (ViewBag.Message != null)
@@ -19,7 +20,7 @@
             }
             <form action="@Url.Action("UploadImages", "GestionPagina", new { area = "Admin" })" method="post" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label for="file">Seleccionar Imagen - CARRUSEL 1</label>
+                    <label for="file">Seleccionar Imagen - Carrusel</label>
                     <input type="file" name="file" id="file" class="form-control" required />
                 </div>
                 <button type="submit" class="btn btn-primary">Subir Imagen</button>
@@ -46,4 +47,41 @@
             </div>
         </div>
     </div>
+
+    <!-- Gestión de Imagen del Logo -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-second-primary">
+            <h6 class="m-0 font-weight-bold text-dark">Gestión de Imagen del Logo</h6>
+        </div>
+        <div class="card-body">
+            <form action="@Url.Action("UploadLogo", "GestionPagina", new { area = "Admin" })" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="logo">Seleccionar Imagen - Logo</label>
+                    <input type="file" name="file" id="logo" class="form-control" required />
+                </div>
+                <button type="submit" class="btn btn-primary">Subir Logo</button>
+            </form>
+
+            <hr />
+
+            <h6 class="m-0 font-weight-bold text-dark">Logo Actual</h6>
+            @if (ViewBag.Logo != null)
+            {
+                <div class="card mb-4">
+                    <!-- Imagen del logo con ajuste de tamaño -->
+                    <img src="@Url.Content("~/Imagenes/Logo/" + ViewBag.Logo)" class="card-img-top img-fluid" alt="Logo" style="max-width: 150px; max-height: 150px; margin: 0 auto; display: block;" />
+                    <div class="card-body">
+                        <form action="@Url.Action("DeleteLogo", "GestionPagina", new { area = "Admin" })" method="post">
+                            <button type="submit" class="btn btn-danger">Eliminar Logo</button>
+                        </form>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">No hay un logo cargado actualmente.</div>
+            }
+        </div>
+    </div>
+
 </div>

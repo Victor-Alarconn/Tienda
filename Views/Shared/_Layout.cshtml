@@ -190,7 +190,15 @@
 
 
                     <div class="col-md-2 text-white bg-overlay fondo-imagen">
-                        <img src="~/Imagenes/dulce.png" alt="Logo" style="width: 150px; height: 150px; " />
+                        @{
+                            var logoPath = Server.MapPath("~/Imagenes/Logo");
+                            var logoFile = Directory.GetFiles(logoPath).Select(Path.GetFileName).FirstOrDefault();
+
+                            // Si no hay logo cargado, se puede usar un logo predeterminado
+                            var logoUrl = logoFile != null ? Url.Content("~/Imagenes/Logo/" + logoFile) : Url.Content("~/Imagenes/Logo/default-logo.png");
+                        }
+
+                        <img src="@logoUrl" alt="Logo" style="width: 150px; height: 150px;" />
                     </div>
                 </div>
             </div>
@@ -454,70 +462,78 @@
         }
     </style>
     <script>
-        var myCarousel = document.querySelector('#carouselExampleIndicators');
-        var carousel = new bootstrap.Carousel(myCarousel, {
-            interval: 8000,
-            wrap: true
-        });
+    var myCarousel = document.querySelector('#carouselExampleIndicators');
+    var carousel = new bootstrap.Carousel(myCarousel, {
+        interval: 8000,
+        wrap: true
+    });
 
-        $(document).ready(function () {
-            // Aplicar colores guardados en localStorage
-            var savedNavbarColor = localStorage.getItem('navbarColor');
-            if (savedNavbarColor) {
-                document.getElementById('navbar').style.backgroundColor = savedNavbarColor;
-                document.getElementById('categoryNav').style.backgroundColor = savedNavbarColor;
-            }
+    $(document).ready(function () {
+        // Aplicar color guardado desde localStorage
+        var savedNavbarColor = localStorage.getItem('navbarColor');
+        if (savedNavbarColor) {
+            document.getElementById('navbar').style.backgroundColor = savedNavbarColor;
+            document.getElementById('categoryNav').style.backgroundColor = savedNavbarColor;
+        } else {
+            // Si no hay color guardado en localStorage, obtenerlo del servidor
+            $.ajax({
+                url: '@Url.Action("ObtenerColorNavbar", "GestionPagina", new { area = "Admin" })',
+                type: 'GET',
+                success: function (response) {
+                    if (response.color) {
+                        // Aplicar el color al fondo de la navbar y la barra de categorías
+                        document.getElementById('navbar').style.backgroundColor = response.color;
+                        document.getElementById('categoryNav').style.backgroundColor = response.color;
 
-            $('.form-control').on('input', function () {
-                var searchTerm = $(this).val();
-                if (searchTerm.length >= 2) {
-                    $.ajax({
-                        url: '/Home/BuscarProductos', // Ruta del método de búsqueda en el controlador HomeController
-                        type: 'GET',
-                        data: { searchTerm: searchTerm },
-                        success: function (response) {
-                            // Limpiar resultados anteriores
-                            $('#searchResultsList').empty(); // Corregido para apuntar al ID correcto
-
-                            // Iterar sobre los resultados y agregarlos a la lista
-                            $.each(response, function (index, result) {
-                                var resultItem = '<li>' + result.NombreMain + ' - ' + result.NombreGrupo + '</li>';
-                                $('#searchResultsList').append(resultItem); // Corregido para apuntar al ID correcto
-                            });
-
-                            // Opcional: Si necesitas mostrar el ul explícitamente, asegúrate de que el ul esté oculto inicialmente con CSS
-                        },
-                        error: function (xhr, status, error) {
-                            // Manejar errores
-                            console.error(error);
-                        }
-                    });
-                } else {
-                    // Si la longitud de la búsqueda es menor que 2, ocultar los resultados
-                    $('#searchResultsList').empty(); // Corregido para apuntar al ID correcto
-                    // Opcional: Si estás utilizando un método para ocultar el ul, asegúrate de activarlo aquí también
+                        // Guardar el color en localStorage para futuras visitas
+                        localStorage.setItem('navbarColor', response.color);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error al obtener el color de la navbar:", error);
                 }
             });
-        });
-    </script>
+        }
 
+        // Manejar la búsqueda de productos
+        $('.form-control').on('input', function () {
+            var searchTerm = $(this).val();
+            if (searchTerm.length >= 2) {
+                $.ajax({
+                    url: '/Home/BuscarProductos',
+                    type: 'GET',
+                    data: { searchTerm: searchTerm },
+                    success: function (response) {
+                        // Limpiar resultados anteriores
+                        $('#searchResultsList').empty();
 
-    <script>
-        $(document).ready(function () {
-            // Aplica el color guardado desde localStorage
-            var savedNavbarColor = localStorage.getItem('navbarColor');
-            if (savedNavbarColor) {
-                document.getElementById('categoryNav').style.backgroundColor = savedNavbarColor;
+                        // Iterar sobre los resultados y agregarlos a la lista
+                        $.each(response, function (index, result) {
+                            var resultItem = '<li>' + result.NombreMain + ' - ' + result.NombreGrupo + '</li>';
+                            $('#searchResultsList').append(resultItem);
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error en la búsqueda:", error);
+                    }
+                });
+            } else {
+                // Si la longitud de la búsqueda es menor que 2, ocultar los resultados
+                $('#searchResultsList').empty();
             }
         });
+    });
     </script>
+
+
+
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/complementos")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
 
-    
+
 
 </body>
 </html>

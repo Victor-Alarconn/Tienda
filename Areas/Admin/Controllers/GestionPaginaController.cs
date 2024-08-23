@@ -9,17 +9,26 @@ namespace Tienda.Areas.Admin.Controllers
 {
     public class GestionPaginaController : Controller
     {
-        // Directorio donde se almacenan las imágenes
+        // Directorio donde se almacenan las imágenes del carrusel
         private string imagePath = "~/Imagenes/Carousel";
 
+        // Directorio donde se almacenará la imagen del logo
+        private string logoPath = "~/Imagenes/Logo";
+
         // Ruta relativa al archivo donde se almacenará la descripción
-         private static readonly string DescripcionPath = System.Web.HttpContext.Current.Server.MapPath("~/Areas/Descripcion/descripcion.txt");
+        private static readonly string DescripcionPath = System.Web.HttpContext.Current.Server.MapPath("~/Areas/Descripcion/descripcion.txt");
 
         // Ruta horario
         private string HorarioPath => Server.MapPath("~/Areas/Descripcion/horarios.txt");
 
         // Ruta para las redes sociales
         private string RedesSocialesPath => Server.MapPath("~/Areas/Descripcion/redes-sociales.txt");
+
+        // Ruta para guardar el color de la barra de navegación
+        private string ColorNavbarPath => Server.MapPath("~/Areas/Descripcion/color-navbar.txt");
+
+        // Ruta para guardar el color del slider
+        private string ColorSliderPath => Server.MapPath("~/Areas/Descripcion/color-slider.txt");
 
         // GET: Admin/GestionPagina
         public ActionResult Index()
@@ -29,6 +38,11 @@ namespace Tienda.Areas.Admin.Controllers
                       .ToList();
             ViewBag.Images = images;
 
+            // Cargar la imagen del logo si existe
+            var logo = Directory.GetFiles(Server.MapPath(logoPath))
+                      .Select(Path.GetFileName)
+                      .FirstOrDefault();
+            ViewBag.Logo = logo;
 
             return View("~/Areas/Admin/Views/Admin/Index.cshtml");
         }
@@ -59,6 +73,40 @@ namespace Tienda.Areas.Admin.Controllers
             }
         }
 
+        // Acción para cargar el logo
+        [HttpPost]
+        public ActionResult UploadLogo(HttpPostedFileBase file)
+        {
+            try
+            {
+                if (file != null && file.ContentLength > 0)
+                {
+                    string path = Server.MapPath(logoPath);
+                    if (!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+
+                    // Eliminar el logo anterior si existe
+                    var existingLogo = Directory.GetFiles(path).FirstOrDefault();
+                    if (existingLogo != null)
+                    {
+                        System.IO.File.Delete(existingLogo);
+                    }
+
+                    string fileName = Path.GetFileName(file.FileName);
+                    string fullPath = Path.Combine(path, fileName);
+                    file.SaveAs(fullPath);
+                }
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error al cargar el logo: " + ex.Message;
+                return View("~/Areas/Admin/Views/Admin/Index.cshtml");
+            }
+        }
+
         // Acción para eliminar imágenes
         [HttpPost]
         public ActionResult DeleteImage(string fileName)
@@ -84,6 +132,32 @@ namespace Tienda.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
+        // Acción para eliminar el logo
+        [HttpPost]
+        public ActionResult DeleteLogo()
+        {
+            try
+            {
+                string path = Server.MapPath(logoPath);
+                var logo = Directory.GetFiles(path).FirstOrDefault();
+                if (logo != null && System.IO.File.Exists(logo))
+                {
+                    System.IO.File.Delete(logo);
+                    ViewBag.Message = "Logo eliminado exitosamente.";
+                }
+                else
+                {
+                    ViewBag.Error = "El logo no existe.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error al eliminar el logo: " + ex.Message;
+            }
+
+            return RedirectToAction("Index");
+        }
+
         // GET: GestionPagina/GestionDescripcion
         public ActionResult GestionDescripcion()
         {
@@ -97,7 +171,6 @@ namespace Tienda.Areas.Admin.Controllers
                 ? System.IO.File.ReadAllText(HorarioPath)
                 : "Horario predeterminado";
 
-            // Ajusta la ruta a la vista según la ubicación real
             return View("~/Areas/Admin/Views/Admin/GestionDescripcion.cshtml");
         }
 
@@ -135,7 +208,6 @@ namespace Tienda.Areas.Admin.Controllers
                 TempData["Error"] = "Error al guardar el horario: " + ex.Message;
             }
 
-            // Volver a cargar la vista de gestión
             return RedirectToAction("GestionDescripcion");
         }
 
@@ -164,25 +236,70 @@ namespace Tienda.Areas.Admin.Controllers
             return View("~/Areas/Admin/Views/Admin/GestionRedesSociales.cshtml");
         }
 
-        // POST: GestionPagina/GuardarRedesSociales
+        // POST: GestionPagina/GuardarColorSlider
         [HttpPost]
-        public ActionResult GuardarRedesSociales(string facebookUrl, string instagramUrl)
+        public JsonResult GuardarColorSlider(string color)
         {
             try
             {
-                var urls = new[] { facebookUrl, instagramUrl };
-                System.IO.File.WriteAllLines(RedesSocialesPath, urls);
-                TempData["Message"] = "URLs de redes sociales guardadas exitosamente.";
+                // Crear el directorio si no existe
+                string directory = Path.GetDirectoryName(ColorSliderPath);
+                if (!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                // Escribir el color en el archivo
+                System.IO.File.WriteAllText(ColorSliderPath, color);
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Error al guardar las URLs: " + ex.Message;
+                return Json(new { success = false, message = ex.Message });
             }
-
-            return RedirectToAction("GestionRedesSociales");
         }
 
+        // GET: GestionPagina/ObtenerColorNavbar
+        [HttpGet]
+        public JsonResult ObtenerColorNavbar()
+        {
+            string color = "#000000"; // Color negro por defecto
 
+            try
+            {
+                if (System.IO.File.Exists(ColorNavbarPath))
+                {
+                    color = System.IO.File.ReadAllText(ColorNavbarPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { color = color }, JsonRequestBehavior.AllowGet);
+        }
+
+        // GET: GestionPagina/ObtenerColorSlider
+        [HttpGet]
+        public JsonResult ObtenerColorSlider()
+        {
+            string color = "#000000"; // Color negro por defecto
+
+            try
+            {
+                if (System.IO.File.Exists(ColorSliderPath))
+                {
+                    color = System.IO.File.ReadAllText(ColorSliderPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { color = color }, JsonRequestBehavior.AllowGet);
+        }
 
 
         // GET: GestionPagina/Details/5

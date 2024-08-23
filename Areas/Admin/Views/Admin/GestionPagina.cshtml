@@ -76,7 +76,6 @@
 @section scripts {
     <script>
         $(document).ready(function () {
-            // Color gris predeterminado
             var defaultColor = "#808080";
 
             // Configuración del color picker para la barra de navegación
@@ -92,6 +91,9 @@
                     var selectedColor = color.toHexString();
                     document.getElementById('navbar').style.backgroundColor = selectedColor;
                     localStorage.setItem('navbarColor', selectedColor);
+
+                    // Guardar el color en el servidor
+                    guardarColorEnServidor('GuardarColorNavbar', selectedColor);
                 }
             });
 
@@ -108,6 +110,9 @@
                     var selectedColor = color.toHexString();
                     document.querySelector('.sb-sidenav-menu').style.backgroundColor = selectedColor;
                     localStorage.setItem('sliderColor', selectedColor);
+
+                    // Guardar el color en el servidor
+                    guardarColorEnServidor('GuardarColorSlider', selectedColor);
                 }
             });
 
@@ -119,7 +124,28 @@
             var savedSliderColor = localStorage.getItem('sliderColor') || defaultColor;
             document.querySelector('.sb-sidenav-menu').style.backgroundColor = savedSliderColor;
             $("#sliderColorPicker").spectrum("set", savedSliderColor);
+
+            // Función para guardar el color en el servidor
+            function guardarColorEnServidor(action, color) {
+                $.ajax({
+                    url: '@Url.Action("GuardarColorNavbar", "GestionPagina", new { area = "Admin" })', // Cambia la acción según sea necesario
+                    type: 'POST',
+                    data: { color: color },
+                    success: function (response) {
+                        if (response.success) {
+                            console.log("Color guardado con éxito.");
+                        } else {
+                            console.error("Error al guardar el color:", response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error al guardar el color:", error);
+                    }
+                });
+            }
         });
     </script>
 }
+
+
 

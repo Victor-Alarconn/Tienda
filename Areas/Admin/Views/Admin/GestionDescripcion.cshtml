@@ -22,7 +22,7 @@
             <!-- Formulario para la descripción -->
             <form action="@Url.Action("GuardarDescripcion", "GestionPagina", new { area = "Admin" })" method="post">
                 <div class="form-group">
-                    <label for="descripcion"><strong>Descripción</strong></label>
+                    <label for="descripcion"><strong>Descripción de cobertura de pedidos</strong></label>
                     <textarea name="nuevaDescripcion" id="descripcion" class="form-control" rows="5" required>@ViewBag.Descripcion</textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">Guardar Descripción</button>
