@@ -374,6 +374,7 @@
     <Folder Include="Areas\Descripcion\" />
     <Folder Include="Imagenes\Carousel\" />
     <Folder Include="Imagenes\Logo\" />
+    <Folder Include="Imagenes\Publicidad\" />
     <Folder Include="Views\GestionPagina\" />
   </ItemGroup>
   <ItemGroup>

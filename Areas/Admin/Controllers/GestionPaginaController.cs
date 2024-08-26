@@ -15,6 +15,8 @@ namespace Tienda.Areas.Admin.Controllers
         // Directorio donde se almacenará la imagen del logo
         private string logoPath = "~/Imagenes/Logo";
 
+        private string publicidadPath = ("~/Imagenes/Publicidad");
+
         // Ruta relativa al archivo donde se almacenará la descripción
         private static readonly string DescripcionPath = System.Web.HttpContext.Current.Server.MapPath("~/Areas/Descripcion/descripcion.txt");
 
@@ -158,6 +160,65 @@ namespace Tienda.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
+        // Método para subir imágenes de publicidad
+        [HttpPost]
+        public ActionResult UploadPublicidad(HttpPostedFileBase file)
+        {
+            try
+            {
+                if (file != null && file.ContentLength > 0)
+                {
+                    // Convertir la ruta virtual a una ruta física
+                    string path = Server.MapPath(publicidadPath);
+
+                    // Verificar si la carpeta existe y crearla si no es así
+                    if (!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+
+                    // Obtener el nombre del archivo y combinarlo con la ruta
+                    string fileName = Path.GetFileName(file.FileName);
+                    string fullPath = Path.Combine(path, fileName);
+
+                    // Guardar el archivo
+                    file.SaveAs(fullPath);
+                }
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error al cargar la imagen de publicidad: " + ex.Message;
+                return View("~/Areas/Admin/Views/Admin/Index.cshtml");
+            }
+        }
+
+        // Método para eliminar imágenes de publicidad
+        [HttpPost]
+        public ActionResult DeletePublicidad(string fileName)
+        {
+            try
+            {
+                string path = Path.Combine(publicidadPath, fileName);
+                if (System.IO.File.Exists(path))
+                {
+                    System.IO.File.Delete(path);
+                    ViewBag.Message = "Imagen de publicidad eliminada exitosamente.";
+                }
+                else
+                {
+                    ViewBag.Error = "La imagen de publicidad no existe.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error al eliminar la imagen de publicidad: " + ex.Message;
+            }
+
+            return RedirectToAction("Index");
+        }
+
+
         // GET: GestionPagina/GestionDescripcion
         public ActionResult GestionDescripcion()
         {
@@ -234,71 +295,6 @@ namespace Tienda.Areas.Admin.Controllers
             ViewBag.InstagramUrl = urls["InstagramUrl"];
 
             return View("~/Areas/Admin/Views/Admin/GestionRedesSociales.cshtml");
-        }
-
-        // POST: GestionPagina/GuardarColorSlider
-        [HttpPost]
-        public JsonResult GuardarColorSlider(string color)
-        {
-            try
-            {
-                // Crear el directorio si no existe
-                string directory = Path.GetDirectoryName(ColorSliderPath);
-                if (!Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-
-                // Escribir el color en el archivo
-                System.IO.File.WriteAllText(ColorSliderPath, color);
-                return Json(new { success = true });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
-
-        // GET: GestionPagina/ObtenerColorNavbar
-        [HttpGet]
-        public JsonResult ObtenerColorNavbar()
-        {
-            string color = "#000000"; // Color negro por defecto
-
-            try
-            {
-                if (System.IO.File.Exists(ColorNavbarPath))
-                {
-                    color = System.IO.File.ReadAllText(ColorNavbarPath);
-                }
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
-            }
-
-            return Json(new { color = color }, JsonRequestBehavior.AllowGet);
-        }
-
-        // GET: GestionPagina/ObtenerColorSlider
-        [HttpGet]
-        public JsonResult ObtenerColorSlider()
-        {
-            string color = "#000000"; // Color negro por defecto
-
-            try
-            {
-                if (System.IO.File.Exists(ColorSliderPath))
-                {
-                    color = System.IO.File.ReadAllText(ColorSliderPath);
-                }
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
-            }
-
-            return Json(new { color = color }, JsonRequestBehavior.AllowGet);
         }
 
 

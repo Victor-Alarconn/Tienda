@@ -1,6 +1,9 @@
 ﻿@{
     ViewBag.Title = "Gestión de Imágenes";
     Layout = "~/Areas/Admin/Views/Shared/_Panel.cshtml";
+
+    // Inicializar ViewBag.Images si es null
+    var images = ViewBag.Images as List<string> ?? new List<string>();
 }
 
 <div class="container-fluid">
@@ -30,7 +33,7 @@
 
             <h6 class="m-0 font-weight-bold text-dark">Imágenes Subidas</h6>
             <div class="row">
-                @foreach (var image in (List<string>)ViewBag.Images)
+                @foreach (var image in images)
                 {
                     <div class="col-md-3">
                         <div class="card mb-4">
@@ -47,7 +50,6 @@
             </div>
         </div>
     </div>
-
     <!-- Gestión de Imagen del Logo -->
     <div class="card shadow mb-4">
         <div class="card-header py-3 bg-second-primary">
@@ -84,4 +86,39 @@
         </div>
     </div>
 
+    <!-- Gestión de Imagen de Publicidad -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-second-primary">
+            <h6 class="m-0 font-weight-bold text-dark">Gestión de Imagen de Publicidad</h6>
+        </div>
+        <div class="card-body">
+            <form action="@Url.Action("UploadPublicidad", "GestionPagina", new { area = "Admin" })" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="publicidad">Seleccionar Imagen - Publicidad</label>
+                    <input type="file" name="file" id="publicidad" class="form-control" required />
+                </div>
+                <button type="submit" class="btn btn-primary">Subir Publicidad</button>
+            </form>
+
+            <hr />
+
+            <h6 class="m-0 font-weight-bold text-dark">Imagen de Publicidad Actual</h6>
+            @if (ViewBag.Publicidad != null)
+            {
+                <div class="card mb-4">
+                    <!-- Imagen de publicidad con ajuste de tamaño -->
+                    <img src="@Url.Content("~/Imagenes/Publicidad/" + ViewBag.Publicidad)" class="card-img-top img-fluid" alt="Publicidad" style="max-width: 150px; max-height: 150px; margin: 0 auto; display: block;" />
+                    <div class="card-body">
+                        <form action="@Url.Action("DeletePublicidad", "GestionPagina", new { area = "Admin" })" method="post">
+                            <button type="submit" class="btn btn-danger">Eliminar Publicidad</button>
+                        </form>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">No hay una imagen de publicidad cargada actualmente.</div>
+            }
+        </div>
+    </div>
 </div>

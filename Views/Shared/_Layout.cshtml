@@ -17,6 +17,7 @@
 </head>
 <body class="sb-nav-fixed">
 
+
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark nav-top" id="navbar">
         <div class="container">
             @Html.ActionLink("Tienda", "Index", "Home", new { area = "" }, new { @class = "navbar-brand custom-nav-link" })
@@ -34,6 +35,7 @@
                     </ul>
                 </form>
             </div>
+
 
             <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Alternar navegación" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
@@ -522,8 +524,15 @@
                 $('#searchResultsList').empty();
             }
         });
+
+        // Mostrar el modal de publicidad si hay una imagen disponible
+        if (publicidadUrl) {
+            $('#publicidadModal').modal('show');
+        }
     });
     </script>
+
+
 
 
 
