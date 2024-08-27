@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - Tienda PETETES</title>
+    <title>@ViewBag.Title - TiendA Ukumari</title>
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.1/spectrum.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css">
     @Styles.Render("~/Content/css")
@@ -11,7 +11,7 @@
 </head>
 <body class="sb-nav-fixed">
     <!-- Barra de navegación superior -->
-    <nav class="sb-topnav navbar navbar-expand navbar-dark" id="navbar">
+    <nav class="sb-topnav navbar navbar-expand navbar-dark" id="navbar" style="background-color: @ViewBag.NavbarColor;">
         <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!">
             <i class="fas fa-bars" style="color: #ffffff;"></i>
         </button>
@@ -35,7 +35,7 @@
 
     <div id="layoutSidenav">
         <div id="layoutSidenav_nav">
-            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion" style="background-color: @ViewBag.SliderColor;">
                 <div class="sb-sidenav-menu">
                     <div class="container">
                         <button type="button" class="navbar-toggler d-md-none" data-bs-toggle="collapse" data-bs-target="#sidenavCollapse" aria-controls="sidenavCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,21 +83,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.1/spectrum.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
 
-    <script>
-        $(document).ready(function () {
-            // Colores por defecto
-            var defaultNavbarColor = '#000000';
-            var defaultSliderColor = '#59BABA';
-
-            // Cargar color del navbar desde localStorage o usar color por defecto
-            var savedNavbarColor = localStorage.getItem('navbarColor') || defaultNavbarColor;
-            document.getElementById('navbar').style.backgroundColor = savedNavbarColor;
-
-            // Cargar color del sidebar desde localStorage o usar color por defecto
-            var savedSliderColor = localStorage.getItem('sliderColor') || defaultSliderColor;
-            document.querySelector('.sb-sidenav-menu').style.backgroundColor = savedSliderColor;
-        });
-    </script>
+   
 </body>
 </html>
 

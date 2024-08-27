@@ -6,17 +6,20 @@
 <div class="container-fluid">
     <div class="card shadow mb-4">
         <div class="card-header py-3 bg-second-primary">
-            <h6 class="m-0 font-weight-bold text-dark">Gestion de Colores Tienda Virtual</h6>
+            <h6 class="m-0 font-weight-bold text-dark">Gestión de Colores Tienda Virtual</h6>
         </div>
         <div class="card-body">
-            <div>
-                <label for="navbarColorPicker">Elige un color para la barra de navegación:</label>
-                <input type="text" id="navbarColorPicker" />
-            </div>
-            <div>
-                <label for="sliderColorPicker">Elige un color para el Slider:</label>
-                <input type="text" id="sliderColorPicker" />
-            </div>
+            <form action="@Url.Action("GuardarColores", "GestionPagina", new { area = "Admin" })" method="post">
+                <div>
+                    <label for="navbarColorPicker">Elige un color para la barra de navegación:</label>
+                    <input type="color" id="navbarColorPicker" name="navbarColor" value="@ViewBag.NavbarColor" />
+                </div>
+                <div>
+                    <label for="sliderColorPicker">Elige un color para el Slider:</label>
+                    <input type="color" id="sliderColorPicker" name="sliderColor" value="@ViewBag.SliderColor" />
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Guardar Colores</button>
+            </form>
         </div>
     </div>
 </div>
@@ -68,51 +71,3 @@
 
 
 
-@section scripts {
-    <script>
-        $(document).ready(function () {
-            $("#navbarColorPicker").spectrum({
-                color: "#86B038",
-                showInput: true,
-                preferredFormat: "hex",
-                showPalette: true,
-                palette: [
-                    ["#007BFF", "#FF0000", "#86B038"]
-                ],
-                change: function (color) {
-                    var selectedColor = color.toHexString();
-                    document.getElementById('navbar').style.backgroundColor = selectedColor;
-                    localStorage.setItem('navbarColor', selectedColor);
-                }
-            });
-
-            $("#sliderColorPicker").spectrum({
-                color: "#d6f792",
-                showInput: true,
-                preferredFormat: "hex",
-                showPalette: true,
-                palette: [
-                    ["#007BFF", "#FF0000", "#d6f792"]
-                ],
-                change: function (color) {
-                    var selectedColor = color.toHexString();
-                    document.querySelector('.sb-sidenav-menu').style.backgroundColor = selectedColor;
-                    localStorage.setItem('sliderColor', selectedColor);
-                }
-            });
-
-            // Al cargar la página, aplica los colores guardados
-            var savedNavbarColor = localStorage.getItem('navbarColor');
-            if (savedNavbarColor) {
-                document.getElementById('navbar').style.backgroundColor = savedNavbarColor;
-                $("#navbarColorPicker").spectrum("set", savedNavbarColor);
-            }
-
-            var savedSliderColor = localStorage.getItem('sliderColor');
-            if (savedSliderColor) {
-                document.querySelector('.sb-sidenav-menu').style.backgroundColor = savedSliderColor;
-                $("#sliderColorPicker").spectrum("set", savedSliderColor);
-            }
-        });
-    </script>
-}
