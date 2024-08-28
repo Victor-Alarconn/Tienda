@@ -9,7 +9,7 @@
             <h6 class="m-0 font-weight-bold text-dark">Gestión de Colores Tienda Virtual</h6>
         </div>
         <div class="card-body">
-            <form action="@Url.Action("GuardarColores", "GestionPagina", new { area = "Admin" })" method="post">
+            <form action="@Url.Action("GuardarColores", "Admin", new { area = "Admin" })" method="post">
                 <div>
                     <label for="navbarColorPicker">Elige un color para la barra de navegación:</label>
                     <input type="color" id="navbarColorPicker" name="navbarColor" value="@ViewBag.NavbarColor" />

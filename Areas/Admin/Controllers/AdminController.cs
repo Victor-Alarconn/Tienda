@@ -9,6 +9,7 @@ using Tienda.Data;
 using Tienda.Areas.Admin.Models;
 using Tienda.Areas.Admin.Permisos;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace Tienda.Areas.Admin.Controllers
 {
@@ -16,10 +17,72 @@ namespace Tienda.Areas.Admin.Controllers
     public class AdminController : Controller
     {
         private readonly DataConexion _dataConexion; // Se crea una instancia de la clase DataConexion
+        private string rutaColores;
 
         public AdminController()
         {
             _dataConexion = new DataConexion();
+        }
+
+        // Método que se ejecuta antes de cada acción
+        protected override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            base.OnActionExecuting(filterContext);
+            InicializarRutaColores();
+            var colores = LeerColores(); // Cargar los colores
+            ViewBag.NavbarColor = colores["navbarColor"];
+            ViewBag.SliderColor = colores["sliderColor"];
+
+            // Verificar los colores
+            System.Diagnostics.Debug.WriteLine($"Navbar Color: {ViewBag.NavbarColor}");
+            System.Diagnostics.Debug.WriteLine($"Slider Color: {ViewBag.SliderColor}");
+        }
+
+        private void InicializarRutaColores()
+        {
+            rutaColores = Server.MapPath("~/App_Data/colores.json");
+        }
+
+        private Dictionary<string, string> LeerColores()
+        {
+            if (!System.IO.File.Exists(rutaColores))
+            {
+                var coloresPorDefecto = new Dictionary<string, string>
+                {
+                    { "navbarColor", "#007BFF" },
+                    { "sliderColor", "#d6f792" }
+                };
+                GuardarColores(coloresPorDefecto);
+                return coloresPorDefecto;
+            }
+
+            var json = System.IO.File.ReadAllText(rutaColores);
+            return JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+        }
+
+        private void GuardarColores(Dictionary<string, string> colores)
+        {
+            var json = JsonConvert.SerializeObject(colores, Formatting.Indented);
+            System.IO.File.WriteAllText(rutaColores, json);
+        }
+
+        [HttpPost]
+        public ActionResult GuardarColores(string navbarColor, string sliderColor)
+        {
+            InicializarRutaColores();
+
+            // Crear un objeto para almacenar los colores seleccionados
+            var colores = new Dictionary<string, string>
+            {
+                { "navbarColor", navbarColor ?? "#007BFF" },
+                { "sliderColor", sliderColor ?? "#d6f792" }
+            };
+
+            // Guardar los colores en el archivo JSON
+            GuardarColores(colores);
+
+            // Redirigir a la página de gestión de colores
+            return RedirectToAction("GestionPagina"); // Redirigir a la acción para recargar la vista
         }
 
         // GET: Admin/Admin
@@ -27,6 +90,7 @@ namespace Tienda.Areas.Admin.Controllers
         {
             return View();
         }
+
         public ActionResult Pedidos()
         {
             return View();
