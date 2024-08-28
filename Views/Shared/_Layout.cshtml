@@ -14,6 +14,8 @@
     <title>@ViewBag.Title - Petetes</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
 </head>
 <body class="sb-nav-fixed">
 
@@ -91,6 +93,33 @@
                     </div>
                 </div>
             }
+        </div>
+    </div>
+
+
+
+    <!-- Modal de Publicidad -->
+    <div class="modal fade" id="publicidadModal" tabindex="-1" aria-labelledby="publicidadModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="publicidadModalLabel">Información importante</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    @{
+                        var publicidadPath = Server.MapPath("~/Imagenes/Publicidad");
+                        var publicidadFile = Directory.GetFiles(publicidadPath).Select(Path.GetFileName).FirstOrDefault();
+
+                        // Si no hay imagen de publicidad cargada, se puede usar una imagen predeterminada
+                        var publicidadUrl = publicidadFile != null ? Url.Content("~/Imagenes/Publicidad/" + publicidadFile) : Url.Content("~/Imagenes/Publicidad/default-publicidad.png");
+                    }
+                    <img src="@publicidadUrl" alt="Publicidad" style="max-width: 100%; height: auto;" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -469,6 +498,16 @@
         interval: 8000,
         wrap: true
     });
+        // Para mi modal de publicidad
+        $(document).ready(function () {
+            // Mostrar el modal
+            $('#publicidadModal').modal('show');
+
+            // Función para cerrar el modal después de 20 segundos
+            setTimeout(function () {
+                $('#publicidadModal').modal('hide');
+            }, 30000); // 20000 ms = 20 segundos
+        });
 
     $(document).ready(function () {
         // Aplicar color guardado desde localStorage
@@ -530,7 +569,10 @@
             $('#publicidadModal').modal('show');
         }
     });
+
     </script>
+
+
 
 
 

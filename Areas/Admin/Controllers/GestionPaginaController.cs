@@ -46,6 +46,56 @@ namespace Tienda.Areas.Admin.Controllers
                       .FirstOrDefault();
             ViewBag.Logo = logo;
 
+            // Cargar la imagen de publicidad si existe y si la fecha límite no ha pasado
+            var publicidadFiles = Directory.GetFiles(Server.MapPath(publicidadPath));
+            foreach (var file in publicidadFiles)
+            {
+                string fechaFileName = Path.Combine(Server.MapPath(publicidadPath), Path.GetFileNameWithoutExtension(file) + "_fecha.txt");
+
+                if (System.IO.File.Exists(fechaFileName))
+                {
+                    try
+                    {
+                        var fechaContenido = System.IO.File.ReadAllText(fechaFileName);
+                        var fechas = fechaContenido.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        if (fechas.Length >= 2)
+                        {
+                            DateTime fechaInicio = DateTime.Parse(fechas[0].Replace("Inicio: ", ""));
+                            DateTime fechaFin = DateTime.Parse(fechas[1].Replace("Fin: ", ""));
+                            DateTime fechaActual = DateTime.Now;
+
+                            if (fechaActual <= fechaFin)
+                            {
+                                ViewBag.Publicidad = Path.GetFileName(file);
+                                ViewBag.PublicidadFechaInicio = fechaInicio;
+                                ViewBag.PublicidadFechaFin = fechaFin;
+                                break; // Encontró una imagen válida, salir del bucle
+                            }
+                            else
+                            {
+                                // Eliminar la imagen y el archivo de fecha si la publicidad ha expirado
+                                System.IO.File.Delete(file);
+                                System.IO.File.Delete(fechaFileName);
+                            }
+                        }
+                        else
+                        {
+                            // Manejar el caso en que el archivo de fecha no tiene el formato esperado
+                            System.IO.File.Delete(file);
+                            System.IO.File.Delete(fechaFileName);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Manejar posibles excepciones al leer o parsear el archivo de fecha
+                        System.IO.File.Delete(file);
+                        System.IO.File.Delete(fechaFileName);
+                        ViewBag.Error = "Error al procesar la imagen de publicidad: " + ex.Message;
+                    }
+                }
+            }
+
             return View("~/Areas/Admin/Views/Admin/Index.cshtml");
         }
 
@@ -160,9 +210,9 @@ namespace Tienda.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
-        // Método para subir imágenes de publicidad
+        // Método para subir imágenes de publicidad con fecha y hora límite
         [HttpPost]
-        public ActionResult UploadPublicidad(HttpPostedFileBase file)
+        public ActionResult UploadPublicidad(HttpPostedFileBase file, DateTime? publicidadFechaInicio, DateTime? publicidadFechaFin)
         {
             try
             {
@@ -177,12 +227,27 @@ namespace Tienda.Areas.Admin.Controllers
                         Directory.CreateDirectory(path);
                     }
 
+                    // Eliminar la imagen de publicidad anterior si existe
+                    var existingPublicidad = Directory.GetFiles(path).FirstOrDefault();
+                    if (existingPublicidad != null)
+                    {
+                        System.IO.File.Delete(existingPublicidad);
+                    }
+
                     // Obtener el nombre del archivo y combinarlo con la ruta
                     string fileName = Path.GetFileName(file.FileName);
                     string fullPath = Path.Combine(path, fileName);
 
-                    // Guardar el archivo
+                    // Guardar el archivo de imagen
                     file.SaveAs(fullPath);
+
+                    // Guardar la fecha y hora límite en un archivo de texto
+                    if (publicidadFechaFin.HasValue)
+                    {
+                        string fechaFileName = Path.Combine(path, Path.GetFileNameWithoutExtension(fileName) + "_fecha.txt");
+                        string fechaContenido = $"Inicio: {publicidadFechaInicio?.ToString("yyyy-MM-dd HH:mm:ss")}\nFin: {publicidadFechaFin.Value.ToString("yyyy-MM-dd HH:mm:ss")}";
+                        System.IO.File.WriteAllText(fechaFileName, fechaContenido);
+                    }
                 }
                 return RedirectToAction("Index");
             }
@@ -195,14 +260,23 @@ namespace Tienda.Areas.Admin.Controllers
 
         // Método para eliminar imágenes de publicidad
         [HttpPost]
-        public ActionResult DeletePublicidad(string fileName)
+        public ActionResult DeletePublicidad()
         {
             try
             {
-                string path = Path.Combine(publicidadPath, fileName);
-                if (System.IO.File.Exists(path))
+                string path = Server.MapPath(publicidadPath);
+                var publicidad = Directory.GetFiles(path).FirstOrDefault();
+                if (publicidad != null && System.IO.File.Exists(publicidad))
                 {
-                    System.IO.File.Delete(path);
+                    System.IO.File.Delete(publicidad);
+
+                    // Eliminar el archivo de fecha asociado
+                    string fechaFileName = Path.Combine(path, Path.GetFileNameWithoutExtension(publicidad) + "_fecha.txt");
+                    if (System.IO.File.Exists(fechaFileName))
+                    {
+                        System.IO.File.Delete(fechaFileName);
+                    }
+
                     ViewBag.Message = "Imagen de publicidad eliminada exitosamente.";
                 }
                 else
