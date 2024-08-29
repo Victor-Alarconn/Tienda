@@ -500,13 +500,19 @@
     });
         // Para mi modal de publicidad
         $(document).ready(function () {
-            // Mostrar el modal
-            $('#publicidadModal').modal('show');
+            // Verificar si el modal ya ha sido mostrado en la sesión
+            if (!sessionStorage.getItem('publicidadModalShown')) {
+                // Mostrar el modal
+                $('#publicidadModal').modal('show');
 
-            // Función para cerrar el modal después de 20 segundos
-            setTimeout(function () {
-                $('#publicidadModal').modal('hide');
-            }, 30000); // 20000 ms = 20 segundos
+                // Guardar en sessionStorage que el modal fue mostrado
+                sessionStorage.setItem('publicidadModalShown', 'true');
+
+                // Función para cerrar el modal después de 30 segundos
+                setTimeout(function () {
+                    $('#publicidadModal').modal('hide');
+                }, 30000); // 30000 ms = 30 segundos
+            }
         });
 
     $(document).ready(function () {
