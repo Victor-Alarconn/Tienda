@@ -356,6 +356,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Areas\Admin\Views\GestionPagina\" />
+    <Folder Include="Imagenes\Carousel\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

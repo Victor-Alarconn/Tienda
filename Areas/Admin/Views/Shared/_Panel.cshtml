@@ -13,10 +13,10 @@
     <!-- Barra de navegación superior -->
     <nav class="sb-topnav navbar navbar-expand navbar-dark" id="navbar" style="background-color: @ViewBag.NavbarColor;">
         <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!">
-            <i class="fas fa-bars" style="color: #ffffff;"></i>
+            <i class="fas fa-bars" style="color: #000000;"></i>
         </button>
         <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-            <a>@Html.ActionLink("ADMINISTRACION", "Inicio", "Admin", new { area = "Admin" }, new { @class = "navbar-brand mi-navbar-brand" })</a>
+            <a>@Html.ActionLink("ADMINISTRACION", "Inicio", "Admin", new { area = "Admin" }, new { @class = "navbar-brand mi-navbar-brand mi-borde" })</a>
         </form>
         <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
             <li class="nav-item dropdown">
@@ -113,9 +113,18 @@
     }
 
     .mi-navbar-brand {
-        color: white !important; /* Color de la letra */
+        color: black !important; /* Color de la letra */
         font-weight: bold; /* Letra en negrita */
     }
+
+    .mi-borde {
+        color: black !important; /* Asegura que el texto sea negro */
+        border: 2px solid black; /* Define el grosor y color del borde */
+        padding: 5px 10px; /* Espaciado alrededor del texto para que el borde no esté pegado al texto */
+        border-radius: 5px; /* Redondea los bordes, si deseas que sean redondeados */
+        text-decoration: none; /* Quita el subrayado del enlace */
+    }
+
 
     .mi-nav-link {
         color: #000000; /* Color negro por defecto */

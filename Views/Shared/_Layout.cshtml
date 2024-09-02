@@ -10,6 +10,8 @@
     <title>@ViewBag.Title - Bioparque Ukumari</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
 </head>
 <body>
     <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
@@ -47,6 +49,7 @@
         <img src="~/Imagenes/ukumarii.png" alt="Imagen Estática 2">
     </div>
 
+    <!-- Barra de Navegación Principal -->
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark nav-top">
         <div class="container">
             @Html.ActionLink("Tienda virtual", "Index", "Home", new { area = "" }, new { @class = "navbar-brand custom-nav-link" })
@@ -62,9 +65,11 @@
             </div>
         </div>
     </nav>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-verde nav-botto">
+
+    <!-- Barra de Navegación Inferior -->
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light nav-botto">
         <div class="container">
-            <div class="collapse navbar-collapse justify-content-center ">
+            <div class="collapse navbar-collapse justify-content-center">
                 <span style="font-weight: bold;">@Html.Action("CategoryNav", "Home")</span>
             </div>
         </div>
@@ -109,7 +114,7 @@
                     </div>
                 </div>
             </div>
-            <div class="container my-5 bg-verde">
+            <div class="container my-5" id="contenedor-colores">
                 <!-- my-5 añade margen arriba y abajo -->
                 <div class="row text-white">
                     <div class="col-md-4">
@@ -140,7 +145,7 @@
                             <img src="~/Imagenes/Instagram.svg" alt="Instagram" style="width: 80px; height: 60px;">
                         </a>
                         <a href="https://www.youtube.com/channel/UCSiERFPD0kXZD604Ewgt3XA" target="_blank" class="social-icon">
-                            <img src="/Imagenes/YouTube.svg" alt="Youtube" style="width: 80px; height: 60px;">
+                            <img src="~/Imagenes/YouTube.svg" alt="Youtube" style="width: 80px; height: 60px;">
                         </a>
                     </div>
                 </div>
@@ -231,105 +236,105 @@
                 border: none;
                 text-decoration: none;
             }
-/* Estilos para el carrusel */
-     .carousel-inner {
-  max-height: 145px;
-  overflow: hidden;
-}
+        /* Estilos para el carrusel */
+        .carousel-inner {
+            max-height: 145px;
+            overflow: hidden;
+        }
 
-.zoom-background img {
-  width: 100%;
-  height: 50%;
-  object-fit: cover;
-  object-position: center;
-  animation: zoom 7s ease-in-out infinite alternate;
-}
+        .zoom-background img {
+            width: 100%;
+            height: 50%;
+            object-fit: cover;
+            object-position: center;
+            animation: zoom 7s ease-in-out infinite alternate;
+        }
 
-@@keyframes zoom {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.1);
-  }
-}
+        @@keyframes zoom {
+            from {
+                transform: scale(1);
+            }
 
-.static-images {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 145px;
-  z-index: 10;
-}
+            to {
+                transform: scale(1.1);
+            }
+        }
 
-.static-images img {
-  width: 145px;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-}
+        .static-images {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 145px;
+            z-index: 10;
+        }
 
-/* Ajustar la posición de las imágenes estáticas */
-.static-images img:first-child {
-  left: 18%; /* Ajusta este valor según sea necesario */
-}
+            .static-images img {
+                width: 145px;
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+            }
 
-.static-images img:last-child {
-  left: 35%; /* Ajusta este valor según sea necesario */
-}
+                /* Ajustar la posición de las imágenes estáticas */
+                .static-images img:first-child {
+                    left: 18%; /* Ajusta este valor según sea necesario */
+                }
+
+                .static-images img:last-child {
+                    left: 35%; /* Ajusta este valor según sea necesario */
+                }
 
         /* Estilo para el botón del menú cuando está en su estado colapsado */
         .navbar-toggler {
             background-color: #23A455 !important; /* Cambia el color del borde del botón si es necesario */
         }
 
-/* Media query para tablets */
-@@media (max-width: 768px) {
-  .static-images img {
-    width: 100px; /* Ajusta el tamaño para tablets */
-  }
+        /* Media query para tablets */
+        @@media (max-width: 768px) {
+            .static-images img {
+                width: 100px; /* Ajusta el tamaño para tablets */
+            }
 
-  .static-images img:first-child {
-    left: 10%; /* Ajusta la posición para tablets */
-  }
+                .static-images img:first-child {
+                    left: 10%; /* Ajusta la posición para tablets */
+                }
 
-  .static-images img:last-child {
-    left: 30%; /* Ajusta la posición para tablets */
-  }
-}
+                .static-images img:last-child {
+                    left: 30%; /* Ajusta la posición para tablets */
+                }
+        }
 
-/* Media query para móviles */
-@@media (max-width: 576px) {
-  .static-images img {
-    width: 80px; /* Ajusta el tamaño para móviles */
-  }
+        /* Media query para móviles */
+        @@media (max-width: 576px) {
+            .static-images img {
+                width: 80px; /* Ajusta el tamaño para móviles */
+            }
 
-  .static-images img:first-child {
-    left: 5%; /* Ajusta la posición para móviles */
-  }
+                .static-images img:first-child {
+                    left: 5%; /* Ajusta la posición para móviles */
+                }
 
-  .static-images img:last-child {
-    left: 28%; /* Ajusta la posición para móviles */
-  }
-}
+                .static-images img:last-child {
+                    left: 28%; /* Ajusta la posición para móviles */
+                }
+        }
 
-@@media (max-width: 375px) {
-  .static-images img {
-    width: 60px; /* Ajusta el tamaño para móviles */
-  }
+        @@media (max-width: 375px) {
+            .static-images img {
+                width: 60px; /* Ajusta el tamaño para móviles */
+            }
 
-  .static-images img:first-child {
-    left: 3%; /* Ajusta la posición para móviles */
-    top: 50%;
-  }
+                .static-images img:first-child {
+                    left: 3%; /* Ajusta la posición para móviles */
+                    top: 50%;
+                }
 
-  .static-images img:last-child {
-    left: 28%; /* Ajusta la posición para móviles */
-     top: 45%;
-  }
-}
-
+                .static-images img:last-child {
+                    left: 28%; /* Ajusta la posición para móviles */
+                    top: 45%;
+                }
+        }
     </style>
     <script>
         var myCarousel = document.querySelector('#carouselExampleIndicators')
@@ -337,9 +342,43 @@
             interval: 7000,
             wrap: true
         });
+
+        document.addEventListener("DOMContentLoaded", function () {
+    // Realizar una solicitud AJAX para obtener los colores
+    $.ajax({
+        url: '@Url.Action("ObtenerColores", "Home")', // Asegúrate de que la ruta es correcta
+        method: 'GET',
+        dataType: 'json',
+        success: function (colores) {
+            // Aplicar colores a la barra de navegación
+            const navbar = document.querySelector('.nav-top');
+            const navbarInferior = document.querySelector('.nav-botto');
+            const contenedorColores = document.querySelector('#contenedor-colores'); // Nueva referencia al contenedor
+
+            if (navbar && colores.navbarColor) {
+                navbar.style.backgroundColor = colores.navbarColor;
+            }
+
+            if (navbarInferior && colores.sliderColor) {
+                navbarInferior.style.backgroundColor = colores.sliderColor;
+            }
+
+            // Aplicar el color al contenedor
+            if (contenedorColores && colores.sliderColor) {
+                contenedorColores.style.backgroundColor = colores.sliderColor;
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('Error al leer los colores:', error);
+        }
+    
+});
+});
+
     </script>
 
     @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/complementos")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
 </body>

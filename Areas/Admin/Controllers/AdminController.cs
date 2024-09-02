@@ -18,6 +18,7 @@ namespace Tienda.Areas.Admin.Controllers
     {
         private readonly DataConexion _dataConexion; // Se crea una instancia de la clase DataConexion
         private string rutaColores;
+        private string imagePath = "~/Imagenes/Carousel";
 
         public AdminController()
         {
@@ -83,6 +84,32 @@ namespace Tienda.Areas.Admin.Controllers
 
             // Redirigir a la página de gestión de colores
             return RedirectToAction("GestionPagina"); // Redirigir a la acción para recargar la vista
+        }
+
+        // Acción para cargar imágenes
+        [HttpPost]
+        public ActionResult UploadImages(HttpPostedFileBase file)
+        {
+            try
+            {
+                if (file != null && file.ContentLength > 0)
+                {
+                    string path = Server.MapPath(imagePath);
+                    if (!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+                    string fileName = Path.GetFileName(file.FileName);
+                    string fullPath = Path.Combine(path, fileName);
+                    file.SaveAs(fullPath);
+                }
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error al cargar la imagen: " + ex.Message;
+                return View("GestionPagina");
+            }
         }
 
         // GET: Admin/Admin

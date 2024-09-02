@@ -21,6 +21,7 @@ using Tienda.Interfaces;
 using Tienda.Servicios;
 using static System.Net.Mime.MediaTypeNames;
 using System.Configuration;
+using Newtonsoft.Json;
 
 namespace Tienda.Controllers
 {
@@ -139,7 +140,23 @@ namespace Tienda.Controllers
         }
 
 
+        public JsonResult ObtenerColores()
+        {
+            string rutaColores = Server.MapPath("~/App_Data/colores.json");
+            if (!System.IO.File.Exists(rutaColores))
+            {
+                var coloresPorDefecto = new Dictionary<string, string>
+        {
+            { "navbarColor", "#007BFF" },
+            { "sliderColor", "#d6f792" }
+        };
+                return Json(coloresPorDefecto, JsonRequestBehavior.AllowGet);
+            }
 
+            var json = System.IO.File.ReadAllText(rutaColores);
+            var colores = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            return Json(colores, JsonRequestBehavior.AllowGet);
+        }
 
         // Método para generar la firma de la solicitud
         private string GenerarFirma(string apiKey, string merchantId, string referencia, string precio, string currency, string paymentMethods)
