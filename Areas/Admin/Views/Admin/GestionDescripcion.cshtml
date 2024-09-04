@@ -33,7 +33,7 @@
             <!-- Formulario para el horario de atención -->
             <form action="@Url.Action("GuardarHorario", "GestionPagina", new { area = "Admin" })" method="post">
                 <div class="form-group">
-                    <label for="horario"><strong>Horario de Atención</strong></label>
+                    <label for="horario"><strong>Direccion y Horario de Atención</strong></label>
                     <textarea name="nuevoHorario" id="horario" class="form-control" rows="3" required>@ViewBag.Horario</textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">Guardar Horario</button>
