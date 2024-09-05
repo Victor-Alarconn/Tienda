@@ -77,7 +77,9 @@
 
     @*esto es para el carrusel de las imagenes con zoom y que van pasando*@
 
+    <!-- Carrusel de imágenes con flechas de navegación -->
     <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+        <!-- Contenido del carrusel -->
         <div class="carousel-inner">
             @{
                 var imagesPath = Server.MapPath("~/Imagenes/Carousel");
@@ -94,6 +96,16 @@
                 </div>
             }
         </div>
+
+        <!-- Flechas de navegación izquierda y derecha -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+        </button>
     </div>
 
 
@@ -495,7 +507,7 @@
     <script>
     var myCarousel = document.querySelector('#carouselExampleIndicators');
     var carousel = new bootstrap.Carousel(myCarousel, {
-        interval: 8000,
+        interval: 5000,
         wrap: true
     });
         // Para mi modal de publicidad
