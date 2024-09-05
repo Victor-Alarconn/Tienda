@@ -38,7 +38,7 @@
             {
                 <div class="alert alert-success">@ViewBag.Message</div>
             }
-            <form action="@Url.Action("UploadImages", "GestionPagina", new { area = "Admin" })" method="post" enctype="multipart/form-data">
+            <form action="@Url.Action("UploadImages", "Admin", new { area = "Admin" })" method="post" enctype="multipart/form-data">
                 <button type="submit" class="btn btn-primary">Subir Imágenes </button>
             </form>
         </div>

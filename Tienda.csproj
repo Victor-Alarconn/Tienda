@@ -292,6 +292,7 @@
     <Content Include="Content\bootstrap-grid.css.map" />
     <Content Include="Areas\Admin\Views\Admin\Pedidos.cshtml" />
     <Content Include="Areas\Admin\Views\Admin\GestionPagina.cshtml" />
+    <Content Include="Areas\Admin\Views\Admin\Index.cshtml" />
     <None Include="Scripts\jquery-3.7.1.intellisense.js" />
     <Content Include="Scripts\fontawesome\all.js" />
     <Content Include="Scripts\fontawesome\all.min.js" />
@@ -355,8 +356,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Areas\Admin\Descripcion\" />
     <Folder Include="Areas\Admin\Views\GestionPagina\" />
-    <Folder Include="Imagenes\Carousel\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

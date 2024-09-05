@@ -13,34 +13,23 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
 </head>
-<body>
+<body class="sb-nav-fixed">
     <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
-            <div class="carousel-item active">
-                <div class="zoom-background">
-                    <img src="~/Imagenes/hipopotamo.svg" class="d-block w-100" alt="Imagen de Fondo 1">
+            @{
+                var imagesPath = Server.MapPath("~/Imagenes/Carousel");
+                var images = Directory.GetFiles(imagesPath).Select(Path.GetFileName).ToList();
+            }
+            @for (int i = 0; i < images.Count; i++)
+            {
+                var image = images[i];
+                var activeClass = i == 0 ? "active" : "";
+                <div class="carousel-item @activeClass">
+                    <div class="zoom-background">
+                        <img src="~/Imagenes/Carousel/@image" class="d-block w-100" alt="Imagen de Fondo @i">
+                    </div>
                 </div>
-            </div>
-            <div class="carousel-item">
-                <div class="zoom-background">
-                    <img src="~/Imagenes/suricata.svg" class="d-block w-100" alt="Imagen de Fondo 2">
-                </div>
-            </div>
-            <div class="carousel-item">
-                <div class="zoom-background">
-                    <img src="~/Imagenes/oso.svg" class="d-block w-100" alt="Imagen de Fondo 3">
-                </div>
-            </div>
-            <div class="carousel-item">
-                <div class="zoom-background">
-                    <img src="~/Imagenes/puma.svg" class="d-block w-100" alt="Imagen de Fondo 4">
-                </div>
-            </div>
-            <div class="carousel-item">
-                <div class="zoom-background">
-                    <img src="~/Imagenes/rinoceronte.svg" class="d-block w-100" alt="Imagen de Fondo 5">
-                </div>
-            </div>
+            }
         </div>
     </div>
 
@@ -74,6 +63,31 @@
             </div>
         </div>
     </nav>
+
+    <!-- Modal de Publicidad -->
+    <div class="modal fade" id="publicidadModal" tabindex="-1" aria-labelledby="publicidadModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="publicidadModalLabel">Información importante</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    @{
+                        var publicidadPath = Server.MapPath("~/Imagenes/Publicidad");
+                        var publicidadFile = Directory.GetFiles(publicidadPath).Select(Path.GetFileName).FirstOrDefault();
+
+                        // Si no hay imagen de publicidad cargada, se puede usar una imagen predeterminada
+                        var publicidadUrl = publicidadFile != null ? Url.Content("~/Imagenes/Publicidad/" + publicidadFile) : Url.Content("~/Imagenes/Publicidad/default-publicidad.png");
+                    }
+                    <img src="@publicidadUrl" alt="Publicidad" style="max-width: 100%; height: auto;" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="container body-content">
         @RenderBody()
@@ -247,7 +261,7 @@
             height: 50%;
             object-fit: cover;
             object-position: center;
-            animation: zoom 7s ease-in-out infinite alternate;
+            animation: zoom 9s ease-in-out infinite alternate;
         }
 
         @@keyframes zoom {
@@ -339,8 +353,25 @@
     <script>
         var myCarousel = document.querySelector('#carouselExampleIndicators')
         var carousel = new bootstrap.Carousel(myCarousel, {
-            interval: 7000,
+            interval: 5000,
             wrap: true
+        });
+
+        // Para mi modal de publicidad
+        $(document).ready(function () {
+            // Verificar si el modal ya ha sido mostrado en la sesión
+            if (!sessionStorage.getItem('publicidadModalShown')) {
+                // Mostrar el modal
+                $('#publicidadModal').modal('show');
+
+                // Guardar en sessionStorage que el modal fue mostrado
+                sessionStorage.setItem('publicidadModalShown', 'true');
+
+                // Función para cerrar el modal después de 30 segundos
+                setTimeout(function () {
+                    $('#publicidadModal').modal('hide');
+                }, 30000); // 30000 ms = 30 segundos
+            }
         });
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -371,15 +402,10 @@
         error: function (xhr, status, error) {
             console.error('Error al leer los colores:', error);
         }
-    
+
 });
 });
 
     </script>
-
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/complementos")
-    @Scripts.Render("~/bundles/bootstrap")
-    @RenderSection("scripts", required: false)
 </body>
 </html>
