@@ -32,7 +32,7 @@ namespace Tienda.Controllers
         private readonly IFactura _facturaService;
         private readonly IProductoService _productoService;
         private readonly IMainService _mainService;
-
+        private string publicidadPath = ("~/Imagenes/Publicidad");
         private readonly DataConexion _dataConexion; // Se crea una instancia de la clase DataConexion
         private readonly Cart _cart; // Se crea una instancia de la clase Cart
         public HomeController() // Constructor de la clase
@@ -45,6 +45,68 @@ namespace Tienda.Controllers
             _productoService = new ProductoService(_dataConexion);
             _mainService = new MainService(_dataConexion);
         }
+
+        [HttpGet]
+        public JsonResult VerificarPublicidadActiva()
+        {
+            // Ruta donde se guardan las imágenes y el archivo de fechas
+            string path = Server.MapPath(publicidadPath);
+            var publicidadFiles = Directory.GetFiles(path);
+
+            foreach (var file in publicidadFiles)
+            {
+                string fechaFileName = Path.Combine(path, Path.GetFileNameWithoutExtension(file) + "_fecha.txt");
+
+                if (System.IO.File.Exists(fechaFileName))
+                {
+                    try
+                    {
+                        // Lee el contenido del archivo de fechas
+                        var fechaContenido = System.IO.File.ReadAllText(fechaFileName);
+                        var fechas = fechaContenido.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        if (fechas.Length >= 2)
+                        {
+                            // Extraer fechas de inicio y fin
+                            DateTime fechaInicio = DateTime.Parse(fechas[0].Replace("Inicio: ", "").Trim());
+                            DateTime fechaFin = DateTime.Parse(fechas[1].Replace("Fin: ", "").Trim());
+                            DateTime fechaActual = DateTime.Now;
+
+                            if (fechaActual >= fechaInicio && fechaActual <= fechaFin)
+                            {
+                                // Si la publicidad está activa, devolver los datos necesarios
+                                return Json(new { Activa = true, Publicidad = Path.GetFileName(file), FechaInicio = fechaInicio, FechaFin = fechaFin }, JsonRequestBehavior.AllowGet);
+                            }
+                            else
+                            {
+                                // Eliminar la imagen y el archivo de fecha si la publicidad ha expirado
+                                System.IO.File.Delete(file);
+                                System.IO.File.Delete(fechaFileName);
+                            }
+                        }
+                        else
+                        {
+                            // Manejar el caso en que el archivo de fecha no tiene el formato esperado
+                            System.IO.File.Delete(file);
+                            System.IO.File.Delete(fechaFileName);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Manejar posibles excepciones al leer o parsear el archivo de fecha
+                        System.IO.File.Delete(file);
+                        System.IO.File.Delete(fechaFileName);
+                        return Json(new { Activa = false, Error = "Error al procesar la imagen de publicidad: " + ex.Message }, JsonRequestBehavior.AllowGet);
+                    }
+                }
+            }
+
+            // Si no hay publicidad activa
+            return Json(new { Activa = false }, JsonRequestBehavior.AllowGet);
+        }
+
+
+
 
         [HttpGet] // Acción para mostrar el formulario de pago
         public ActionResult Checkout()

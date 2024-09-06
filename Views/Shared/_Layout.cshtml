@@ -357,22 +357,37 @@
             wrap: true
         });
 
-        // Para mi modal de publicidad
-        $(document).ready(function () {
-            // Verificar si el modal ya ha sido mostrado en la sesión
-            if (!sessionStorage.getItem('publicidadModalShown')) {
-                // Mostrar el modal
-                $('#publicidadModal').modal('show');
+      $(document).ready(function () {
+    // Llamada AJAX para verificar si hay publicidad activa
+    $.ajax({
+        url: '@Url.Action("VerificarPublicidadActiva", "Home")', // Asegúrate de cambiar "Home" al nombre del controlador adecuado
+        method: 'GET',
+        dataType: 'json',
+        success: function (data) {
+            if (data.Activa) {
+                // Verificar si el modal ya ha sido mostrado en la sesión
+                if (!sessionStorage.getItem('publicidadModalShown')) {
+                    // Mostrar el modal
+                    $('#publicidadModal').modal('show');
 
-                // Guardar en sessionStorage que el modal fue mostrado
-                sessionStorage.setItem('publicidadModalShown', 'true');
+                    // Guardar en sessionStorage que el modal fue mostrado
+                    sessionStorage.setItem('publicidadModalShown', 'true');
 
-                // Función para cerrar el modal después de 30 segundos
-                setTimeout(function () {
-                    $('#publicidadModal').modal('hide');
-                }, 30000); // 30000 ms = 30 segundos
+                    // Función para cerrar el modal después de 30 segundos
+                    setTimeout(function () {
+                        $('#publicidadModal').modal('hide');
+                    }, 30000); // 30000 ms = 30 segundos
+                }
+            } else if (data.Error) {
+                console.error('Error al procesar la publicidad:', data.Error);
             }
-        });
+        },
+        error: function (xhr, status, error) {
+            console.error('Error al verificar la publicidad activa:', error);
+        }
+    });
+});
+
 
         document.addEventListener("DOMContentLoaded", function () {
     // Realizar una solicitud AJAX para obtener los colores
