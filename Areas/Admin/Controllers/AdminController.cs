@@ -10,6 +10,7 @@ using Tienda.Areas.Admin.Models;
 using Tienda.Areas.Admin.Permisos;
 using System.IO;
 using Newtonsoft.Json;
+using System.Data.SqlClient;
 
 namespace Tienda.Areas.Admin.Controllers
 {
@@ -298,6 +299,11 @@ namespace Tienda.Areas.Admin.Controllers
             return View();
         }
 
+        public ActionResult Ventas()
+        {
+            return View();
+        }
+
         public ActionResult AgregarProducto()
         {
             var categorias = ObtenerCategorias();
@@ -472,8 +478,92 @@ namespace Tienda.Areas.Admin.Controllers
 
         public ActionResult Inicio()
         {
+            // Consulta el total de ventas desde la base de datos
+            var totalVentas = ObtenerTotalVentas();
+            var totalproductos = ObtenerTotalProductos();
+            var totalcategorias = ObtenerTotalCategorias();
+            var totalpedidos = ObtenerTotalPedidos();
+
+            // Asignar el total de ventas al ViewBag para que esté disponible en la vista
+            ViewBag.TotalVentas = totalVentas;
+            ViewBag.TotalProductos = totalproductos;
+            ViewBag.TotalCategorias = totalcategorias;
+            ViewBag.TotalPedidos = totalpedidos;
+
             return View();
         }
+
+        // Método que realiza la consulta a la base de datos sobre las ventas 
+        private int ObtenerTotalVentas()
+        {
+            int totalVentas = 0;
+            using (var conexion = _dataConexion.CreateConnection())
+            {
+                string query = "SELECT COUNT(Id_fac) FROM td_fac";
+                MySqlCommand comando = new MySqlCommand(query, conexion);
+                conexion.Open();
+
+                var resultado = comando.ExecuteScalar();
+                totalVentas = (resultado != null) ? Convert.ToInt32(resultado) : 0;
+            }
+
+            return totalVentas;
+        }
+
+
+        // Método que realiza la consulta a la base de datos sobre los productos 
+        private int ObtenerTotalProductos()
+        {
+            int totalproductos = 0;
+            using (var conexion = _dataConexion.CreateConnection())
+            {
+                string query = "SELECT COUNT(Id) FROM td_produc";
+                MySqlCommand comando = new MySqlCommand(query, conexion);
+                conexion.Open();
+
+                var resultado = comando.ExecuteScalar();
+                totalproductos = (resultado != null) ? Convert.ToInt32(resultado) : 0;
+            }
+
+            return totalproductos;
+        }
+
+
+        // Método que realiza la consulta a la base de datos sobre las categorias 
+        private int ObtenerTotalCategorias()
+        {
+            int totalcategorias = 0;
+            using (var conexion = _dataConexion.CreateConnection())
+            {
+                string query = "SELECT COUNT(id_grupo) FROM td_grupos";
+                MySqlCommand comando = new MySqlCommand(query, conexion);
+                conexion.Open();
+
+                var resultado = comando.ExecuteScalar();
+                totalcategorias = (resultado != null) ? Convert.ToInt32(resultado) : 0;
+            }
+
+            return totalcategorias;
+        }
+
+        // Método que realiza la consulta a la base de datos sobre los pedidos 
+        private int ObtenerTotalPedidos()
+        {
+            int totalpedidos = 0;
+            using (var conexion = _dataConexion.CreateConnection())
+            {
+                string query = "SELECT COUNT(Id) FROM td_orden";
+                MySqlCommand comando = new MySqlCommand(query, conexion);
+                conexion.Open();
+
+                var resultado = comando.ExecuteScalar();
+                totalpedidos = (resultado != null) ? Convert.ToInt32(resultado) : 0;
+            }
+
+            return totalpedidos;
+        }
+
+
         public ActionResult Categorias()
         {
             List<Categorias> listaCategorias = new List<Categorias>();

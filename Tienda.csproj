@@ -293,6 +293,7 @@
     <Content Include="Areas\Admin\Views\Admin\Pedidos.cshtml" />
     <Content Include="Areas\Admin\Views\Admin\GestionPagina.cshtml" />
     <Content Include="Areas\Admin\Views\Admin\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Admin\Ventas.cshtml" />
     <None Include="Scripts\jquery-3.7.1.intellisense.js" />
     <Content Include="Scripts\fontawesome\all.js" />
     <Content Include="Scripts\fontawesome\all.min.js" />
@@ -357,7 +358,6 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Areas\Admin\Descripcion\" />
-    <Folder Include="Areas\Admin\Views\GestionPagina\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
