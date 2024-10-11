@@ -21,6 +21,7 @@ using Tienda.Interfaces;
 using Tienda.Servicios;
 using static System.Net.Mime.MediaTypeNames;
 using System.Configuration;
+using Newtonsoft.Json;
 
 namespace Tienda.Controllers
 {
