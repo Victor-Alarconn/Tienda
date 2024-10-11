@@ -22,6 +22,10 @@ using Tienda.Servicios;
 using static System.Net.Mime.MediaTypeNames;
 using System.Configuration;
 using Newtonsoft.Json;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Dynamic;
 
 namespace Tienda.Controllers
 {
@@ -122,84 +126,121 @@ namespace Tienda.Controllers
         }
 
         [HttpPost] // Acción para procesar el pago y redirigir a PayU. 
-        public ActionResult Checkout(PaymentInfo model)
+        public async Task<ActionResult> Checkout(PaymentInfo model)
         {
             StringBuilder productNames = new StringBuilder();
-            // Recuperar el carrito de la sesión
             model.Cart = Session["cart"] as Cart;
-            // Se prepara los datos para PayU
-            var merchantId = "508029";
-            var apiKey = "4Vj8eK4rloUd272L48hsrarnUA";
-            var referenceCode = _referenciaService.GenerarReferencia();
-            var amount = model.Cart.TotalPrice();
-            var currency = "COP";
-            var buyerEmail = model.Email; // Guardad en base de datos
-            var accountId = "512321";
-            var tax = 0;
-            var taxReturnBase = 0;
-            var test = "1";
-            var phone = model.Phone; // Guardad en base de datos
-            var fullName = $"{model.FirstName} {model.MiddleName} {model.LastName} {model.SecondLastName}";  // Combina FirstName y LastName
-            var paymentMethods = "MASTERCARD,PSE,VISA";
-            var responseUrl = "https://901d-181-59-112-193.ngrok-free.app/Home/PayUResponse";
-            var confirmationUrl = "https://901d-181-59-112-193.ngrok-free.app/Home/Confirmation";
-            // Genera la firma
-            var formattedAmount = amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
-            var signature = GenerarFirma(apiKey, merchantId, referenceCode, formattedAmount, currency, paymentMethods); // Llama al método para generar la firma
 
-            foreach (var item in model.Cart.Items) // Guardad todos los productos en base de datos 
-            {
-                if (productNames.Length > 0)
-                {
-                    productNames.Append(", ");
-                }
-                productNames.Append(item.Product.Nombre);
-            }
-            string productDescription = productNames.ToString();
-            using (var connection = _dataConexion.CreateConnection())
-            {
-                connection.Open();
-                using (var transaction = connection.BeginTransaction())
-                {
-                    try
-                    {
-                        int orderId = _ordenService.Orden(model, referenceCode, connection, transaction);
-                        _productoService.GuardarProductos(orderId, model.Cart, connection, transaction);
+            // Datos de la API
+            var login = "16af31f43647987414b5ced2164947c5";
+            var secretKey = "e76GdAOfhzuytyI9";
+            var seed = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ssK");
 
-                        // Si todo ha ido bien
-                        transaction.Commit();
-                    }
-                    catch (Exception)
-                    {
-                        transaction.Rollback();
-                        throw;  // Puedes manejar el error como prefieras o informar al usuario.
-                    }
-                }
-            }
-            // Se crea un nuevo modelo para pasar a la vista de PayU
-            var payUModel = new PayUModel
+            // Generación de `nonce`
+            var random = new Random();
+            var nonceNumber = random.Next(100000000, 999999999);
+            var nonce = Convert.ToBase64String(Encoding.UTF8.GetBytes(nonceNumber.ToString()));
+
+            // Crear `tranKey` con SHA-256
+            string tranKey;
+            using (var sha256 = SHA256.Create())
             {
-                MerchantId = merchantId,
-                ApiKey = apiKey,
-                ReferenceCode = referenceCode,
-                Amount = amount,  // mantener amount como decimal
-                Currency = currency,
-                BuyerEmail = buyerEmail,
-                Signature = signature,
-                AccountId = accountId,
-                Tax = tax,
-                TaxReturnBase = taxReturnBase,
-                Test = test,
-                ResponseUrl = responseUrl,
-                ConfirmationUrl = confirmationUrl,
-                Description = productDescription,
-                Telephone = phone,
-                BuyerfullName = fullName,
-                paymentMethods = paymentMethods
+                var tranKeyInput = nonceNumber.ToString() + seed + secretKey;
+                var tranKeyBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(tranKeyInput));
+                tranKey = Convert.ToBase64String(tranKeyBytes);
+            }
+
+            // Configurar datos de la solicitud a la API
+            var expiration = DateTime.Now.AddHours(24).ToString("yyyy-MM-ddTHH:mm:ssK");
+            var requestBody = new
+            {
+                buyer = new
+                {
+                    name = model.FirstName,
+                    surname = model.LastName,
+                    email = model.Email,
+                    document = model.DocumentNumber, // Campo que puede estar en el modelo PaymentInfo
+                    documentType = "CC", // Cambiar según corresponda
+                    mobile = model.Phone
+                },
+                payment = new
+                {
+                    reference = _referenciaService.GenerarReferencia(),
+                    description = "Pago de productos en la tienda",
+                    amount = new
+                    {
+                        currency = "COP",
+                        total = model.Cart.TotalPrice()
+                    }
+                },
+                expiration = expiration,
+                ipAddress = Request.UserHostAddress,
+                returnUrl = "https://tusitio.com/retorno",
+                userAgent = Request.UserAgent,
+                paymentMethod = (string)null,
+                auth = new
+                {
+                    login = login,
+                    tranKey = tranKey,
+                    nonce = nonce,
+                    seed = seed
+                }
             };
 
-            return View("PayUForm", payUModel);
+            //using (var connection = _dataConexion.CreateConnection())
+            //{
+            //    connection.Open();
+            //    using (var transaction = connection.BeginTransaction())
+            //    {
+            //        try
+            //        {
+            //            int orderId = _ordenService.Orden(model, requestBody.payment.reference, connection, transaction);
+            //            _productoService.GuardarProductos(orderId, model.Cart, connection, transaction);
+
+            //            transaction.Commit();
+            //        }
+            //        catch (Exception)
+            //        {
+            //            transaction.Rollback();
+            //            throw;
+            //        }
+            //    }
+            //}
+
+            // Llamada HTTP a la API (reemplaza la URL con la de tu API)
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("https://checkout.test.goupagos.com.co");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
+                // Imprimir el contenido que se enviará
+                string requestData = await content.ReadAsStringAsync();
+                Console.WriteLine("Contenido a enviar: " + requestData);
+
+                HttpResponseMessage response = await client.PostAsync("procesar-pago", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+
+                    // Usa dynamic para deserializar sin definir una clase
+                    dynamic apiResult = JsonConvert.DeserializeObject<ExpandoObject>(responseData);
+
+                    // Puedes acceder a los valores como si fuera un diccionario o con las propiedades dinámicas
+                    string status = apiResult.status; // Ejemplo de acceso
+                    string message = apiResult.message; // Ejemplo de acceso
+
+                    return RedirectToAction("PayUSuccess", new { result = apiResult });
+                }
+                else
+                {
+                    // Manejo de error
+                    return View("PayUForm", model);
+                }
+            }
         }
+
 
 
         public JsonResult ObtenerColores()
