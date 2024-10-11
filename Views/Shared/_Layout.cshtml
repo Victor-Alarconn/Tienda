@@ -14,8 +14,11 @@
     <title>@ViewBag.Title - Petetes</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+        @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
 </head>
 <body class="sb-nav-fixed">
+
 
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark nav-top" id="navbar">
         <div class="container">
@@ -34,6 +37,7 @@
                     </ul>
                 </form>
             </div>
+
 
             <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Alternar navegación" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +77,9 @@
 
     @*esto es para el carrusel de las imagenes con zoom y que van pasando*@
 
+    <!-- Carrusel de imágenes con flechas de navegación -->
     <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+        <!-- Contenido del carrusel -->
         <div class="carousel-inner">
             @{
                 var imagesPath = Server.MapPath("~/Imagenes/Carousel");
@@ -89,6 +95,43 @@
                     </div>
                 </div>
             }
+        </div>
+
+        <!-- Flechas de navegación izquierda y derecha -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+        </button>
+    </div>
+
+
+
+    <!-- Modal de Publicidad -->
+    <div class="modal fade" id="publicidadModal" tabindex="-1" aria-labelledby="publicidadModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="publicidadModalLabel">Información importante</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    @{
+                        var publicidadPath = Server.MapPath("~/Imagenes/Publicidad");
+                        var publicidadFile = Directory.GetFiles(publicidadPath).Select(Path.GetFileName).FirstOrDefault();
+
+                        // Si no hay imagen de publicidad cargada, se puede usar una imagen predeterminada
+                        var publicidadUrl = publicidadFile != null ? Url.Content("~/Imagenes/Publicidad/" + publicidadFile) : Url.Content("~/Imagenes/Publicidad/default-publicidad.png");
+                    }
+                    <img src="@publicidadUrl" alt="Publicidad" style="max-width: 100%; height: auto;" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -190,7 +233,15 @@
 
 
                     <div class="col-md-2 text-white bg-overlay fondo-imagen">
-                        <img src="~/Imagenes/dulce.png" alt="Logo" style="width: 150px; height: 150px; " />
+                        @{
+                            var logoPath = Server.MapPath("~/Imagenes/Logo");
+                            var logoFile = Directory.GetFiles(logoPath).Select(Path.GetFileName).FirstOrDefault();
+
+                            // Si no hay logo cargado, se puede usar un logo predeterminado
+                            var logoUrl = logoFile != null ? Url.Content("~/Imagenes/Logo/" + logoFile) : Url.Content("~/Imagenes/Logo/default-logo.png");
+                        }
+
+                        <img src="@logoUrl" alt="Logo" style="width: 150px; height: 150px;" />
                     </div>
                 </div>
             </div>
@@ -454,70 +505,104 @@
         }
     </style>
     <script>
-        var myCarousel = document.querySelector('#carouselExampleIndicators');
-        var carousel = new bootstrap.Carousel(myCarousel, {
-            interval: 8000,
-            wrap: true
+    var myCarousel = document.querySelector('#carouselExampleIndicators');
+    var carousel = new bootstrap.Carousel(myCarousel, {
+        interval: 5000,
+        wrap: true
+    });
+        // Para mi modal de publicidad
+        $(document).ready(function () {
+            // Verificar si el modal ya ha sido mostrado en la sesión
+            if (!sessionStorage.getItem('publicidadModalShown')) {
+                // Mostrar el modal
+                $('#publicidadModal').modal('show');
+
+                // Guardar en sessionStorage que el modal fue mostrado
+                sessionStorage.setItem('publicidadModalShown', 'true');
+
+                // Función para cerrar el modal después de 30 segundos
+                setTimeout(function () {
+                    $('#publicidadModal').modal('hide');
+                }, 30000); // 30000 ms = 30 segundos
+            }
         });
 
-        $(document).ready(function () {
-            // Aplicar colores guardados en localStorage
-            var savedNavbarColor = localStorage.getItem('navbarColor');
-            if (savedNavbarColor) {
-                document.getElementById('navbar').style.backgroundColor = savedNavbarColor;
-                document.getElementById('categoryNav').style.backgroundColor = savedNavbarColor;
-            }
+    $(document).ready(function () {
+        // Aplicar color guardado desde localStorage
+        var savedNavbarColor = localStorage.getItem('navbarColor');
+        if (savedNavbarColor) {
+            document.getElementById('navbar').style.backgroundColor = savedNavbarColor;
+            document.getElementById('categoryNav').style.backgroundColor = savedNavbarColor;
+        } else {
+            // Si no hay color guardado en localStorage, obtenerlo del servidor
+            $.ajax({
+                url: '@Url.Action("ObtenerColorNavbar", "GestionPagina", new { area = "Admin" })',
+                type: 'GET',
+                success: function (response) {
+                    if (response.color) {
+                        // Aplicar el color al fondo de la navbar y la barra de categorías
+                        document.getElementById('navbar').style.backgroundColor = response.color;
+                        document.getElementById('categoryNav').style.backgroundColor = response.color;
 
-            $('.form-control').on('input', function () {
-                var searchTerm = $(this).val();
-                if (searchTerm.length >= 2) {
-                    $.ajax({
-                        url: '/Home/BuscarProductos', // Ruta del método de búsqueda en el controlador HomeController
-                        type: 'GET',
-                        data: { searchTerm: searchTerm },
-                        success: function (response) {
-                            // Limpiar resultados anteriores
-                            $('#searchResultsList').empty(); // Corregido para apuntar al ID correcto
-
-                            // Iterar sobre los resultados y agregarlos a la lista
-                            $.each(response, function (index, result) {
-                                var resultItem = '<li>' + result.NombreMain + ' - ' + result.NombreGrupo + '</li>';
-                                $('#searchResultsList').append(resultItem); // Corregido para apuntar al ID correcto
-                            });
-
-                            // Opcional: Si necesitas mostrar el ul explícitamente, asegúrate de que el ul esté oculto inicialmente con CSS
-                        },
-                        error: function (xhr, status, error) {
-                            // Manejar errores
-                            console.error(error);
-                        }
-                    });
-                } else {
-                    // Si la longitud de la búsqueda es menor que 2, ocultar los resultados
-                    $('#searchResultsList').empty(); // Corregido para apuntar al ID correcto
-                    // Opcional: Si estás utilizando un método para ocultar el ul, asegúrate de activarlo aquí también
+                        // Guardar el color en localStorage para futuras visitas
+                        localStorage.setItem('navbarColor', response.color);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error al obtener el color de la navbar:", error);
                 }
             });
-        });
-    </script>
+        }
 
+        // Manejar la búsqueda de productos
+        $('.form-control').on('input', function () {
+            var searchTerm = $(this).val();
+            if (searchTerm.length >= 2) {
+                $.ajax({
+                    url: '/Home/BuscarProductos',
+                    type: 'GET',
+                    data: { searchTerm: searchTerm },
+                    success: function (response) {
+                        // Limpiar resultados anteriores
+                        $('#searchResultsList').empty();
 
-    <script>
-        $(document).ready(function () {
-            // Aplica el color guardado desde localStorage
-            var savedNavbarColor = localStorage.getItem('navbarColor');
-            if (savedNavbarColor) {
-                document.getElementById('categoryNav').style.backgroundColor = savedNavbarColor;
+                        // Iterar sobre los resultados y agregarlos a la lista
+                        $.each(response, function (index, result) {
+                            var resultItem = '<li>' + result.NombreMain + ' - ' + result.NombreGrupo + '</li>';
+                            $('#searchResultsList').append(resultItem);
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error en la búsqueda:", error);
+                    }
+                });
+            } else {
+                // Si la longitud de la búsqueda es menor que 2, ocultar los resultados
+                $('#searchResultsList').empty();
             }
         });
+
+        // Mostrar el modal de publicidad si hay una imagen disponible
+        if (publicidadUrl) {
+            $('#publicidadModal').modal('show');
+        }
+    });
+
     </script>
+
+
+
+
+
+
+
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/complementos")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
 
-    
+
 
 </body>
 </html>

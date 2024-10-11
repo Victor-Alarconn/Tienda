@@ -22,7 +22,7 @@
             <!-- Formulario para la descripción -->
             <form action="@Url.Action("GuardarDescripcion", "GestionPagina", new { area = "Admin" })" method="post">
                 <div class="form-group">
-                    <label for="descripcion"><strong>Descripción</strong></label>
+                    <label for="descripcion"><strong>Descripción de cobertura de pedidos</strong></label>
                     <textarea name="nuevaDescripcion" id="descripcion" class="form-control" rows="5" required>@ViewBag.Descripcion</textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">Guardar Descripción</button>
@@ -33,7 +33,7 @@
             <!-- Formulario para el horario de atención -->
             <form action="@Url.Action("GuardarHorario", "GestionPagina", new { area = "Admin" })" method="post">
                 <div class="form-group">
-                    <label for="horario"><strong>Horario de Atención</strong></label>
+                    <label for="horario"><strong>Direccion y Horario de Atención</strong></label>
                     <textarea name="nuevoHorario" id="horario" class="form-control" rows="3" required>@ViewBag.Horario</textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">Guardar Horario</button>

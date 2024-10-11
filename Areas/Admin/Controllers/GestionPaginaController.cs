@@ -9,17 +9,28 @@ namespace Tienda.Areas.Admin.Controllers
 {
     public class GestionPaginaController : Controller
     {
-        // Directorio donde se almacenan las imágenes
+        // Directorio donde se almacenan las imágenes del carrusel
         private string imagePath = "~/Imagenes/Carousel";
 
+        // Directorio donde se almacenará la imagen del logo
+        private string logoPath = "~/Imagenes/Logo";
+
+        private string publicidadPath = ("~/Imagenes/Publicidad");
+
         // Ruta relativa al archivo donde se almacenará la descripción
-         private static readonly string DescripcionPath = System.Web.HttpContext.Current.Server.MapPath("~/Areas/Descripcion/descripcion.txt");
+        private static readonly string DescripcionPath = System.Web.HttpContext.Current.Server.MapPath("~/Areas/Descripcion/descripcion.txt");
 
         // Ruta horario
         private string HorarioPath => Server.MapPath("~/Areas/Descripcion/horarios.txt");
 
         // Ruta para las redes sociales
         private string RedesSocialesPath => Server.MapPath("~/Areas/Descripcion/redes-sociales.txt");
+
+        // Ruta para guardar el color de la barra de navegación
+        private string ColorNavbarPath => Server.MapPath("~/Areas/Descripcion/color-navbar.txt");
+
+        // Ruta para guardar el color del slider
+        private string ColorSliderPath => Server.MapPath("~/Areas/Descripcion/color-slider.txt");
 
         // GET: Admin/GestionPagina
         public ActionResult Index()
@@ -29,6 +40,61 @@ namespace Tienda.Areas.Admin.Controllers
                       .ToList();
             ViewBag.Images = images;
 
+            // Cargar la imagen del logo si existe
+            var logo = Directory.GetFiles(Server.MapPath(logoPath))
+                      .Select(Path.GetFileName)
+                      .FirstOrDefault();
+            ViewBag.Logo = logo;
+
+            // Cargar la imagen de publicidad si existe y si la fecha límite no ha pasado
+            var publicidadFiles = Directory.GetFiles(Server.MapPath(publicidadPath));
+            foreach (var file in publicidadFiles)
+            {
+                string fechaFileName = Path.Combine(Server.MapPath(publicidadPath), Path.GetFileNameWithoutExtension(file) + "_fecha.txt");
+
+                if (System.IO.File.Exists(fechaFileName))
+                {
+                    try
+                    {
+                        var fechaContenido = System.IO.File.ReadAllText(fechaFileName);
+                        var fechas = fechaContenido.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        if (fechas.Length >= 2)
+                        {
+                            DateTime fechaInicio = DateTime.Parse(fechas[0].Replace("Inicio: ", ""));
+                            DateTime fechaFin = DateTime.Parse(fechas[1].Replace("Fin: ", ""));
+                            DateTime fechaActual = DateTime.Now;
+
+                            if (fechaActual <= fechaFin)
+                            {
+                                ViewBag.Publicidad = Path.GetFileName(file);
+                                ViewBag.PublicidadFechaInicio = fechaInicio;
+                                ViewBag.PublicidadFechaFin = fechaFin;
+                                break; // Encontró una imagen válida, salir del bucle
+                            }
+                            else
+                            {
+                                // Eliminar la imagen y el archivo de fecha si la publicidad ha expirado
+                                System.IO.File.Delete(file);
+                                System.IO.File.Delete(fechaFileName);
+                            }
+                        }
+                        else
+                        {
+                            // Manejar el caso en que el archivo de fecha no tiene el formato esperado
+                            System.IO.File.Delete(file);
+                            System.IO.File.Delete(fechaFileName);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Manejar posibles excepciones al leer o parsear el archivo de fecha
+                        System.IO.File.Delete(file);
+                        System.IO.File.Delete(fechaFileName);
+                        ViewBag.Error = "Error al procesar la imagen de publicidad: " + ex.Message;
+                    }
+                }
+            }
 
             return View("~/Areas/Admin/Views/Admin/Index.cshtml");
         }
@@ -59,6 +125,40 @@ namespace Tienda.Areas.Admin.Controllers
             }
         }
 
+        // Acción para cargar el logo
+        [HttpPost]
+        public ActionResult UploadLogo(HttpPostedFileBase file)
+        {
+            try
+            {
+                if (file != null && file.ContentLength > 0)
+                {
+                    string path = Server.MapPath(logoPath);
+                    if (!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+
+                    // Eliminar el logo anterior si existe
+                    var existingLogo = Directory.GetFiles(path).FirstOrDefault();
+                    if (existingLogo != null)
+                    {
+                        System.IO.File.Delete(existingLogo);
+                    }
+
+                    string fileName = Path.GetFileName(file.FileName);
+                    string fullPath = Path.Combine(path, fileName);
+                    file.SaveAs(fullPath);
+                }
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error al cargar el logo: " + ex.Message;
+                return View("~/Areas/Admin/Views/Admin/Index.cshtml");
+            }
+        }
+
         // Acción para eliminar imágenes
         [HttpPost]
         public ActionResult DeleteImage(string fileName)
@@ -84,6 +184,115 @@ namespace Tienda.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
+        // Acción para eliminar el logo
+        [HttpPost]
+        public ActionResult DeleteLogo()
+        {
+            try
+            {
+                string path = Server.MapPath(logoPath);
+                var logo = Directory.GetFiles(path).FirstOrDefault();
+                if (logo != null && System.IO.File.Exists(logo))
+                {
+                    System.IO.File.Delete(logo);
+                    ViewBag.Message = "Logo eliminado exitosamente.";
+                }
+                else
+                {
+                    ViewBag.Error = "El logo no existe.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error al eliminar el logo: " + ex.Message;
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        // Método para subir imágenes de publicidad con fecha y hora límite
+        [HttpPost]
+        public ActionResult UploadPublicidad(HttpPostedFileBase file, DateTime? publicidadFechaInicio, DateTime? publicidadFechaFin)
+        {
+            try
+            {
+                if (file != null && file.ContentLength > 0)
+                {
+                    // Convertir la ruta virtual a una ruta física
+                    string path = Server.MapPath(publicidadPath);
+
+                    // Verificar si la carpeta existe y crearla si no es así
+                    if (!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+
+                    // Eliminar la imagen de publicidad anterior si existe
+                    var existingPublicidad = Directory.GetFiles(path).FirstOrDefault();
+                    if (existingPublicidad != null)
+                    {
+                        System.IO.File.Delete(existingPublicidad);
+                    }
+
+                    // Obtener el nombre del archivo y combinarlo con la ruta
+                    string fileName = Path.GetFileName(file.FileName);
+                    string fullPath = Path.Combine(path, fileName);
+
+                    // Guardar el archivo de imagen
+                    file.SaveAs(fullPath);
+
+                    // Guardar la fecha y hora límite en un archivo de texto
+                    if (publicidadFechaFin.HasValue)
+                    {
+                        string fechaFileName = Path.Combine(path, Path.GetFileNameWithoutExtension(fileName) + "_fecha.txt");
+                        string fechaContenido = $"Inicio: {publicidadFechaInicio?.ToString("yyyy-MM-dd HH:mm:ss")}\nFin: {publicidadFechaFin.Value.ToString("yyyy-MM-dd HH:mm:ss")}";
+                        System.IO.File.WriteAllText(fechaFileName, fechaContenido);
+                    }
+                }
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error al cargar la imagen de publicidad: " + ex.Message;
+                return View("~/Areas/Admin/Views/Admin/Index.cshtml");
+            }
+        }
+
+        // Método para eliminar imágenes de publicidad
+        [HttpPost]
+        public ActionResult DeletePublicidad()
+        {
+            try
+            {
+                string path = Server.MapPath(publicidadPath);
+                var publicidad = Directory.GetFiles(path).FirstOrDefault();
+                if (publicidad != null && System.IO.File.Exists(publicidad))
+                {
+                    System.IO.File.Delete(publicidad);
+
+                    // Eliminar el archivo de fecha asociado
+                    string fechaFileName = Path.Combine(path, Path.GetFileNameWithoutExtension(publicidad) + "_fecha.txt");
+                    if (System.IO.File.Exists(fechaFileName))
+                    {
+                        System.IO.File.Delete(fechaFileName);
+                    }
+
+                    ViewBag.Message = "Imagen de publicidad eliminada exitosamente.";
+                }
+                else
+                {
+                    ViewBag.Error = "La imagen de publicidad no existe.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error al eliminar la imagen de publicidad: " + ex.Message;
+            }
+
+            return RedirectToAction("Index");
+        }
+
+
         // GET: GestionPagina/GestionDescripcion
         public ActionResult GestionDescripcion()
         {
@@ -97,7 +306,6 @@ namespace Tienda.Areas.Admin.Controllers
                 ? System.IO.File.ReadAllText(HorarioPath)
                 : "Horario predeterminado";
 
-            // Ajusta la ruta a la vista según la ubicación real
             return View("~/Areas/Admin/Views/Admin/GestionDescripcion.cshtml");
         }
 
@@ -135,7 +343,6 @@ namespace Tienda.Areas.Admin.Controllers
                 TempData["Error"] = "Error al guardar el horario: " + ex.Message;
             }
 
-            // Volver a cargar la vista de gestión
             return RedirectToAction("GestionDescripcion");
         }
 
@@ -163,26 +370,6 @@ namespace Tienda.Areas.Admin.Controllers
 
             return View("~/Areas/Admin/Views/Admin/GestionRedesSociales.cshtml");
         }
-
-        // POST: GestionPagina/GuardarRedesSociales
-        [HttpPost]
-        public ActionResult GuardarRedesSociales(string facebookUrl, string instagramUrl)
-        {
-            try
-            {
-                var urls = new[] { facebookUrl, instagramUrl };
-                System.IO.File.WriteAllLines(RedesSocialesPath, urls);
-                TempData["Message"] = "URLs de redes sociales guardadas exitosamente.";
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = "Error al guardar las URLs: " + ex.Message;
-            }
-
-            return RedirectToAction("GestionRedesSociales");
-        }
-
-
 
 
         // GET: GestionPagina/Details/5
