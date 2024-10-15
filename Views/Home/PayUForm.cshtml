@@ -1,4 +1,4 @@
-﻿@*@model Tienda.Models.GouModel*@ // Cambia el modelo según corresponda, o quítalo si no necesitas pasar datos
+﻿@*@model Tienda.Models.GouModel*@
 @{
     ViewBag.Title = "GouForm";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -14,7 +14,7 @@
             <th>MÉTODO DE PAGO:</th>
         </tr>
         <tr>
-            <td>@ViewBag.ReferenceCode</td> <!-- Puedes definir estos datos en el controlador -->
+            <td>@ViewBag.ReferenceCode</td>
             <td>@DateTime.Now.ToString("MMMM dd, yyyy", new System.Globalization.CultureInfo("es-ES"))</td>
             <td>$ @ViewBag.Amount.ToString("N0")</td>
             <td>GoU</td>
@@ -26,6 +26,7 @@
 <div class="text-center">
     <a href="@ViewBag.PaymentUrl" target="_blank" class="btn btn-red">Ir a GoU para pagar</a>
 </div>
+
 
 <style>
     .btn-red {

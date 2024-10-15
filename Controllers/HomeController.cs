@@ -176,10 +176,10 @@ namespace Tienda.Controllers
                     }
                 },
                 expiration = expiration,
-                ipAddress = "181.143.249.173",
+                ipAddress = "181.55.25.206",
                 returnUrl = "https://tusitio.com/retorno",
                 userAgent = Request.UserAgent,
-                paymentMethod = "",
+                paymentMethod = "MASTERCARD,PSE,VISA,DINERS",
                 auth = new
                 {
                     login = login,
@@ -220,33 +220,18 @@ namespace Tienda.Controllers
 
                 string requestData = await content.ReadAsStringAsync();
 
-                // Define la ruta donde se guardará el archivo
-                // Aquí el archivo se guarda en la carpeta raíz de la aplicación en una carpeta llamada "Logs"
-                var filePath = Path.Combine(Server.MapPath("~/Logs"), "requestData.txt");
-
-                // Crea la carpeta "Logs" si no existe
-                if (!Directory.Exists(Path.GetDirectoryName(filePath)))
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-                }
-                var logContent = $"Nonce Number (antes de Base64): {nonceNumber}\n" +
-                 $"Nonce (Base64): {nonce}\n" +
-                 $"TranKey (antes de SHA-256): {llave}\n" +
-                 $"TranKey (SHA-256 Base64): {tranKey}\n" +
-                 $"Contenido de la solicitud: {requestData}\n";
-                // Guarda el contenido en un archivo de texto
-                System.IO.File.WriteAllText(filePath,  logContent, Encoding.UTF8);
-
-
-                HttpResponseMessage response = await client.PostAsync("procesar-pago", content);
+                HttpResponseMessage response = await client.PostAsync("/api/session", content);
                 if (response.IsSuccessStatusCode)
                 {
                     var responseData = await response.Content.ReadAsStringAsync();
                     dynamic result = JsonConvert.DeserializeObject<dynamic>(responseData);
-                    ViewBag.PaymentUrl = result?.url; // La URL de pago proporcionada por GoU
-                  //  ViewBag.ReferenceCode = tuReferencia; // Completa con los datos necesarios
-                  //  ViewBag.Amount = tuMonto;
-                    return View("GouForm"); // Asegúrate de que sea el nombre correcto de la vista
+
+                    // Obtén la URL de pago correcta
+                    ViewBag.PaymentUrl = result?.processUrl; // Cambia a "processUrl"
+                    ViewBag.ReferenceCode = _referenciaService.GenerarReferencia(); // Completa con los datos necesarios
+                    ViewBag.Amount = model.Cart.TotalPrice();
+
+                    return View("PayUForm"); // Asegúrate de que sea el nombre correcto de la vista
                 }
                 else
                 {
