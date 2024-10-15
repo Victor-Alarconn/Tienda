@@ -1,6 +1,6 @@
-﻿@model Tienda.Models.PayUModel
+﻿@*@model Tienda.Models.GouModel*@ // Cambia el modelo según corresponda, o quítalo si no necesitas pasar datos
 @{
-    ViewBag.Title = "PayUForm";
+    ViewBag.Title = "GouForm";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -14,36 +14,18 @@
             <th>MÉTODO DE PAGO:</th>
         </tr>
         <tr>
-            <td>@Model.ReferenceCode</td>
+            <td>@ViewBag.ReferenceCode</td> <!-- Puedes definir estos datos en el controlador -->
             <td>@DateTime.Now.ToString("MMMM dd, yyyy", new System.Globalization.CultureInfo("es-ES"))</td>
-            <td>$ @Model.Amount.ToString("N0")</td>
-            <td>PayU Latam</td>
+            <td>$ @ViewBag.Amount.ToString("N0")</td>
+            <td>GoU</td>
         </tr>
     </table>
-    <p class="mt-4">Gracias por su pedido, de clic en el botón que aparece para continuar el pago con PayU Latam.</p>
+    <p class="mt-4">Gracias por su pedido. Haga clic en el botón a continuación para continuar el pago con GoU.</p>
 </div>
 
-
-
-<form method="post" action="https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/">
-    <input name="merchantId" type="hidden" value="@Model.MerchantId">
-    <input name="accountId" type="hidden" value="@Model.AccountId">
-    <input name="description" type="hidden" value="@Model.Description">
-    <input name="referenceCode" type="hidden" value="@Model.ReferenceCode">
-    <input name="amount" type="hidden" value="@Model.Amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)">
-    <input name="tax" type="hidden" value="@Model.Tax">
-    <input name="taxReturnBase" type="hidden" value="@Model.TaxReturnBase">
-    <input name="currency" type="hidden" value="@Model.Currency">
-    <input name="signature" type="hidden" value="@Model.Signature">
-    <input name="test" type="hidden" value="@Model.Test">
-    <input name="buyerEmail" type="hidden" value="@Model.BuyerEmail">
-    <input name="telephone" type="hidden" value="@Model.Telephone">
-    <input name="buyerFullName" type="hidden" value="@Model.BuyerfullName">
-    <input name="paymentMethods" type="hidden" value="@Model.paymentMethods">
-    <input name="responseUrl" type="hidden" value="@Model.ResponseUrl">
-    <input name="confirmationUrl" type="hidden" value="@Model.ConfirmationUrl">
-    <input name="Submit" type="submit" value="Pagar" class="btn btn-red">
-</form>
+<div class="text-center">
+    <a href="@ViewBag.PaymentUrl" target="_blank" class="btn btn-red">Ir a GoU para pagar</a>
+</div>
 
 <style>
     .btn-red {
@@ -53,15 +35,15 @@
         padding: 10px 20px;
         cursor: pointer;
         font-size: 16px;
+        text-decoration: none;
     }
-    .btn-red:hover {
-        background-color: red;
-        color: white;
-    }
+
+        .btn-red:hover {
+            background-color: red;
+            color: white;
+        }
 
     .order-info {
         margin-bottom: 20px;
     }
 </style>
-
-

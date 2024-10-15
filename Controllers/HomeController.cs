@@ -143,9 +143,11 @@ namespace Tienda.Controllers
 
             // Crear `tranKey` con SHA-256
             string tranKey;
+            string llave;
             using (var sha256 = SHA256.Create())
             {
                 var tranKeyInput = nonceNumber.ToString() + seed + secretKey;
+                llave = tranKeyInput.ToString();
                 var tranKeyBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(tranKeyInput));
                 tranKey = Convert.ToBase64String(tranKeyBytes);
             }
@@ -174,10 +176,10 @@ namespace Tienda.Controllers
                     }
                 },
                 expiration = expiration,
-                ipAddress = Request.UserHostAddress,
+                ipAddress = "181.143.249.173",
                 returnUrl = "https://tusitio.com/retorno",
                 userAgent = Request.UserAgent,
-                paymentMethod = (string)null,
+                paymentMethod = "",
                 auth = new
                 {
                     login = login,
@@ -215,28 +217,40 @@ namespace Tienda.Controllers
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
-                // Imprimir el contenido que se enviará
+
                 string requestData = await content.ReadAsStringAsync();
-                Console.WriteLine("Contenido a enviar: " + requestData);
+
+                // Define la ruta donde se guardará el archivo
+                // Aquí el archivo se guarda en la carpeta raíz de la aplicación en una carpeta llamada "Logs"
+                var filePath = Path.Combine(Server.MapPath("~/Logs"), "requestData.txt");
+
+                // Crea la carpeta "Logs" si no existe
+                if (!Directory.Exists(Path.GetDirectoryName(filePath)))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                }
+                var logContent = $"Nonce Number (antes de Base64): {nonceNumber}\n" +
+                 $"Nonce (Base64): {nonce}\n" +
+                 $"TranKey (antes de SHA-256): {llave}\n" +
+                 $"TranKey (SHA-256 Base64): {tranKey}\n" +
+                 $"Contenido de la solicitud: {requestData}\n";
+                // Guarda el contenido en un archivo de texto
+                System.IO.File.WriteAllText(filePath,  logContent, Encoding.UTF8);
+
 
                 HttpResponseMessage response = await client.PostAsync("procesar-pago", content);
                 if (response.IsSuccessStatusCode)
                 {
                     var responseData = await response.Content.ReadAsStringAsync();
-
-                    // Usa dynamic para deserializar sin definir una clase
-                    dynamic apiResult = JsonConvert.DeserializeObject<ExpandoObject>(responseData);
-
-                    // Puedes acceder a los valores como si fuera un diccionario o con las propiedades dinámicas
-                    string status = apiResult.status; // Ejemplo de acceso
-                    string message = apiResult.message; // Ejemplo de acceso
-
-                    return RedirectToAction("PayUSuccess", new { result = apiResult });
+                    dynamic result = JsonConvert.DeserializeObject<dynamic>(responseData);
+                    ViewBag.PaymentUrl = result?.url; // La URL de pago proporcionada por GoU
+                  //  ViewBag.ReferenceCode = tuReferencia; // Completa con los datos necesarios
+                  //  ViewBag.Amount = tuMonto;
+                    return View("GouForm"); // Asegúrate de que sea el nombre correcto de la vista
                 }
                 else
                 {
-                    // Manejo de error
-                    return View("PayUForm", model);
+                    return View("Error"); // Puedes redirigir a una vista de error si la solicitud falla
                 }
             }
         }
