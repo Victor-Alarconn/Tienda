@@ -177,7 +177,7 @@ namespace Tienda.Controllers
                 },
                 expiration = expiration,
                 ipAddress = "181.55.25.206",
-                returnUrl = "https://tusitio.com/retorno",
+                returnUrl = "https://8e93-181-55-25-206.ngrok-free.app/Home/PayUResponse",
                 userAgent = Request.UserAgent,
                 paymentMethod = "MASTERCARD,PSE,VISA,DINERS",
                 auth = new
@@ -302,24 +302,53 @@ namespace Tienda.Controllers
         }
 
 
-        public ActionResult PayUResponse(PayUResponse model)
+      
+        public ActionResult PayUResponse()
         {
-            string apiKey = "4Vj8eK4rloUd272L48hsrarnUA";
-            string generatedSignature = CreateSignature2(apiKey, model.MerchantId, model.ReferenceCode, model.Currency, model.TransactionState);
-
-            if (model.Message == "APPROVED" && model.TransactionState == 4)
+            // Leer el cuerpo de la solicitud
+            using (var reader = new System.IO.StreamReader(Request.InputStream))
             {
-                model.IsSuccess = true;  // La firma es válida y la transacción está aprobada
-                model.Message = "La transacción fue exitosa."; // Puedes configurar un mensaje de éxito aquí si lo deseas
-            }
-            else
-            {
-                model.IsSuccess = false;  // La firma no es válida o la transacción no está aprobada
-                model.Message = "Hubo un problema con la transacción."; // Puedes configurar un mensaje de error aquí
-            }
+                var jsonResponse = reader.ReadToEnd();
+                // Asegúrate de que jsonResponse no sea nulo
+                if (string.IsNullOrEmpty(jsonResponse))
+                {
+                    return new HttpStatusCodeResult(400, "El contenido de la respuesta está vacío.");
+                }
 
-            return View(model);  // Esta vista simplemente informa al usuario sobre el estado de la transacción
+                // Deserializar la respuesta JSON
+                var response = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonResponse);
+
+                // Asegúrate de que 'status' no sea nulo antes de acceder a él
+                if (response.TryGetValue("status", out var statusValue))
+                {
+                    var status = ((Newtonsoft.Json.Linq.JToken)statusValue).ToObject<Dictionary<string, object>>();
+                    var internalReference = response["internalReference"];
+                    var reference = response["reference"];
+                    var signature = response["signature"];
+
+                    // Crear un nuevo modelo para pasar a la vista
+                    var model = new PayUResponse
+                    {
+                        IsSuccess = (string)status["status"] == "APPROVED",
+                        Message = (string)status["message"],
+                        TransactionId = (string)reference,
+                      //  TX_VALUE = "N/A", // Ajusta esto según cómo manejas el monto
+                        Description = "N/A" // Ajusta esto según cómo manejas la descripción
+                    };
+
+                    // Retornar la vista con el modelo
+                    return View(model);
+                }
+                else
+                {
+                    return new HttpStatusCodeResult(400, "No se encontró el estado en la respuesta.");
+                }
+            }
         }
+
+
+
+
 
 
 
@@ -367,6 +396,46 @@ namespace Tienda.Controllers
                 return sBuilder.ToString();
             }
         }
+
+
+        [HttpPost]
+        public ActionResult GoUConfirmation(GoUResponse model)
+        {
+            // Paso 1: Imprimir el modelo recibido para depuración
+            System.Diagnostics.Debug.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(model));
+
+            // Paso 2: Validar la firma
+            string secretKey = "tuLlaveSecreta"; // Cambia esto por tu clave secreta de GoU
+            string generatedSignature = GenerateSignature(model.InternalReference, model.Status.Status, secretKey);
+
+            if (model.Status.Status == "APPROVED" && model.Status.Reason == "00")
+            {
+                // Aquí puedes agregar la lógica para guardar la transacción o enviar un correo
+                var productos = _ordenService.ObtenerProductosPorOrden(model.Reference);
+                var datos = _ordenService.Obtenerdatos(model.Reference);
+              //  EnviarEmail(model, productos, datos);  // Enviar correo con el resumen de la compra
+              //  GuardarBase(model);  // Guardar en la base de datos
+            }
+            else
+            {
+              //  GuardarBase(model);  // Guarda el estado de la transacción aunque no sea exitosa
+            }
+
+            return new EmptyResult();  // O devolver algún resultado específico si es necesario
+        }
+
+        // Método para generar la firma de GoU
+        private string GenerateSignature(int internalReference, string status, string secretKey)
+        {
+            string data = $"{internalReference}{status}{secretKey}";
+
+            using (SHA1 sha1 = SHA1.Create())
+            {
+                byte[] hashBytes = sha1.ComputeHash(Encoding.UTF8.GetBytes(data));
+                return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+            }
+        }
+
 
         private void EnviarEmail(PayUConfirmation model, List<Producto> productos, DatosCliente datos)
         {

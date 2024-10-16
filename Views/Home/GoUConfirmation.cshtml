@@ -1,0 +1,33 @@
+﻿@model Tienda.Models.PayUResponse
+
+@{
+    ViewBag.Title = "GoUConfirmation";
+    Layout = "~/Areas/Admin/Views/Shared/_Panel.cshtml";
+}
+
+<div class="container mt-5">
+    <h2>Resultado de la Transacción</h2>
+    <hr />
+
+    <div class="alert @(Model.IsSuccess ? "alert-success" : "alert-danger")">
+        @if (Model.IsSuccess)
+        {
+            <p>¡Gracias por tu compra! Tu pago ha sido procesado exitosamente.</p>
+        }
+        else
+        {
+            <p>Lo sentimos, hubo un problema procesando tu pago. Por favor, intenta de nuevo o contacta a soporte.</p>
+        }
+    </div>
+
+    <div class="details">
+        <h4>Detalles del Pago:</h4>
+        <p><strong>ID de la Transacción:</strong> @(Model.TransactionId ?? "No disponible")</p>
+        <p><strong>Estado:</strong> @(Model.Message ?? "No disponible")</p>
+        <p><strong>Monto:</strong> @(Model.TX_VALUE.ToString() ?? "No disponible")</p>
+        <p><strong>Descripción:</strong> @(Model.Description ?? "No disponible")</p>
+    </div>
+
+
+    <a href="/" class="btn btn-primary mt-4">Regresar al Inicio</a>
+</div>

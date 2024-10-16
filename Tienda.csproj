@@ -185,6 +185,7 @@
     <Compile Include="Models\Categoria.cs" />
     <Compile Include="Models\Ciudad.cs" />
     <Compile Include="Models\DatosCliente.cs" />
+    <Compile Include="Models\GoUResponse.cs" />
     <Compile Include="Models\PaymentInfo.cs" />
     <Compile Include="Models\PayUConfirmation.cs" />
     <Compile Include="Models\PayUModel.cs" />
@@ -236,6 +237,7 @@
     <Content Include="Imagenes\Facebook.svg" />
     <Content Include="Imagenes\hipopotamo.svg" />
     <Content Include="Imagenes\Instagram.svg" />
+    <Content Include="Imagenes\LOGOGOU.png" />
     <Content Include="Imagenes\mastercard.jpg" />
     <Content Include="Imagenes\Nequi.jpg" />
     <Content Include="Imagenes\oso.svg" />
@@ -354,6 +356,7 @@
     <Content Include="webfonts\fa-brands-400.woff" />
     <Content Include="webfonts\fa-brands-400.ttf" />
     <Content Include="webfonts\fa-brands-400.eot" />
+    <Content Include="Views\Home\GoUConfirmation.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
